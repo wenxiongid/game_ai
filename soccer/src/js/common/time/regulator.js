@@ -32,3 +32,7 @@ class Regulator{
 		return false;
 	}
 }
+
+export {
+	Regulator as default
+};

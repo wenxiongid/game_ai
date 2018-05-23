@@ -23,7 +23,7 @@ class Region{
 	}
 	inside(pos, r = 'NORMAL'){
 		if(r == 'NORMAL'){
-			return pos.x > this.m_dLeft && pos.x < this.m_dRight && pox.y > this.m_dTop && pos.y < this.m_dBottom;
+			return pos.x > this.m_dLeft && pos.x < this.m_dRight && pos.y > this.m_dTop && pos.y < this.m_dBottom;
 		}else{
 			let marginX = this.width() * 0.25;
 			let marginY = this.height() * 0.25;
@@ -49,7 +49,7 @@ class Region{
 		return Math.abs(this.m_dRight - this.m_dLeft);
 	}
 	height(){
-		return Math.abs(this.m_dTop - this.m_dTop);
+		return Math.abs(this.m_dBottom - this.m_dTop);
 	}
 	length(){
 		return Math.max(this.width(), this.height());
@@ -65,4 +65,6 @@ class Region{
 	}
 }
 
-export default Region;
+export{
+	Region as default
+};

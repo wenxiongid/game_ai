@@ -23,6 +23,7 @@ class Vector2D{
 		let length = this.length();
 		this.x /= length;
 		this.y /= length;
+		return this;
 	}
 	add(vec){
 		return new Vector2D(this.x + vec.x, this.y + vec.y);
@@ -63,9 +64,9 @@ class Vector2D{
 		return new Vector2D(-this.x, -this.y);
 	}
 	reflect(normVec){
-		let diff = 2 * this.dot(normVec) * normVec.getReverse();
-		this.x += diff;
-		this.y += diff;
+		let diff = normVec.getReverse().crossNum(2 * this.dot(normVec));
+		this.x += diff.x;
+		this.y += diff.y;
 	}
 	clone(){
 		return new Vector2D(this.x, this.y);

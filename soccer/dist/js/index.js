@@ -50,28 +50,23 @@
 	
 	var _cgdi2 = _interopRequireDefault(_cgdi);
 	
-	var _game_world = __webpack_require__(2);
+	var _constants = __webpack_require__(2);
 	
-	var _game_world2 = _interopRequireDefault(_game_world);
+	var _soccer_pitch = __webpack_require__(3);
+	
+	var _soccer_pitch2 = _interopRequireDefault(_soccer_pitch);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var WIDTH = 600;
-	var HEIGHT = 600;
-	
-	_cgdi2.default.setCanvas(document.getElementById('canvasWrapper'), WIDTH, HEIGHT);
-	var g_GameWorld = new _game_world2.default(WIDTH, HEIGHT);
-	
-	document.addEventListener('keydown', function (e) {
-		g_GameWorld.handleKeyPresses(e.key);
-	});
+	_cgdi2.default.setCanvas(document.getElementById('canvasWrapper'), _constants.WindowWidth, _constants.WindowHeight);
+	var g_SoccerPitch = new _soccer_pitch2.default(_constants.WindowWidth, _constants.WindowHeight);
 	
 	var lastTime = new Date().getTime();
 	function render() {
 		var currentTime = new Date().getTime();
 		_cgdi2.default.clear();
-		g_GameWorld.update((currentTime - lastTime) / 1000);
-		g_GameWorld.render();
+		g_SoccerPitch.update((currentTime - lastTime) / 500);
+		g_SoccerPitch.render();
 		requestAnimationFrame(render);
 		lastTime = currentTime;
 	}
@@ -110,6 +105,7 @@
 			this.LIGHT_BLUE = 'rgb(0, 255, 255)';
 			this.LIGHT_GREY = 'rgb(200, 200, 200)';
 			this.LIGHT_PINK = 'rgb(255, 230, 230)';
+			this.TRANSPARENT = 'rgba(0, 0, 0, 0)';
 		}
 	
 		_createClass(GDI, [{
@@ -124,6 +120,8 @@
 		}, {
 			key: 'transparentText',
 			value: function transparentText() {}
+			// pen
+	
 		}, {
 			key: 'normalPen',
 			value: function normalPen() {
@@ -209,9 +207,33 @@
 			value: function lightPinkPen() {
 				this.ctx.strokeStyle = this.LIGHT_PINK;this.normalPen();
 			}
+			// brush
+	
+		}, {
+			key: 'brownBrush',
+			value: function brownBrush() {
+				this.ctx.fillStyle = this.BROWN;
+			}
+		}, {
+			key: 'darkGreenBrush',
+			value: function darkGreenBrush() {
+				this.ctx.fillStyle = this.DARK_GREEN;
+			}
+		}, {
+			key: 'whiteBrush',
+			value: function whiteBrush() {
+				this.ctx.fillStyle = this.WHITE;
+			}
+		}, {
+			key: 'blackBrush',
+			value: function blackBrush() {
+				this.ctx.fillStyle = this.BLACK;
+			}
 		}, {
 			key: 'hollowBrush',
-			value: function hollowBrush() {}
+			value: function hollowBrush() {
+				this.ctx.fillStyle = this.TRANSPARENT;
+			}
 		}, {
 			key: 'thickRedPen',
 			value: function thickRedPen() {
@@ -235,6 +257,7 @@
 				this.ctx.beginPath();
 				this.ctx.arc(pos.x, pos.y, r, 0, 2 * Math.PI);
 				this.ctx.stroke();
+				this.ctx.fill();
 			}
 		}, {
 			key: 'line',
@@ -247,10 +270,25 @@
 		}, {
 			key: 'closedShape',
 			value: function closedShape(posList) {
+				this.ctx.beginPath();
 				for (var i = 0; i < posList.length - 1; i++) {
-					this.line(posList[i], posList[i + 1]);
+					this.ctx.moveTo(posList[i].x, posList[i].y);
+					this.ctx.lineTo(posList[i + 1].x, posList[i + 1].y);
 				}
-				this.line(posList[posList.length - 1], posList[0]);
+				this.ctx.moveTo(posList[posList.length - 1].x, posList[posList.length - 1].y);
+				this.ctx.lineTo(posList[0].x, posList[0].y);
+				this.ctx.stroke();
+				this.ctx.fill();
+			}
+		}, {
+			key: 'rect',
+			value: function rect(x1, y1, x2, y2) {
+				var startX = Math.min(x1, x2);
+				var startY = Math.min(y1, y2);
+				this.ctx.beginPath();
+				this.ctx.rect(startX, startY, Math.abs(x1 - x2), Math.abs(y1 - y2));
+				this.ctx.stroke();
+				this.ctx.fill();
 			}
 		}, {
 			key: 'clear',
@@ -268,6 +306,23 @@
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var WindowWidth = 700;
+	var WindowHeight = 400;
+	var TeamSize = 5;
+	
+	exports.WindowWidth = WindowWidth;
+	exports.WindowHeight = WindowHeight;
+	exports.TeamSize = TeamSize;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -278,316 +333,147 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _cgdi = __webpack_require__(1);
+	var _region = __webpack_require__(4);
 	
-	var _cgdi2 = _interopRequireDefault(_cgdi);
+	var _region2 = _interopRequireDefault(_region);
 	
-	var _vector2d = __webpack_require__(3);
+	var _goal = __webpack_require__(6);
+	
+	var _goal2 = _interopRequireDefault(_goal);
+	
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
 	
-	var _entity_function_templates = __webpack_require__(4);
-	
-	var _cell_space_partition = __webpack_require__(8);
-	
-	var _cell_space_partition2 = _interopRequireDefault(_cell_space_partition);
-	
-	var _utils = __webpack_require__(10);
-	
-	var _geometry = __webpack_require__(5);
-	
-	var _path = __webpack_require__(11);
-	
-	var _path2 = _interopRequireDefault(_path);
-	
-	var _params = __webpack_require__(12);
+	var _params = __webpack_require__(10);
 	
 	var _params2 = _interopRequireDefault(_params);
 	
-	var _vehicle = __webpack_require__(13);
+	var _soccer_ball = __webpack_require__(11);
 	
-	var _vehicle2 = _interopRequireDefault(_vehicle);
+	var _soccer_ball2 = _interopRequireDefault(_soccer_ball);
 	
-	var _smoother = __webpack_require__(18);
+	var _soccer_team = __webpack_require__(16);
 	
-	var _smoother2 = _interopRequireDefault(_smoother);
+	var _soccer_team2 = _interopRequireDefault(_soccer_team);
 	
-	var _wall2d = __webpack_require__(19);
+	var _wall2d = __webpack_require__(33);
 	
 	var _wall2d2 = _interopRequireDefault(_wall2d);
 	
-	var _obstacle = __webpack_require__(20);
+	var _team_state = __webpack_require__(18);
 	
-	var _obstacle2 = _interopRequireDefault(_obstacle);
+	var _cgdi = __webpack_require__(1);
 	
-	var _resource = __webpack_require__(21);
-	
-	var _resource2 = _interopRequireDefault(_resource);
-	
-	var _invertedaabbox2d = __webpack_require__(9);
-	
-	var _invertedaabbox2d2 = _interopRequireDefault(_invertedaabbox2d);
+	var _cgdi2 = _interopRequireDefault(_cgdi);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var GameWorld = function () {
-		function GameWorld(cx, cy) {
-			_classCallCheck(this, GameWorld);
+	var NumRegionsHorizontal = 6;
+	var NumRegionsVertical = 3;
 	
-			var border = 30;
-			this.m_Vehicles = [];
-			this.m_Obstacles = [];
-			this.m_Walls = [];
-			this.m_pCellSpace = new _cell_space_partition2.default(cx, cy, _params2.default.NumCellsX, _params2.default.NumCellsY, _params2.default.NumAgents);
-			this.m_pPath = new _path2.default(5, border, border, cx - border, cy - border, true);
+	var SoccerPitch = function () {
+		function SoccerPitch(cxClient, cyClient) {
+			_classCallCheck(this, SoccerPitch);
+	
+			this.m_vecWalls = [];
+			this.m_pPlayingArea = new _region2.default(20, 20, cxClient - 20, cyClient - 20);
+			this.m_Regions = [];
+			this.m_bGoalKeeperHasBall = false;
+			this.m_bGameOn = true;
 			this.m_bPaused = false;
-			this.m_cxClient = cx;
-			this.m_cyClient = cy;
-			this.m_vCrosshair = new _vector2d2.default(cx / 2, cx / 2);
-			this.m_dAvFrameTime = 0;
-			this.m_bShowWalls = true;
-			this.m_bShowObstacles = true;
-			this.m_bShowPath = false;
-			this.m_bShowDetectionBox = false;
-			this.m_bShowWanderCircle = false;
-			this.m_bShowFeelers = false;
-			this.m_bShowSteeringForce = false;
-			this.m_bShowFPS = true;
-			this.m_bRenderNeighbors = false;
-			this.m_bViewKeys = true;
-			this.m_bShowCellSpaceInfo = true;
-			// for(let a = 0; a < 2; a++){
-			// 	let spawnPos = new Vector2D(cx / 2 * (1 + randomClamped()), cy / 2 * (1 + randomClamped()));
-			// 	let pVehicle = new Vehicle(this, spawnPos, Math.random() * 2 * Math.PI, new Vector2D(), PRM.VehicleMass, PRM.MaxSteeringForce, PRM.MaxSpeed, PRM.MaxTurnRatePerSecond, PRM.VehicleScale);
-			// 	pVehicle.steering().wanderOn();
-			// 	this.m_Vehicles.push(pVehicle);
-			// 	this.m_pCellSpace.addEntity(pVehicle);
-			// }
-			// for(let i = 0; i < 2; i++){
-			// 	let vehicle = this.m_Vehicles[i];
-			// 	let targetVehicle = this.m_Vehicles[1 - i];
-			// 	// vehicle.steering().evadeOn(targetVehicle);
-			// 	vehicle.steering().pursuitOn(targetVehicle);
-			// }
-	
-			for (var a = 0; a < _params2.default.NumAgents; a++) {
-				var spawnPos = new _vector2d2.default(cx / 2 * (1 + (0, _utils.randomClamped)()), cy / 2 * (1 + (0, _utils.randomClamped)()));
-				var pVehicle = new _vehicle2.default(this, spawnPos, Math.random() * 2 * Math.PI, new _vector2d2.default(), _params2.default.VehicleMass, _params2.default.MaxSteeringForce, _params2.default.MaxSpeed, _params2.default.MaxTurnRatePerSecond, _params2.default.VehicleScale);
-				pVehicle.steering().flockingOn();
-				// pVehicle.smoothingOn();
-				this.m_Vehicles.push(pVehicle);
-				this.m_pCellSpace.addEntity(pVehicle);
-			}
-			// SHOAL
-			var vehicle0Index = -1;
-			for (var _i = 0; _i < _params2.default.NumAgents; _i++) {
-				var vehicle = this.m_Vehicles[_i];
-				if (vehicle.id() === 0) {
-					vehicle.steering().flockingOff();
-					vehicle.setScale(10);
-					vehicle.steering().wanderOn();
-					vehicle.setMaxSpeed(70);
-					vehicle0Index = _i;
-				}
-			}
-			for (var _i2 = 0; _i2 < _params2.default.NumAgents; _i2++) {
-				if (_i2 != vehicle0Index) {
-					this.m_Vehicles[_i2].steering().evadeOn(this.m_Vehicles[vehicle0Index]);
-				}
-			}
-			// 
+			this.m_cxClient = cxClient;
+			this.m_cyClient = cyClient;
+			this.createRegions(this.playingArea().width() / NumRegionsHorizontal, this.playingArea().height() / NumRegionsVertical);
+			this.m_pRedGoal = new _goal2.default(new _vector2d2.default(this.m_pPlayingArea.left(), (cyClient - _params2.default.GoalWidth) / 2), new _vector2d2.default(this.m_pPlayingArea.left(), (cyClient + _params2.default.GoalWidth) / 2), new _vector2d2.default(1, 0));
+			this.m_pBlueGoal = new _goal2.default(new _vector2d2.default(this.m_pPlayingArea.right(), (cyClient - _params2.default.GoalWidth) / 2), new _vector2d2.default(this.m_pPlayingArea.right(), (cyClient + _params2.default.GoalWidth) / 2), new _vector2d2.default(-1, 0));
+			var topLeft = new _vector2d2.default(this.m_pPlayingArea.left(), this.m_pPlayingArea.top());
+			var topRight = new _vector2d2.default(this.m_pPlayingArea.right(), this.m_pPlayingArea.top());
+			var bottomRight = new _vector2d2.default(this.m_pPlayingArea.right(), this.m_pPlayingArea.bottom());
+			var bottomLeft = new _vector2d2.default(this.m_pPlayingArea.left(), this.m_pPlayingArea.bottom());
+			this.m_vecWalls.push(new _wall2d2.default(bottomLeft, this.m_pRedGoal.rightPost()));
+			this.m_vecWalls.push(new _wall2d2.default(this.m_pRedGoal.leftPost(), topLeft));
+			this.m_vecWalls.push(new _wall2d2.default(topLeft, topRight));
+			this.m_vecWalls.push(new _wall2d2.default(topRight, this.m_pBlueGoal.leftPost()));
+			this.m_vecWalls.push(new _wall2d2.default(this.m_pBlueGoal.rightPost(), bottomRight));
+			this.m_vecWalls.push(new _wall2d2.default(bottomRight, bottomLeft));
+			this.m_pBall = new _soccer_ball2.default(new _vector2d2.default(this.m_cxClient / 2, this.m_cyClient / 2), _params2.default.BallSize, _params2.default.BallMass, this.m_vecWalls);
+			this.m_pRedTeam = new _soccer_team2.default(this.m_pRedGoal, this.m_pBlueGoal, this, _soccer_team.TEAM_COLOR.red);
+			this.m_pBlueTeam = new _soccer_team2.default(this.m_pBlueGoal, this.m_pRedGoal, this, _soccer_team.TEAM_COLOR.blue);
+			this.m_pRedTeam.setOpponents(this.m_pBlueTeam);
+			this.m_pBlueTeam.setOpponents(this.m_pRedTeam);
 		}
 	
-		_createClass(GameWorld, [{
-			key: 'createObstacles',
-			value: function createObstacles() {
-				for (var o = 0; o < _params2.default.NumObstacles; o++) {
-					var bOverlapped = true;
-					var numTrys = 0;
-					var numAllowableTrys = 2000;
-					while (bOverlapped) {
-						numTrys++;
-						if (numTrys > numAllowableTrys) {
-							return;
-						}
-						var radius = _params2.default.MinObstacleRadius + Math.floor(Math.random() * (_params2.default.MaxObstacleRadius - _params2.default.MinObstacleRadius + 1));
-						var border = 10;
-						var minGapBetweenObstacles = 20;
-						var ob = new _obstacle2.default(radius + border + Math.floor(Math.random() * (this.m_cxClient - 2 * radius - 2 * border + 1)), radius + border + Math.floor(Math.random() * (this.m_cyClient - 2 * radius - 30 - 2 * border + 1)), radius);
-						if (!(0, _entity_function_templates.overlapped)(ob, this.m_Obstacles, minGapBetweenObstacles)) {
-							this.m_Obstacles.push(ob);
-							bOverlapped = false;
-						} else {
-							ob = null;
-						}
+		_createClass(SoccerPitch, [{
+			key: 'createRegions',
+			value: function createRegions(width, height) {
+				var idx = NumRegionsHorizontal * NumRegionsVertical - 1;
+				for (var col = 0; col < NumRegionsHorizontal; col++) {
+					for (var row = 0; row < NumRegionsVertical; row++) {
+						this.m_Regions[idx--] = new _region2.default(this.playingArea().left() + col * width, this.playingArea().top() + row * height, this.playingArea().left() + (col + 1) * width, this.playingArea().top() + (row + 1) * height, idx);
 					}
 				}
 			}
 		}, {
-			key: 'createWalls',
-			value: function createWalls() {
-				var borderSize = 20;
-				var cornerSize = 0.2;
-				var vDist = this.m_cyClient - 2 * borderSize;
-				var hDist = this.m_cxClient - 2 * borderSize;
-				var numWallVerts = 8;
-				var walls = [new _vector2d2.default(hDist * cornerSize + borderSize, borderSize), new _vector2d2.default(this.m_cxClient - borderSize - hDist * cornerSize, borderSize), new _vector2d2.default(this.m_cxClient - borderSize, borderSize + vDist * cornerSize), new _vector2d2.default(this.m_cxClient - borderSize, this.m_cyClient - borderSize - vDist * cornerSize), new _vector2d2.default(this.m_cxClient - borderSize - hDist * cornerSize, this.m_cyClient - borderSize), new _vector2d2.default(borderSize + hDist * cornerSize, this.m_cyClient - borderSize), new _vector2d2.default(borderSize, this.m_cyClient - borderSize - vDist * cornerSize), new _vector2d2.default(borderSize, borderSize + vDist * cornerSize)];
-				for (var w = 0; w < numWallVerts - 1; w++) {
-					this.m_Walls.push(new _wall2d2.default(walls[w], walls[w + 1]));
-				}
-				this.m_Walls.push(new _wall2d2.default(walls[numWallVerts - 1], walls[0]));
-			}
-		}, {
 			key: 'update',
-			value: function update(time_elapsed) {
+			value: function update(timeElapsed) {
 				if (this.m_bPaused) {
 					return;
 				}
-				var sampleRate = 10;
-				var frameRateSmoother = new _smoother2.default(sampleRate, 0);
-				this.m_dAvFrameTime = frameRateSmoother.update(time_elapsed);
-				for (var a = 0; a < this.m_Vehicles.length; a++) {
-					this.m_Vehicles[a].update(time_elapsed);
+				var tick = 0;
+				this.m_pBall.update(timeElapsed);
+				this.m_pRedTeam.update(timeElapsed);
+				this.m_pBlueTeam.update(timeElapsed);
+				if (this.m_pBlueGoal.scored(this.m_pBall) || this.m_pRedGoal.scored(this.m_pBall)) {
+					this.m_bGameOn = false;
+					this.m_pBall.placeAtPosition(new _vector2d2.default(this.m_cxClient / 2, this.m_cyClient / 2));
+					this.m_pRedTeam.getFSM().changeState(_team_state.PrepareForKickOff);
+					this.m_pBlueTeam.getFSM().changeState(_team_state.PrepareForKickOff);
 				}
 			}
 		}, {
 			key: 'render',
 			value: function render() {
-				_cgdi2.default.transparentText();
-				_cgdi2.default.blackPen();
-				for (var w = 0; w < this.m_Walls.length; w++) {
-					this.m_Walls[w].render(true);
-				}
-				_cgdi2.default.blackPen();
-				for (var ob = 0; ob < this.m_Obstacles.length; ob++) {
-					_cgdi2.default.circle(this.m_Obstacles[ob].pos(), this.m_Obstacles[ob].bRadius());
-				}
-				for (var a = 0; a < this.m_Vehicles.length; a++) {
-					this.m_Vehicles[a].render();
-					if (this.m_bShowCellSpaceInfo && a == 0) {
-						_cgdi2.default.hollowBrush();
-						var box = new _invertedaabbox2d2.default(this.m_Vehicles[a].pos().add(new _vector2d2.default(_params2.default.ViewDistance, _params2.default.ViewDistance).getReverse()), this.m_Vehicles[a].pos().add(new _vector2d2.default(_params2.default.ViewDistance, _params2.default.ViewDistance)));
-						box.render();
-						_cgdi2.default.redPen();
-						this.cellSpace().calculateNeighbors(this.m_Vehicles[a].pos(), _params2.default.ViewDistance);
-						for (var _i3 = 0; _i3 < this.cellSpace().neighbours().length; _i3++) {
-							var pV = this.cellSpace().neighbours()[_i3];
-							_cgdi2.default.circle(pV.pos(), pV.bRadius());
-						}
-						_cgdi2.default.greenPen();
-						_cgdi2.default.circle(this.m_Vehicles[a].pos(), _params2.default.ViewDistance);
+				_cgdi2.default.darkGreenPen();
+				_cgdi2.default.darkGreenBrush();
+				_cgdi2.default.rect(0, 0, this.m_cxClient, this.m_cyClient);
+				if (_params2.default.ViewRegions) {
+					for (var r = 0; r < this.m_Regions.length; r++) {
+						this.m_Regions[r].render(true);
 					}
 				}
-				_cgdi2.default.textColor(_cgdi2.default.GREY);
-				if (this.renderPath()) {
-					_cgdi2.default.textAtPos(this.cxClient() / 2 - 80, this.cyClient() - 20, "Press 'U' for random path");
-					this.m_pPath.render();
+				_cgdi2.default.hollowBrush();
+				//red goal
+				_cgdi2.default.redPen();
+				_cgdi2.default.rect(this.m_pPlayingArea.left(), (this.m_cyClient - _params2.default.GoalWidth) / 2, this.m_pPlayingArea.left() + 40, this.m_cyClient - (this.m_cyClient - _params2.default.GoalWidth) / 2);
+				// blue goal
+				_cgdi2.default.bluePen();
+				_cgdi2.default.rect(this.m_pPlayingArea.right(), (this.m_cyClient - _params2.default.GoalWidth) / 2, this.m_pPlayingArea.right() - 40, this.m_cyClient - (this.m_cyClient - _params2.default.GoalWidth) / 2);
+				// pitch marking
+				_cgdi2.default.whitePen();
+				_cgdi2.default.circle(this.m_pPlayingArea.center(), this.m_pPlayingArea.width() * 0.125);
+				_cgdi2.default.line(new _vector2d2.default(this.m_pPlayingArea.center().x, this.m_pPlayingArea.top()), new _vector2d2.default(this.m_pPlayingArea.center().x, this.m_pPlayingArea.bottom()));
+				_cgdi2.default.circle(this.m_pPlayingArea.center(), 2);
+				// ball
+				_cgdi2.default.whitePen();
+				_cgdi2.default.whiteBrush();
+				this.m_pBall.render();
+				// team
+				this.m_pRedTeam.render();
+				this.m_pBlueTeam.render();
+				// walls
+				_cgdi2.default.whitePen();
+				for (var w = 0; w < this.m_vecWalls.length; w++) {
+					this.m_vecWalls[w].render();
 				}
-				if (this.renderFPS()) {
-					_cgdi2.default.textColor(_cgdi2.default.GREY);
-					_cgdi2.default.textAtPos(5, this.cyClient() - 20, (1 / this.m_dAvFrameTime).toFixed(2));
-				}
-				if (this.m_bShowCellSpaceInfo) {
-					this.m_pCellSpace.renderCells();
-				}
+				_cgdi2.default.textColor(_cgdi2.default.RED);
+				_cgdi2.default.textAtPos(this.m_cxClient / 2 - 50, this.m_cyClient - 18, 'Red: ' + this.m_pBlueGoal.numGoalsScored());
+				_cgdi2.default.textColor(_cgdi2.default.BLUE);
+				_cgdi2.default.textAtPos(this.m_cxClient / 2 + 10, this.m_cyClient - 18, 'Blue: ' + this.m_pRedGoal.numGoalsScored());
+				return true;
 			}
-		}, {
-			key: 'nonPenetraitionContraint',
-			value: function nonPenetraitionContraint(v) {
-				(0, _entity_function_templates.enforceNonPenetrationConstraint)(v, this.m_Vehicles);
-			}
-		}, {
-			key: 'tagVehiclesWithinViewRange',
-			value: function tagVehiclesWithinViewRange(pVehicle, range) {
-				(0, _entity_function_templates.tagNeighbors)(pVehicle, this.m_Vehicles, range);
-			}
-		}, {
-			key: 'tagObstaclesWithinViewRange',
-			value: function tagObstaclesWithinViewRange(pVehicle, range) {
-				(0, _entity_function_templates.tagNeighbors)(pVehicle, this.m_Obstacles, range);
-			}
-		}, {
-			key: 'walls',
-			value: function walls() {
-				return this.m_Walls;
-			}
-		}, {
-			key: 'cellSpace',
-			value: function cellSpace() {
-				return this.m_pCellSpace;
-			}
-		}, {
-			key: 'obstacles',
-			value: function obstacles() {
-				return this.m_Obstacles;
-			}
-		}, {
-			key: 'agents',
-			value: function agents() {
-				return this.m_Vehicles;
-			}
-		}, {
-			key: 'handleKeyPresses',
-			value: function handleKeyPresses(wParam) {
-				switch (wParam) {
-					case 'u':
-						delete this.m_pPath;
-						var border = 60;
-						this.m_pPath = new _path2.default(3 + Math.floor(Math.random() * 5), border, this.cxClient() - border, this.cyClient() - border, true);
-						this.m_bShowPath = true;
-						for (var _i4 = 0; _i4 < this.m_Vehicles.length; _i4++) {
-							this.m_Vehicles[_i4].steering().setPath(this.m_pPath.getPath());
-							if (this.m_Vehicles[_i4].id() !== 0) {
-								this.m_Vehicles[_i4].steering().followPathOn();
-							}
-						}
-						break;
-					case 'p':
-						this.togglePause();
-						break;
-					case 'o':
-						this.toggleRenderNeighbors();
-						break;
-					case 'i':
-						for (var _i5 = 0; _i5 < this.m_Vehicles.length; _i5++) {
-							this.m_Vehicles[_i5].toggleSmoothing();
-						}
-						break;
-					case 'y':
-						this.m_bShowObstacles = !this.m_bShowObstacles;
-						if (!this.m_bShowObstacles) {
-							this.m_Obstacles = [];
-							for (var _i6 = 0; _i6 < this.m_Vehicles.length; _i6++) {
-								this.m_Vehicles[_i6].steering().obstacleAvoidanceOff();
-							}
-						} else {
-							this.createObstacles();
-							for (var _i7 = 0; _i7 < this.m_Vehicles.length; _i7++) {
-								this.m_Vehicles[_i7].steering().obstacleAvoidanceOn();
-							}
-						}
-						break;
-					case 'w':
-						this.m_bShowWalls = !this.m_bShowWalls;
-						if (!this.m_bShowWalls) {
-							this.m_Walls = [];
-							for (var _i8 = 0; _i8 < this.m_Vehicles.length; _i8++) {
-								this.m_Vehicles[_i8].steering().wallAvoidanceOff();
-							}
-						} else {
-							this.createWalls();
-							for (var _i9 = 0; _i9 < this.m_Vehicles.length; _i9++) {
-								this.m_Vehicles[_i9].steering().wallAvoidanceOn();
-							}
-						}
-						break;
-				}
-			}
-		}, {
-			key: 'handleMenuItems',
-			value: function handleMenuItems(wParam, hwnd) {}
 		}, {
 			key: 'togglePause',
 			value: function togglePause() {
@@ -597,24 +483,6 @@
 			key: 'paused',
 			value: function paused() {
 				return this.m_bPaused;
-			}
-		}, {
-			key: 'crosshair',
-			value: function crosshair() {
-				return this.m_vCrosshair;
-			}
-		}, {
-			key: 'setCrosshair',
-			value: function setCrosshair(p) {
-				var proposedPosition = new _vector2d2.default(p.x, p.y);
-				for (i = 0; i < this.m_Obstacles.lenght; i++) {
-					var curOb = this.m_Obstacles[i];
-					if ((0, _geometry.pointInCircle)(curOb.pos(), curOb.bRadius(), proposedPosition)) {
-						return;
-					}
-				}
-				this.m_vCrosshair.x = p.x;
-				this.m_vCrosshair.y = p.y;
 			}
 		}, {
 			key: 'cxClient',
@@ -627,91 +495,190 @@
 				return this.m_cyClient;
 			}
 		}, {
-			key: 'renderWalls',
-			value: function renderWalls() {
-				return this.m_bShowWalls;
+			key: 'goalKeeperHasBall',
+			value: function goalKeeperHasBall() {
+				return this.m_bGoalKeeperHasBall;
 			}
 		}, {
-			key: 'renderObstacles',
-			value: function renderObstacles() {
-				return this.m_bShowObstacles;
+			key: 'setGoalKeeperHasBall',
+			value: function setGoalKeeperHasBall(b) {
+				this.m_bGoalKeeperHasBall = b;
 			}
 		}, {
-			key: 'renderPath',
-			value: function renderPath() {
-				return this.m_bShowPath;
+			key: 'playingArea',
+			value: function playingArea() {
+				return this.m_pPlayingArea;
 			}
 		}, {
-			key: 'renderDetectionBox',
-			value: function renderDetectionBox() {
-				return this.m_bShowDetectionBox;
+			key: 'walls',
+			value: function walls() {
+				return this.m_vecWalls;
 			}
 		}, {
-			key: 'renderWanderCircle',
-			value: function renderWanderCircle() {
-				return this.m_bShowWanderCircle;
+			key: 'ball',
+			value: function ball() {
+				return this.m_pBall;
 			}
 		}, {
-			key: 'renderFeelers',
-			value: function renderFeelers() {
-				return this.m_bShowFeelers;
-			}
-		}, {
-			key: 'renderSteeringForce',
-			value: function renderSteeringForce() {
-				return this.m_bShowSteeringForce;
-			}
-		}, {
-			key: 'renderFPS',
-			value: function renderFPS() {
-				return this.m_bShowFPS;
-			}
-		}, {
-			key: 'toggleShowFPS',
-			value: function toggleShowFPS() {
-				this.m_bShowFPS = !this.m_bShowFPS;
-			}
-		}, {
-			key: 'toggleRenderNeighbors',
-			value: function toggleRenderNeighbors() {
-				this.m_bRenderNeighbors = !this.m_bRenderNeighbors;
-			}
-		}, {
-			key: 'renderNeighbors',
-			value: function renderNeighbors() {
-				return this.m_bRenderNeighbors;
-			}
-		}, {
-			key: 'toggleViewKeys',
-			value: function toggleViewKeys() {
-				this.m_bViewKeys = !this.m_bViewKeys;
-			}
-		}, {
-			key: 'viewKeys',
-			value: function viewKeys() {
-				return this.m_bViewKeys;
-			}
-		}, {
-			key: 'destroy',
-			value: function destroy() {
-				for (var a = 0; a < this.m_Vehicles.length; a++) {
-					delete this.m_Vehicles[a];
+			key: 'getRegionFromIndex',
+			value: function getRegionFromIndex(idx) {
+				if (idx >= 0 && idx < this.m_Regions.length) {
+					return this.m_Regions[idx];
 				}
-				for (var ob = 0; ob < this.m_Obstacles.length; ob++) {
-					delete this.m_Obstacles[ob];
-				}
-				delete this.m_pCellSpace;
-				delete this.m_pPath;
+			}
+		}, {
+			key: 'gameOn',
+			value: function gameOn() {
+				return this.m_bGameOn;
+			}
+		}, {
+			key: 'setGameOn',
+			value: function setGameOn() {
+				this.m_bGameOn = true;
+			}
+		}, {
+			key: 'setGameOff',
+			value: function setGameOff() {
+				this.m_bGameOn = false;
 			}
 		}]);
 	
-		return GameWorld;
+		return SoccerPitch;
 	}();
 	
-	exports.default = GameWorld;
+	exports.default = SoccerPitch;
 
 /***/ },
-/* 3 */
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _cgdi = __webpack_require__(1);
+	
+	var _cgdi2 = _interopRequireDefault(_cgdi);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Region = function () {
+		function Region(left, top, right, bottom) {
+			var id = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : -1;
+	
+			_classCallCheck(this, Region);
+	
+			this.m_dTop = top || 0;
+			this.m_dLeft = left || 0;
+			this.m_dRight = right || 0;
+			this.m_dBottom = bottom || 0;
+			this.m_dWidth = Math.abs(right - left);
+			this.m_dHeight = Math.abs(bottom - top);
+			this.m_vCenter = new _vector2d2.default((left + right) / 2, (top + bottom) / 2);
+			this.m_iID = id;
+		}
+	
+		_createClass(Region, [{
+			key: 'render',
+			value: function render() {
+				var showID = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	
+				_cgdi2.default.hollowBrush();
+				_cgdi2.default.greenPen();
+				_cgdi2.default.rect(this.m_dLeft, this.m_dTop, this.m_dRight, this.m_dBottom);
+				if (showID) {
+					_cgdi2.default.textColor(_cgdi2.default.green);
+					_cgdi2.default.textAtPos(this.center(), this.id());
+				}
+			}
+		}, {
+			key: 'inside',
+			value: function inside(pos) {
+				var r = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'NORMAL';
+	
+				if (r == 'NORMAL') {
+					return pos.x > this.m_dLeft && pos.x < this.m_dRight && pos.y > this.m_dTop && pos.y < this.m_dBottom;
+				} else {
+					var marginX = this.width() * 0.25;
+					var marginY = this.height() * 0.25;
+					return pos.x > this.m_dLeft + marginX && pos.x < this.m_dRight - marginX && pos.y > this.m_dTop + marginY && pos.y < this.m_dBottom - marginY;
+				}
+			}
+		}, {
+			key: 'getRandomPosition',
+			value: function getRandomPosition() {
+				return new _vector2d2.default(this.m_dLeft + Math.random() * (this.m_dRight - this.m_dLeft), this.m_dTop + Math.random() * (this.m_dBottom - this.m_dTop));
+			}
+		}, {
+			key: 'top',
+			value: function top() {
+				return this.m_dTop;
+			}
+		}, {
+			key: 'bottom',
+			value: function bottom() {
+				return this.m_dBottom;
+			}
+		}, {
+			key: 'left',
+			value: function left() {
+				return this.m_dLeft;
+			}
+		}, {
+			key: 'right',
+			value: function right() {
+				return this.m_dRight;
+			}
+		}, {
+			key: 'width',
+			value: function width() {
+				return Math.abs(this.m_dRight - this.m_dLeft);
+			}
+		}, {
+			key: 'height',
+			value: function height() {
+				return Math.abs(this.m_dBottom - this.m_dTop);
+			}
+		}, {
+			key: 'length',
+			value: function length() {
+				return Math.max(this.width(), this.height());
+			}
+		}, {
+			key: 'breadth',
+			value: function breadth() {
+				return Math.min(this.width(), this.height());
+			}
+		}, {
+			key: 'center',
+			value: function center() {
+				return this.m_vCenter;
+			}
+		}, {
+			key: 'id',
+			value: function id() {
+				return this.m_iID;
+			}
+		}]);
+	
+		return Region;
+	}();
+	
+	exports.default = Region;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -762,6 +729,7 @@
 				var length = this.length();
 				this.x /= length;
 				this.y /= length;
+				return this;
 			}
 		}, {
 			key: "add",
@@ -822,9 +790,9 @@
 		}, {
 			key: "reflect",
 			value: function reflect(normVec) {
-				var diff = 2 * this.dot(normVec) * normVec.getReverse();
-				this.x += diff;
-				this.y += diff;
+				var diff = normVec.getReverse().crossNum(2 * this.dot(normVec));
+				this.x += diff.x;
+				this.y += diff.y;
 			}
 		}, {
 			key: "clone",
@@ -873,7 +841,7 @@
 	exports.vec2DDistance = vec2DDistance;
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -881,99 +849,73 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.getClosestEntityLineSegmentIntersection = exports.getEntityLineSegmentIntersections = exports.enforceNonPenetrationConstraint = exports.tagNeighbors = exports.overlapped = undefined;
 	
-	var _geometry = __webpack_require__(5);
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _vector2d = __webpack_require__(3);
+	var _geometry = __webpack_require__(7);
 	
-	var maxDouble = 999999;
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	function overlapped(ob, conOb) {
-		var minDistBetweenObstacles = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 40;
+	var Goal = function () {
+		function Goal(left, right, facing) {
+			_classCallCheck(this, Goal);
 	
-		for (var i = 0; i < conOb.length; i++) {
-			var it = conOb[i];
-			if ((0, _geometry.twoCirclesOverlapped)(ob.pos().x, ob.pos().y, ob.bRadius() + minDistBetweenObstacles, it.pos().x, it.pos().y, it.bRadius())) {
-				return true;
-			}
+			this.m_vLeftPost = left;
+			this.m_vRightPost = right;
+			this.m_vFacing = facing;
+			this.m_vCenter = left.add(right).crossNum(1 / 2);
+			this.m_iNumGoalsScored = 0;
 		}
-		return false;
-	}
 	
-	function tagNeighbors(entity, containerOfEntities, radius) {
-		for (var i = 0; i < containerOfEntities.length; i++) {
-			var curEntity = containerOfEntities[i];
-			curEntity.unTag();
-			var to = curEntity.pos().add(entity.pos().getReverse());
-			var range = radius + curEntity.bRadius();
-			if (curEntity != entity && to.lengthSq() < range * range) {
-				curEntity.tag();
-			}
-		}
-	}
-	
-	function enforceNonPenetrationConstraint(entity, containerOfEntities) {
-		for (var i = 0; i < containerOfEntities.length; i++) {
-			var curEntity = containerOfEntities[i];
-			if (curEntity != entity) {
-				var toEntity = entity.pos().add(curEntity.pos().getReverse());
-				var distFromEachOther = toEntity.length();
-				var amountOfOverLap = curEntity.bRadius() + entity.bRadius() - distFromEachOther;
-				if (amountOfOverLap >= 0) {
-					entity.setPos(entity.pos().add(toEntity.crossNum(1 / distFromEachOther * amountOfOverLap)));
+		_createClass(Goal, [{
+			key: 'scored',
+			value: function scored(ball) {
+				var scoreInfo = (0, _geometry.lineIntersection2D)(ball.pos(), ball.oldPos(), this.m_vLeftPost, this.m_vRightPost);
+				if (scoreInfo.result) {
+					++this.m_iNumGoalsScored;
+					return true;
 				}
+				return false;
 			}
-		}
-	}
-	
-	function getEntityLineSegmentIntersections(entities, theOneToIgnore, A, B) {
-		var range = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : maxDouble;
-	
-		var hits = [];
-		for (var i = 0; i < entities.length; i++) {
-			var it = entities[i];
-			if (it.id() === theOneToIgnore || (0, _vector2d.vec2DDistanceSq)(it.pos(), A) > range * range) {
-				// do nothing
-			} else {
-				if ((0, _geometry.distToLineSegment)(A, B, it.pos()) < it.bRadius()) {
-					hits.push(it);
-				}
+		}, {
+			key: 'center',
+			value: function center() {
+				return this.m_vCenter;
 			}
-		}
-		return hits;
-	}
-	
-	function getClosestEntityLineSegmentIntersection(entities, theOneToIgnore, A, B) {
-		var range = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : MaxDouble;
-	
-		var closestEntity = null;
-		var closestDist = maxDouble;
-		for (var i = 0; i < entities.length; i++) {
-			var it = entities[i];
-			var distSq = (0, _vector2d.vec2DDistanceSq)(it.pos(), A);
-			if (it.id() === theOneToIgnore || distSq > range * range) {
-				// do nothing
-			} else {
-				if ((0, _geometry.distToLineSegment)(A, B, it.pos()) < it.bRadius()) {
-					if (distSq < closestDist) {
-						closestDist = distSq;
-						closestEntity = it;
-					}
-				}
+		}, {
+			key: 'facing',
+			value: function facing() {
+				return this.m_vFacing;
 			}
-		}
-		return closestEntity;
-	}
+		}, {
+			key: 'leftPost',
+			value: function leftPost() {
+				return this.m_vLeftPost;
+			}
+		}, {
+			key: 'rightPost',
+			value: function rightPost() {
+				return this.m_vRightPost;
+			}
+		}, {
+			key: 'numGoalsScored',
+			value: function numGoalsScored() {
+				return this.m_iNumGoalsScored;
+			}
+		}, {
+			key: 'resetGoalScored',
+			value: function resetGoalScored() {
+				this.m_iNumGoalsScored = 0;
+			}
+		}]);
 	
-	exports.overlapped = overlapped;
-	exports.tagNeighbors = tagNeighbors;
-	exports.enforceNonPenetrationConstraint = enforceNonPenetrationConstraint;
-	exports.getEntityLineSegmentIntersections = getEntityLineSegmentIntersections;
-	exports.getClosestEntityLineSegmentIntersection = getClosestEntityLineSegmentIntersection;
+		return Goal;
+	}();
+	
+	exports.default = Goal;
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -983,11 +925,11 @@
 	});
 	exports.getLineSegmentCircleClosestIntersectionPoint = exports.lineSegmentCircleIntersection = exports.pointInCircle = exports.circleArea = exports.twoCirclesIntersectionArea = exports.twoCirclesIntersectionPoints = exports.twoCirclesEnclosed = exports.twoCirclesOverlapped = exports.segmentObjectIntersection2D = exports.objectIntersection2D = exports.lineIntersection2D = exports.distToLineSegmentSq = exports.distToLineSegment = exports.getTangentPoints = exports.doRayCircleIntersect = exports.getRayCircleIntersect = exports.whereIsPoint = exports.distanceToRayPlaneIntersection = undefined;
 	
-	var _vector2d = __webpack_require__(3);
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
 	
-	var _transformations = __webpack_require__(6);
+	var _transformations = __webpack_require__(8);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1012,7 +954,7 @@
 			case d < -0.000001:
 				return 'PLANE_FRONT';
 			case d > 0.000001:
-				return 'PLANE_BACKIDE';
+				return 'PLANE_BACKSIDE';
 			default:
 				return 'ON_PLANE';
 		}
@@ -1037,7 +979,7 @@
 	function getTangentPoints(circleOrigin, radius, point, T1, T2) {
 		var toCircle = circleOrigin.add(point.getReverse());
 		var lengthSq = toCircle.lengthSq();
-		var rSq = r * r;
+		var rSq = radius * radius;
 		if (lengthSq <= rSq) {
 			return false;
 		}
@@ -1121,9 +1063,9 @@
 	}
 	
 	function objectIntersection2D(obj1, obj2) {
-		for (var _r = 0; _r < obj1.length - 1; _r++) {
+		for (var r = 0; r < obj1.length - 1; r++) {
 			for (var t = 0; t < obj2.length - 1; t++) {
-				if (lineIntersection2D(obj2[t], obj2[t + 1], obj1[_r], obj1[_r + 1])) {
+				if (lineIntersection2D(obj2[t], obj2[t + 1], obj1[r], obj1[r + 1])) {
 					return true;
 				}
 			}
@@ -1132,8 +1074,8 @@
 	}
 	
 	function segmentObjectIntersection2D(A, B, obj) {
-		for (var _r2 = 0; _r2 < obj.length - 1; _r2++) {
-			if (lineIntersection2D(A, B, obj[_r2], obj[_r2 + 1])) {
+		for (var r = 0; r < obj.length - 1; r++) {
+			if (lineIntersection2D(A, B, obj[r], obj[r + 1])) {
 				return true;
 			}
 		}
@@ -1252,7 +1194,7 @@
 	exports.getLineSegmentCircleClosestIntersectionPoint = getLineSegmentCircleClosestIntersectionPoint;
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1262,7 +1204,7 @@
 	});
 	exports.worldTransform = exports.vec2dRotateAroundOrigin = exports.pointToLocalSpace = exports.vectorToWorldSpace = exports.pointToWorldSpace = undefined;
 	
-	var _c2dmatrix = __webpack_require__(7);
+	var _c2dmatrix = __webpack_require__(9);
 	
 	var _c2dmatrix2 = _interopRequireDefault(_c2dmatrix);
 	
@@ -1322,7 +1264,7 @@
 	exports.worldTransform = worldTransform;
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1438,229 +1380,6 @@
 	exports.default = C2DMatrix;
 
 /***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = undefined;
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _invertedaabbox2d = __webpack_require__(9);
-	
-	var _invertedaabbox2d2 = _interopRequireDefault(_invertedaabbox2d);
-	
-	var _vector2d = __webpack_require__(3);
-	
-	var _vector2d2 = _interopRequireDefault(_vector2d);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var Cell = function Cell(topLeft, botRight) {
-		_classCallCheck(this, Cell);
-	
-		this.members = [];
-		this.bBox = new _invertedaabbox2d2.default(topLeft, botRight);
-	};
-	
-	var CellSpacePartition = function () {
-		function CellSpacePartition(width, height, cellsX, cellsY, maxEntitys) {
-			_classCallCheck(this, CellSpacePartition);
-	
-			this.m_Cells = [];
-			this.m_Neighbors = [];
-			this.m_curNeighbor = null;
-			this.m_dSpaceWidth = width;
-			this.m_dSpaceHeight = height;
-			this.m_iNumCellsX = cellsX;
-			this.m_iNumCellsY = cellsY;
-			this.m_dCellSizeX = width / cellsX;
-			this.m_dCellSizeY = height / cellsY;
-			for (var y = 0; y < this.m_iNumCellsY; y++) {
-				for (var x = 0; x < this.m_iNumCellsX; x++) {
-					var left = x * this.m_dCellSizeX;
-					var right = left + this.m_dCellSizeX;
-					var top = y * this.m_dCellSizeY;
-					var bot = top + this.m_dCellSizeY;
-					this.m_Cells.push(new Cell(new _vector2d2.default(left, top), new _vector2d2.default(right, bot)));
-				}
-			}
-		}
-	
-		_createClass(CellSpacePartition, [{
-			key: 'neighbours',
-			value: function neighbours() {
-				return this.m_Neighbors;
-			}
-		}, {
-			key: 'calculateNeighbors',
-			value: function calculateNeighbors(targetPos, queryRadius) {
-				this.m_Neighbors = [];
-				var queryBox = new _invertedaabbox2d2.default(targetPos.add(new _vector2d2.default(queryRadius, queryRadius).getReverse()), targetPos.add(new _vector2d2.default(queryRadius, queryRadius)));
-				var curCell = void 0;
-				for (var i = 0; i < this.m_Cells.length; i++) {
-					curCell = this.m_Cells[i];
-					if (curCell.bBox.isOverlappedWith(queryBox) && curCell.members.length != 0) {
-						for (var j = 0; j < curCell.members.length; j++) {
-							var it = curCell.members[j];
-							if ((0, _vector2d.vec2DDistanceSq)(it.pos(), targetPos) < queryRadius) {
-								this.m_Neighbors.push(it);
-							}
-						}
-					}
-				}
-			}
-		}, {
-			key: 'emptyCells',
-			value: function emptyCells() {
-				var it = void 0;
-				for (var i = 0; i < this.m_Cells.length; i++) {
-					it.members = [];
-				}
-			}
-		}, {
-			key: 'positionToIndex',
-			value: function positionToIndex(pos) {
-				var idx = Math.floor(pos.x / (this.m_dSpaceWidth / this.m_iNumCellsX)) + Math.floor(pos.y / (this.m_dSpaceHeight / this.m_iNumCellsY)) * this.m_iNumCellsX;
-				if (idx > this.m_Cells.length - 1) {
-					idx = this.m_Cells.length - 1;
-				}
-				return idx;
-			}
-		}, {
-			key: 'addEntity',
-			value: function addEntity(ent) {
-				var idx = this.positionToIndex(ent.pos());
-				this.m_Cells[idx].members.push(ent);
-			}
-		}, {
-			key: 'updateEntity',
-			value: function updateEntity(ent, oldPos) {
-				var oldIdx = this.positionToIndex(oldPos);
-				var newIdx = this.positionToIndex(ent.pos());
-				if (newIdx == oldIdx) {
-					return;
-				}
-				var tempOldMembers = [];
-				for (var i = 0; i < this.m_Cells[oldIdx].members.length; i++) {
-					if (this.m_Cells[oldIdx].members[i] != ent) {
-						tempOldMembers.push(this.m_Cells[oldIdx].members[i]);
-					}
-				}
-				this.m_Cells[oldIdx].members = tempOldMembers;
-				this.m_Cells[newIdx].members.push(ent);
-			}
-		}, {
-			key: 'renderCells',
-			value: function renderCells() {
-				for (var i = 0; i < this.m_Cells.length; i++) {
-					var curCell = this.m_Cells[i];
-					curCell.bBox.render(false);
-				}
-			}
-		}]);
-	
-		return CellSpacePartition;
-	}();
-	
-	exports.default = CellSpacePartition;
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _cgdi = __webpack_require__(1);
-	
-	var _cgdi2 = _interopRequireDefault(_cgdi);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var InvertedAABBox2D = function () {
-		function InvertedAABBox2D(tl, br) {
-			_classCallCheck(this, InvertedAABBox2D);
-	
-			this.m_vTopLeft = tl;
-			this.m_vBottomRight = br;
-			this.m_vCenter = tl.add(br).crossNum(0.5);
-		}
-	
-		_createClass(InvertedAABBox2D, [{
-			key: 'isOverlappedWith',
-			value: function isOverlappedWith(other) {
-				return !(other.top() > this.bottom() || other.bottom() < this.top() || other.left() > this.right() || other.right() < this.left());
-			}
-		}, {
-			key: 'topLeft',
-			value: function topLeft() {
-				return this.m_vTopLeft;
-			}
-		}, {
-			key: 'bottomRight',
-			value: function bottomRight() {
-				return this.m_vBottomRight;
-			}
-		}, {
-			key: 'top',
-			value: function top() {
-				return this.m_vTopLeft.y;
-			}
-		}, {
-			key: 'left',
-			value: function left() {
-				return this.m_vTopLeft.x;
-			}
-		}, {
-			key: 'bottom',
-			value: function bottom() {
-				return this.m_vBottomRight.y;
-			}
-		}, {
-			key: 'right',
-			value: function right() {
-				return this.m_vBottomRight.x;
-			}
-		}, {
-			key: 'center',
-			value: function center() {
-				return this.m_vCenter;
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				var renderCenter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-	
-				_cgdi2.default.line(this.left(), this.top(), this.right(), this.top());
-				_cgdi2.default.line(this.left(), this.bottom(), this.right(), this.bottom());
-				_cgdi2.default.line(this.left(), this.top(), this.left(), this.bottom());
-				_cgdi2.default.line(this.right(), this.top(), this.right(), this.bottom());
-				if (renderCenter) {
-					_cgdi2.default.circle(this.m_vCenter, 5);
-				}
-			}
-		}]);
-	
-		return InvertedAABBox2D;
-	}();
-	
-	exports.default = InvertedAABBox2D;
-
-/***/ },
 /* 10 */
 /***/ function(module, exports) {
 
@@ -1669,23 +1388,109 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	function clamp(arg, minVal, maxVal) {
-		var ret = arg;
-		if (ret < minVal) {
-			ret = minVal;
-		}
-		if (ret > maxVal) {
-			ret = maxVal;
-		}
-		return ret;
-	}
+	var BallWithinReceivingRange = 10;
+	var KeeperInBallRange = 10.0;
+	var PlayerInTargetRange = 10.0;
+	var PlayerKickingDistance = 6.0;
+	var BallSize = 5.0;
+	var PlayerComfortZone = 60.0;
+	var GoalKeeperInterceptRange = 100.0;
+	var WithinRangeOfSupportSpot = 15.0;
 	
-	function randomClamped() {
-		return Math.random() - Math.random();
-	}
+	var PRM = {
+		GoalWidth: 100,
+		//use to set up the sweet spot calculator,
+		NumSupportSpotsX: 13,
+		NumSupportSpotsY: 6,
+		//these values tweak the various rules used to calculate the support spots,
+		Spot_CanPassScore: 2.0,
+		Spot_CanScoreFromPositionScore: 1.0,
+		Spot_DistFromControllingPlayerScore: 2.0,
+		Spot_ClosenessToSupportingPlayerScore: 0.0,
+		Spot_AheadOfAttackerScore: 0.0,
+		//how many times per second the support spots will be calculated,
+		SupportSpotUpdateFreq: 1,
+		//the chance a player might take a random pot shot at the goal,
+		ChancePlayerAttemptsPotShot: 0.005,
+		//this is the chance that a player will receive a pass using the arrive,
+		//steering behavior, rather than Pursuit,
+		ChanceOfUsingArriveTypeReceiveBehavior: 0.5,
+		BallSize: BallSize,
+		BallMass: 1.0,
+		Friction: -0.015,
+		//the goalkeeper has to be this close to the ball to be able to interact with it,
+		KeeperInBallRange: KeeperInBallRange,
+		PlayerInTargetRange: PlayerInTargetRange,
+		//player has to be this close to the ball to be able to kick it. The higher,
+		//the value this gets, the easier it gets to tackle. ,
+		// PlayerKickingDistance:           6.0,
+		//the number of times a player can kick the ball per second,
+		PlayerKickFrequency: 8,
+		PlayerMass: 3.0,
+		PlayerMaxForce: 1.0,
+		PlayerMaxSpeedWithBall: 1.2,
+		PlayerMaxSpeedWithoutBall: 1.6,
+		PlayerMaxTurnRate: 0.4,
+		PlayerScale: 1.0,
+		//when an opponents comes within this range the player will attempt to pass,
+		//the ball. Players tend to pass more often, the higher the value,
+		PlayerComfortZone: PlayerComfortZone,
+		//in the range zero to 1.0. adjusts the amount of noise added to a kick,,
+		//the lower the value the worse the players get.,
+		PlayerKickingAccuracy: 0.99,
+		//the number of times the SoccerTeam::CanShoot method attempts to find,
+		//a valid shot,
+		NumAttemptsToFindValidStrike: 5,
+		MaxDribbleForce: 1.5,
+		MaxShootingForce: 6.0,
+		MaxPassingForce: 3.0,
+		//the distance away from the center of its home region a player,
+		//must be to be considered at home,
+		WithinRangeOfHome: 15.0,
+		//how close a player must get to a sweet spot before he can change state,
+		WithinRangeOfSupportSpot: WithinRangeOfSupportSpot,
+		//the minimum distance a receiving player must be from the passing player,
+		MinPassDistance: 120.0,
+		//the minimum distance a player must be from the goalkeeper before it will,
+		//pass the ball,
+		GoalkeeperMinPassDistance: 50.0,
+		//this is the distance the keeper puts between the back of the net ,
+		//and the ball when using the interpose steering behavior,
+		GoalKeeperTendingDistance: 20.0,
+		//when the ball becomes within this distance of the goalkeeper he,
+		//changes state to intercept the ball,
+		GoalKeeperInterceptRange: GoalKeeperInterceptRange,
+		//how close the ball must be to a receiver before he starts chasing it,
+		BallWithinReceivingRange: BallWithinReceivingRange,
+		//these (boolean) values control the amount of player and pitch info shown,
+		//1=ON; 0=OFF,
+		ViewStates: 1,
+		ViewIDs: 1,
+		bSupportSpots: 1,
+		ViewRegions: 0,
+		bShowControllingTeam: 1,
+		ViewTargets: 0,
+		HighlightIfThreatened: 0,
+		//simple soccer's physics are calculated using each tick as the unit of time,
+		//so changing this will adjust the speed,
+		FrameRate: 60,
+		//--------------------------------------------steering behavior stuff,
+		SeparationCoefficient: 10.0,
+		//how close a neighbour must be to be considered for separation,
+		ViewDistance: 30.0,
+		//1=ON; 0=OFF,
+		bNonPenetrationConstraint: 0,
+		BallWithinReceivingRangeSq: BallWithinReceivingRange * BallWithinReceivingRange,
+		KeeperInBallRangeSq: KeeperInBallRange * KeeperInBallRange,
+		PlayerInTargetRangeSq: PlayerInTargetRange * PlayerInTargetRange,
+		PlayerKickingDistance: PlayerKickingDistance + BallSize,
+		PlayerKickingDistanceSq: (PlayerKickingDistance + BallSize) * (PlayerKickingDistance + BallSize),
+		PlayerComfortZoneSq: PlayerComfortZone * PlayerComfortZone,
+		GoalKeeperInterceptRangeSq: GoalKeeperInterceptRange * GoalKeeperInterceptRange,
+		WithinRangeOfSupportSpotSq: WithinRangeOfSupportSpot * WithinRangeOfSupportSpot
+	};
 	
-	exports.clamp = clamp;
-	exports.randomClamped = randomClamped;
+	exports.default = PRM;
 
 /***/ },
 /* 11 */
@@ -1696,255 +1501,31 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.default = undefined;
+	exports.addNoiseToKick = exports.default = undefined;
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _cgdi = __webpack_require__(1);
-	
-	var _cgdi2 = _interopRequireDefault(_cgdi);
-	
-	var _vector2d = __webpack_require__(3);
-	
-	var _vector2d2 = _interopRequireDefault(_vector2d);
-	
-	var _transformations = __webpack_require__(6);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var Path = function () {
-		function Path(numWaypoints, minX, minY, maxX, maxY, looped) {
-			_classCallCheck(this, Path);
-	
-			this.m_WayPoints = [];
-			this.curWaypoint = this.m_WayPoints[0];
-			this.m_bLooped = looped || false;
-			this.createRandomPath(numWaypoints, minX, minY, maxX, maxY);
-		}
-	
-		_createClass(Path, [{
-			key: 'currentWaypoint',
-			value: function currentWaypoint() {
-				return this.curWaypoint;
-			}
-		}, {
-			key: 'finished',
-			value: function finished() {
-				return !(this.curWaypoint != this.m_WayPoints[this.m_WayPoints.length - 1]);
-			}
-		}, {
-			key: 'setNextWaypoint',
-			value: function setNextWaypoint() {
-				if (this.m_WayPoints.length > 0) {
-					var curIndex = -1;
-					for (var i = 0; i < this.m_WayPoints.length; i++) {
-						if (this.m_WayPoints[i] == this.curWaypoint) {
-							curIndex = i;
-						}
-					}
-					if (curIndex >= 0) {
-						if (curIndex == this.m_WayPoints.length - 1) {
-							curIndex = 0;
-						} else {
-							++curIndex;
-						}
-						this.curWaypoint = this.m_WayPoints[curIndex];
-					}
-				}
-			}
-		}, {
-			key: 'createRandomPath',
-			value: function createRandomPath(numWaypoints, minX, minY, maxX, maxY) {
-				this.m_WayPoints = [];
-				var midX = (maxX + minX) / 2;
-				var midY = (maxY + minY) / 2;
-				var smaller = Math.min(midX, midY);
-				var spacing = 2 * Math.PI / numWaypoints;
-				for (var i = 0; i < numWaypoints; ++i) {
-					var radialDist = (0.2 + Math.random() * 0.8) * smaller;
-					var temp = new _vector2d2.default(radialDist, 0);
-					(0, _transformations.vec2dRotateAroundOrigin)(temp, i * spacing);
-					temp.x += midX;
-					temp.y += midY;
-					this.m_WayPoints.push(temp);
-				}
-				this.curWaypoint = this.m_WayPoints[0];
-				return this.m_WayPoints;
-			}
-		}, {
-			key: 'loopOn',
-			value: function loopOn() {
-				this.m_bLooped = true;
-			}
-		}, {
-			key: 'loopOff',
-			value: function loopOff() {
-				this.m_bLooped = false;
-			}
-		}, {
-			key: 'addWayPoint',
-			value: function addWayPoint(newPoint) {
-				// 
-			}
-		}, {
-			key: 'set',
-			value: function set(path) {
-				if (path instanceof Path) {
-					this.m_WayPoints = path.getPath();
-					this.curWaypoint = this.m_WayPoints[0];
-				}
-				if (path instanceof Array) {
-					this.m_WayPoints = path;
-					this.curWaypoint = this.m_WayPoints[0];
-				}
-			}
-		}, {
-			key: 'clear',
-			value: function clear() {
-				this.m_WayPoints = [];
-			}
-		}, {
-			key: 'getPath',
-			value: function getPath() {
-				return this.m_WayPoints;
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				_cgdi2.default.orangePen();
-				for (var i = 0; i < this.m_WayPoints.length; i++) {
-					var it = this.m_WayPoints[i];
-					var wp = void 0;
-					if (i != this.m_WayPoints.length - 1) {
-						wp = this.m_WayPoints[i + 1];
-					} else {
-						if (this.m_bLooped) {
-							wp = this.m_WayPoints[0];
-						}
-					}
-					if (wp) {
-						_cgdi2.default.line(wp, it);
-					}
-				}
-			}
-		}]);
-	
-		return Path;
-	}();
-	
-	exports.default = Path;
-
-/***/ },
-/* 12 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	var PRM = {
-		NumAgents: 300,
-		NumObstacles: 7,
-		MinObstacleRadius: 10,
-		MaxObstacleRadius: 30,
-		//number of horizontal cells used for spatial partitioning
-		NumCellsX: 7,
-		//number of vertical cells used for spatial partitioning
-		NumCellsY: 7,
-		//how many samples the smoother will use to average a value
-		NumSamplesForSmoothing: 10,
-		//this is used to multiply the steering force AND all the multipliers
-		//found in SteeringBehavior
-		SteeringForceTweaker: 200.0,
-		SteeringForce: 2.0,
-		MaxSteeringForce: 2 * 200,
-		MaxSpeed: 150.0,
-		VehicleMass: 1.0,
-		VehicleScale: 3.0,
-		//use these values to tweak the amount that each steering force
-		//contributes to the total steering force
-		SeparationWeight: 1.0 * 200,
-		AlignmentWeight: 1.0 * 200,
-		CohesionWeight: 2.0 * 200,
-		ObstacleAvoidanceWeight: 10.0 * 200,
-		WallAvoidanceWeight: 10.0 * 200,
-		WanderWeight: 1.0 * 200,
-		SeekWeight: 1.0 * 200,
-		FleeWeight: 1.0 * 200,
-		ArriveWeight: 1.0 * 200,
-		PursuitWeight: 1.0 * 200,
-		OffsetPursuitWeight: 1.0 * 200,
-		InterposeWeight: 1.0 * 200,
-		HideWeight: 1.0 * 200,
-		EvadeWeight: 0.01 * 200,
-		FollowPathWeight: 0.05 * 200,
-		//how close a neighbour must be before an agent perceives it (considers it
-		//to be within its neighborhood)
-		ViewDistance: 50.0,
-		//used in obstacle avoidance
-		MinDetectionBoxLength: 40.0,
-		//used in wall avoidance
-		WallDetectionFeelerLength: 40.0,
-		//these are the probabilities that a steering behavior will be used
-		//when the Prioritized Dither calculate method is used to sum
-		//combined behaviors
-		prWallAvoidance: 0.5,
-		prObstacleAvoidance: 0.5,
-		prSeparation: 0.2,
-		prAlignment: 0.3,
-		prCohesion: 0.6,
-		prWander: 0.8,
-		prSeek: 0.8,
-		prFlee: 0.6,
-		prEvade: 1.0,
-		prHide: 0.8,
-		prArrive: 0.5,
-		MaxTurnRatePerSecond: Math.PI
-	};
-	
-	exports.default = PRM;
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = undefined;
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _cgdi = __webpack_require__(1);
-	
-	var _cgdi2 = _interopRequireDefault(_cgdi);
-	
-	var _moving_entity = __webpack_require__(14);
+	var _moving_entity = __webpack_require__(12);
 	
 	var _moving_entity2 = _interopRequireDefault(_moving_entity);
 	
-	var _steering_behavior = __webpack_require__(17);
-	
-	var _steering_behavior2 = _interopRequireDefault(_steering_behavior);
-	
-	var _vector2d = __webpack_require__(3);
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
 	
-	var _params = __webpack_require__(12);
+	var _utils = __webpack_require__(15);
+	
+	var _transformations = __webpack_require__(8);
+	
+	var _geometry = __webpack_require__(7);
+	
+	var _params = __webpack_require__(10);
 	
 	var _params2 = _interopRequireDefault(_params);
 	
-	var _transformations = __webpack_require__(6);
+	var _cgdi = __webpack_require__(1);
 	
-	var _smoother = __webpack_require__(18);
-	
-	var _smoother2 = _interopRequireDefault(_smoother);
+	var _cgdi2 = _interopRequireDefault(_cgdi);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1954,137 +1535,136 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var Vehicle = function (_MovingEntity) {
-		_inherits(Vehicle, _MovingEntity);
+	function addNoiseToKick(ballPos, ballTarget) {
+		var displacement = Math.PI * (1 - _params2.default.PlayerKickingAccuracy) * (0, _utils.randomClamped)();
+		var toTarget = ballTarget.add(ballPos.getReverse());
+		(0, _transformations.vec2dRotateAroundOrigin)(toTarget, displacement);
+		return ballPos.add(toTarget);
+	}
 	
-		function Vehicle(world, position, rotation, velocity, mass, maxForce, maxSpeed, maxTurnRate, scale) {
-			_classCallCheck(this, Vehicle);
+	var SoccerBall = function (_MovingEntity) {
+		_inherits(SoccerBall, _MovingEntity);
 	
-			var _this = _possibleConstructorReturn(this, (Vehicle.__proto__ || Object.getPrototypeOf(Vehicle)).call(this, position, scale, velocity, maxSpeed, new _vector2d2.default(Math.sin(rotation), -Math.cos(rotation)), mass, new _vector2d2.default(scale, scale), maxTurnRate, maxForce));
+		function SoccerBall(pos, ballSize, mass, pitchBoundary) {
+			_classCallCheck(this, SoccerBall);
 	
-			_this.m_pWorld = world;
-			_this.m_vSmoothedHeading = new _vector2d2.default(0, 0);
-			_this.m_bSmoothingOn = false;
-			_this.m_dTimeElapsed = 0;
-			_this.m_vecVehicleVB = [];
-			_this.initializeBuffer();
-			_this.m_pSteering = new _steering_behavior2.default(_this);
-			_this.m_pHeadingSmoother = new _smoother2.default(_params2.default.NumsamplesForSmoothing, new _vector2d2.default(0, 0));
+			var _this = _possibleConstructorReturn(this, (SoccerBall.__proto__ || Object.getPrototypeOf(SoccerBall)).call(this, pos, ballSize, new _vector2d2.default(), -1, new _vector2d2.default(0, 1), mass, new _vector2d2.default(1, 1), 0, 0));
+	
+			_this.m_vOldPos = pos;
+			_this.m_PitchBoundary = pitchBoundary;
 			return _this;
 		}
 	
-		_createClass(Vehicle, [{
-			key: 'initializeBuffer',
-			value: function initializeBuffer() {
-				this.m_vecVehicleVB = [new _vector2d2.default(-4.0, 2.4), new _vector2d2.default(4.0, 0.0), new _vector2d2.default(-4.0, -2.4)];
+		_createClass(SoccerBall, [{
+			key: 'testCollisionWithWalls',
+			value: function testCollisionWithWalls(walls) {
+				var idxClosest = -1;
+				var velNormal = (0, _vector2d.vec2dNormalize)(this.m_vVelocity);
+				var intersectionPoint = new _vector2d2.default();
+				var collisionPoint = new _vector2d2.default();
+				var distToIntersection = _utils.MaxFloat;
+				for (var w = 0; w < walls.length; w++) {
+					var thisCollisionPoint = this.pos().add(walls[w].normal().crossNum(this.bRadius()).getReverse());
+					var distToWall = 0;
+					if ((0, _geometry.whereIsPoint)(thisCollisionPoint, walls[w].from(), walls[w].normal()) == 'PLANE_BACKSIDE') {
+						distToWall = (0, _geometry.distanceToRayPlaneIntersection)(thisCollisionPoint, walls[w].normal(), walls[w].from(), walls[w].normal());
+						intersectionPoint = thisCollisionPoint.add(walls[w].normal().crossNum(distToWall));
+					} else {
+						distToWall = (0, _geometry.distanceToRayPlaneIntersection)(thisCollisionPoint, velNormal, walls[w].from(), walls[w].normal());
+						intersectionPoint = thisCollisionPoint.add(velNormal.crossNum(distToWall));
+					}
+					var onLineSegment = false;
+					var intersectionInfo = (0, _geometry.lineIntersection2D)(walls[w].from(), walls[w].to(), thisCollisionPoint.add(walls[w].normal().crossNum(20).getReverse()), thisCollisionPoint.add(walls[w].normal().crossNum(20)));
+					if (intersectionInfo.result) {
+						onLineSegment = true;
+					}
+					var distSq = (0, _vector2d.vec2DDistanceSq)(thisCollisionPoint, intersectionPoint);
+					if (distSq <= this.m_vVelocity.lengthSq() && distSq < distToIntersection && onLineSegment) {
+						distToIntersection = distSq;
+						idxClosest = w;
+						collisionPoint = intersectionPoint;
+					}
+				}
+				if (idxClosest >= 0 && velNormal.dot(walls[idxClosest].normal()) < 0) {
+					this.m_vVelocity.reflect(walls[idxClosest].normal());
+				}
 			}
 		}, {
 			key: 'update',
-			value: function update(time_elapsed) {
-				this.m_dTimeElapsed = time_elapsed;
-				var oldPos = this.pos();
-				var steeringForce = this.m_pSteering.calculate();
-				var acceleration = steeringForce.crossNum(1 / this.m_dMass);
-				this.m_vVelocity = this.m_vVelocity.add(acceleration.crossNum(time_elapsed));
-				this.m_vVelocity.truncate(this.m_dMaxSpeed);
-				this.m_vPos = this.m_vPos.add(this.m_vVelocity.crossNum(time_elapsed));
-				if (this.m_vVelocity.lengthSq() > 0.00000001) {
+			value: function update(timeElapsed) {
+				this.m_vOldPos = this.m_vPos;
+				this.testCollisionWithWalls(this.m_PitchBoundary);
+				if (this.m_vVelocity.lengthSq() > _params2.default.Friction * _params2.default.Friction) {
+					this.m_vVelocity = this.m_vVelocity.add((0, _vector2d.vec2dNormalize)(this.m_vVelocity).crossNum(_params2.default.Friction));
+					this.m_vPos = this.m_vPos.add(this.m_vVelocity);
 					this.m_vHeading = (0, _vector2d.vec2dNormalize)(this.m_vVelocity);
-					this.m_vSide = this.m_vHeading.perp();
-				}
-				(0, _vector2d.wrapAround)(this.m_vPos, this.m_pWorld.cxClient(), this.m_pWorld.cyClient());
-				if (this.steering().isSpacePartitioningOn()) {
-					this.world().cellSpace().updateEntity(this, oldPos);
-				}
-				if (this.isSmoothingOn()) {
-					this.m_vSmoothedHeading = this.m_pHeadingSmoother.update(this.heading());
 				}
 			}
 		}, {
 			key: 'render',
 			value: function render() {
-				var m_vecVehicleVBTrans = [];
-				if (this.m_pWorld.renderNeighbors()) {
-					if (this.id() === 0) {
-						_cgdi2.default.redPen();
-					} else if (this.isTagged()) {
-						_cgdi2.default.greenPen();
-					} else {
-						_cgdi2.default.bluePen();
-					}
-				} else {
-					_cgdi2.default.bluePen();
+				_cgdi2.default.blackBrush();
+				_cgdi2.default.circle(this.m_vPos, this.m_dBoundingRadius);
+			}
+		}, {
+			key: 'handleMessage',
+			value: function handleMessage(msg) {
+				return false;
+			}
+		}, {
+			key: 'kick',
+			value: function kick(direction, force) {
+				direction.normalize();
+				var acceleration = direction.crossNum(force / this.m_dMass);
+				this.m_vVelocity = acceleration;
+			}
+		}, {
+			key: 'timeToCoverDistance',
+			value: function timeToCoverDistance(A, B, force) {
+				var speed = force / this.m_dMass;
+				var distanceToCover = (0, _vector2d.vec2DDistance)(A, B);
+				var term = speed * speed + 2 * distanceToCover * _params2.default.Friction;
+				if (term <= 0) {
+					return -1;
 				}
-	
-				if (this.steering().isInterposeOn()) {
-					_cgdi2.default.redPen();
-				}
-	
-				if (this.steering().isHideOn()) {
-					_cgdi2.default.greenPen();
-				}
-	
-				if (this.isSmoothingOn()) {
-					m_vecVehicleVBTrans = (0, _transformations.worldTransform)(this.m_vecVehicleVB, this.pos(), this.smoothedHeading(), this.smoothedHeading().perp(), this.scale());
-				} else {
-					m_vecVehicleVBTrans = (0, _transformations.worldTransform)(this.m_vecVehicleVB, this.pos(), this.heading(), this.side(), this.scale());
-				}
-	
-				_cgdi2.default.closedShape(m_vecVehicleVBTrans);
-	
-				if (this.id() === 0 && this.m_pWorld.viewKeys()) {
-					this.steering().renderAids();
-				}
+				var v = Math.sqrt(term);
+				return (v - speed) / _params2.default.Friction;
 			}
 		}, {
-			key: 'steering',
-			value: function steering() {
-				return this.m_pSteering;
+			key: 'futurePosition',
+			value: function futurePosition(time) {
+				var ut = this.m_vVelocity.crossNum(time);
+				var half_a_t_squared = 0.5 * _params2.default.Friction * time * time;
+				var scalarToVector = (0, _vector2d.vec2dNormalize)(this.m_vVelocity).crossNum(half_a_t_squared);
+				return this.pos().add(ut).add(scalarToVector);
 			}
 		}, {
-			key: 'world',
-			value: function world() {
-				return this.m_pWorld;
+			key: 'trap',
+			value: function trap() {
+				this.m_vVelocity.zero();
 			}
 		}, {
-			key: 'smoothedHeading',
-			value: function smoothedHeading() {
-				return this.m_vSmoothedHeading;
+			key: 'oldPos',
+			value: function oldPos() {
+				return this.m_vOldPos;
 			}
 		}, {
-			key: 'isSmoothingOn',
-			value: function isSmoothingOn() {
-				return this.m_bSmoothingOn;
-			}
-		}, {
-			key: 'smoothingOn',
-			value: function smoothingOn() {
-				this.m_bSmoothingOn = true;
-			}
-		}, {
-			key: 'smoothingOff',
-			value: function smoothingOff() {
-				this.m_bSmoothingOn = false;
-			}
-		}, {
-			key: 'toggleSmoothing',
-			value: function toggleSmoothing() {
-				this.m_bSmoothingOn = !this.m_bSmoothingOn;
-			}
-		}, {
-			key: 'timeElapsed',
-			value: function timeElapsed() {
-				return this.m_dTimeElapsed;
+			key: 'placeAtPosition',
+			value: function placeAtPosition(newPos) {
+				this.m_vPos = newPos;
+				this.m_vOldPos = this.m_vPosition;
+				this.m_vVelocity.zero();
 			}
 		}]);
 	
-		return Vehicle;
+		return SoccerBall;
 	}(_moving_entity2.default);
 	
-	exports.default = Vehicle;
+	exports.default = SoccerBall;
+	exports.addNoiseToKick = addNoiseToKick;
 
 /***/ },
-/* 14 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2095,17 +1675,19 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _base_game_entity = __webpack_require__(15);
+	var _base_game_entity = __webpack_require__(13);
 	
 	var _base_game_entity2 = _interopRequireDefault(_base_game_entity);
 	
-	var _c2dmatrix = __webpack_require__(7);
+	var _c2dmatrix = __webpack_require__(9);
 	
 	var _c2dmatrix2 = _interopRequireDefault(_c2dmatrix);
 	
-	var _vector2d = __webpack_require__(3);
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _utils = __webpack_require__(15);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -2203,8 +1785,9 @@
 	  }, {
 	    key: 'rotateHeadingToFacePosition',
 	    value: function rotateHeadingToFacePosition(target) {
+	      var heading = this.m_vHeading.clone();
 	      var toTarget = new _vector2d2.default(target.x - this.m_vPos.x, target.y - this.m_vPos.y).normalize();
-	      var angle = Math.acos(this.m_vHeading.dot(toTarget));
+	      var angle = Math.acos((0, _utils.clamp)(this.m_vHeading.dot(toTarget), -1, 1));
 	      var rotationMatrix = new _c2dmatrix2.default();
 	      if (angle < 0.00001) {
 	        return true;
@@ -2216,6 +1799,9 @@
 	      rotationMatrix.transformVector2D(this.m_vHeading);
 	      rotationMatrix.transformVector2D(this.m_vVelocity);
 	      this.m_vSide = this.m_vHeading.perp();
+	      if (this.m_vHeading.x == 0 && this.m_vHeading.y == 0 || isNaN(this.m_vHeading.x)) {
+	        console.log(toTarget, heading, angle);
+	      }
 	      return false;
 	    }
 	  }, {
@@ -2236,7 +1822,7 @@
 	exports.default = MovingEntity;
 
 /***/ },
-/* 15 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2247,11 +1833,11 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _entity_type = __webpack_require__(16);
+	var _entity_type = __webpack_require__(14);
 	
 	var _entity_type2 = _interopRequireDefault(_entity_type);
 	
-	var _vector2d = __webpack_require__(3);
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
 	
@@ -2367,7 +1953,7 @@
 	exports.default = BaseGameEntity;
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2382,7 +1968,764 @@
 	exports.default = ENTITYTYPE;
 
 /***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var MaxFloat = 999999;
+	
+	function clamp(arg, minVal, maxVal) {
+		var ret = arg;
+		if (ret < minVal) {
+			ret = minVal;
+		}
+		if (ret > maxVal) {
+			ret = maxVal;
+		}
+		return ret;
+	}
+	
+	function randomClamped() {
+		return Math.random() - Math.random();
+	}
+	
+	function timeGetTime() {
+		return new Date().getTime();
+	}
+	
+	function randFloat() {
+		return Math.random();
+	}
+	
+	function isEqual(a, b) {
+		if (Math.abs(a - b) < 1e-12) {
+			return true;
+		}
+		return false;
+	}
+	
+	function randInRange(x, y) {
+		return x + randFloat() * (y - x);
+	}
+	
+	function randInt(x, y) {
+		if (y >= x) {
+			return Math.floor(Math.random() * (y - x + 1) + x);
+		}
+	}
+	
+	exports.clamp = clamp;
+	exports.randomClamped = randomClamped;
+	exports.MaxFloat = MaxFloat;
+	exports.timeGetTime = timeGetTime;
+	exports.randFloat = randFloat;
+	exports.isEqual = isEqual;
+	exports.randInRange = randInRange;
+	exports.randInt = randInt;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.TEAM_COLOR = exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _state_machine = __webpack_require__(17);
+	
+	var _state_machine2 = _interopRequireDefault(_state_machine);
+	
+	var _team_state = __webpack_require__(18);
+	
+	var _utils = __webpack_require__(15);
+	
+	var _support_spot_calculator = __webpack_require__(19);
+	
+	var _support_spot_calculator2 = _interopRequireDefault(_support_spot_calculator);
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	var _geometry = __webpack_require__(7);
+	
+	var _transformations = __webpack_require__(8);
+	
+	var _message_dispatcher = __webpack_require__(21);
+	
+	var _message_dispatcher2 = _interopRequireDefault(_message_dispatcher);
+	
+	var _soccer_messages = __webpack_require__(24);
+	
+	var _soccer_messages2 = _interopRequireDefault(_soccer_messages);
+	
+	var _player_base = __webpack_require__(25);
+	
+	var _goalkeeper_state = __webpack_require__(28);
+	
+	var _field_player_state = __webpack_require__(29);
+	
+	var _goal_keeper = __webpack_require__(30);
+	
+	var _goal_keeper2 = _interopRequireDefault(_goal_keeper);
+	
+	var _field_player = __webpack_require__(32);
+	
+	var _field_player2 = _interopRequireDefault(_field_player);
+	
+	var _entity_manager = __webpack_require__(22);
+	
+	var _entity_manager2 = _interopRequireDefault(_entity_manager);
+	
+	var _cgdi = __webpack_require__(1);
+	
+	var _cgdi2 = _interopRequireDefault(_cgdi);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var TEAM_COLOR = {
+		blue: 'BLUE',
+		red: 'RED'
+	};
+	
+	var SoccerTeam = function () {
+		function SoccerTeam(homeGoal, opponentsGoal, pitch, color) {
+			_classCallCheck(this, SoccerTeam);
+	
+			this.m_Players = [];
+			this.m_Color = color;
+			this.m_pPitch = pitch;
+			this.m_pOpponentsGoal = opponentsGoal;
+			this.m_pHomeGoal = homeGoal;
+			this.m_pOpponents = null;
+			this.m_pControllingPlayer = null;
+			this.m_pSupportingPlayer = null;
+			this.m_pReceivingPlayer = null;
+			this.m_pPlayerClosestToBall = null;
+			this.m_dDistSqToBallOfClosestPlayer = 0;
+			this.m_pStateMachine = new _state_machine2.default(this);
+			this.m_pStateMachine.setCurrentState(_team_state.Defending);
+			this.m_pStateMachine.setPreviousState(_team_state.Defending);
+			this.m_pStateMachine.setGlobalState(null);
+			this.createPlayers();
+			for (var i = 0; i < this.m_Players.length; i++) {
+				var it = this.m_Players[i];
+				it.steering().separationOn();
+			}
+			this.m_pSupportSpotCalc = new _support_spot_calculator2.default(_params2.default.NumSupportSpotsX, _params2.default.NumSupportSpotsY, this);
+		}
+	
+		_createClass(SoccerTeam, [{
+			key: 'createPlayers',
+			value: function createPlayers() {
+				if (this.teamColor() == TEAM_COLOR.blue) {
+					this.m_Players.push(new _goal_keeper2.default(this, 1, _goalkeeper_state.TendGoal, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale));
+					this.m_Players.push(new _field_player2.default(this, 6, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.attacker));
+					this.m_Players.push(new _field_player2.default(this, 8, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.attacker));
+					this.m_Players.push(new _field_player2.default(this, 3, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.defender));
+					this.m_Players.push(new _field_player2.default(this, 5, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.defender));
+				} else {
+					this.m_Players.push(new _goal_keeper2.default(this, 16, _goalkeeper_state.TendGoal, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale));
+					this.m_Players.push(new _field_player2.default(this, 9, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.attacker));
+					this.m_Players.push(new _field_player2.default(this, 11, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.attacker));
+					this.m_Players.push(new _field_player2.default(this, 12, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.defender));
+					this.m_Players.push(new _field_player2.default(this, 14, _field_player_state.Wait, new _vector2d2.default(0, 1), new _vector2d2.default(0, 0), _params2.default.PlayerMass, _params2.default.PlayerMaxForce, _params2.default.PlayerMaxSpeedWithoutBall, _params2.default.PlayerMaxTurnRate, _params2.default.PlayerScale, _player_base.PLAYERROLE.defender));
+				}
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					_entity_manager2.default.registerEntity(it);
+				}
+			}
+		}, {
+			key: 'calculateClosestPlayerToBall',
+			value: function calculateClosestPlayerToBall() {
+				var closestSoFar = _utils.MaxFloat;
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					var dist = (0, _vector2d.vec2DDistanceSq)(it.pos(), this.pitch().ball().pos());
+					it.setDistSqToBall(dist);
+					if (dist < closestSoFar) {
+						closestSoFar = dist;
+						this.m_pPlayerClosestToBall = it;
+					}
+				}
+				this.m_dDistSqToBallOfClosestPlayer = closestSoFar;
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				for (var i = 0; i < this.m_Players.length; i++) {
+					this.m_Players[i].render();
+				}
+				if (_params2.default.bShowControllingTeam) {
+					_cgdi2.default.textColor(_cgdi2.default.WHITE);
+					if (this.teamColor() == TEAM_COLOR.blue && this.inControl()) {
+						_cgdi2.default.textAtPos(20, 3, 'Blue in Control');
+					} else if (this.teamColor() == TEAM_COLOR.red && this.inControl()) {
+						_cgdi2.default.textAtPos(20, 3, 'Red in Control');
+					}
+					if (this.m_pControllingPlayer != null) {
+						_cgdi2.default.textAtPos(this.pitch().cxClient() - 150, 3, 'Controlling Player: this.m_pControllingPlayer.id()');
+					}
+				}
+				if (_params2.default.bSupportSpots && this.inControl()) {
+					this.m_pSupportSpotCalc.render();
+				}
+			}
+		}, {
+			key: 'update',
+			value: function update(timeElapsed) {
+				this.calculateClosestPlayerToBall();
+				this.m_pStateMachine.update();
+				for (var i = 0; i < this.m_Players.length; i++) {
+					this.m_Players[i].update(timeElapsed);
+				}
+			}
+		}, {
+			key: 'returnAllFieldPlayersToHome',
+			value: function returnAllFieldPlayersToHome() {
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					if (it.role() != _player_base.PLAYERROLE.goalKeeper) {
+						_message_dispatcher2.default.dispatchMessage(0, 1, it.id(), _soccer_messages2.default.Msg_GoHome, null);
+					}
+				}
+			}
+		}, {
+			key: 'canShoot',
+			value: function canShoot(ballPos, power) {
+				var shotTarget = new _vector2d2.default();
+				var numAttempts = _params2.default.NumAttemptsToFindValidStrike;
+				while (numAttempts--) {
+					shotTarget = this.opponentsGoal().center();
+					var minYVal = this.opponentsGoal().leftPost().y + this.pitch().ball().bRadius();
+					var maxYVal = this.opponentsGoal().rightPost().y - this.pitch().ball().bRadius();
+					shotTarget.y = (0, _utils.randInt)(minYVal, maxYVal);
+					var time = this.pitch().ball().timeToCoverDistance(ballPos, shotTarget, power);
+					if (time >= 0) {
+						if (this.isPassSafeFromAllOpponents(ballPos, shotTarget, null, power)) {
+							return {
+								result: true,
+								target: shotTarget
+							};
+						}
+					}
+				}
+				return {
+					result: false,
+					target: shotTarget
+				};
+			}
+		}, {
+			key: 'findPass',
+			value: function findPass(passer, power, minPassingDistance) {
+				var receiver = null;
+				var result = false;
+				var closestToGoalSoFar = _utils.MaxFloat;
+				var target = null;
+				for (var i = 0; i < this.members().length; i++) {
+					var curPlayer = this.members()[i];
+					if (curPlayer != passer && (0, _vector2d.vec2DDistanceSq)(passer.pos(), curPlayer.pos()) > minPassingDistance * minPassingDistance) {
+						var passInfo = this.getBestPassToReceiver(passer, curPlayer, power);
+						if (passInfo.result) {
+							target = passInfo.passTarget;
+							var dist2Goal = Math.abs(target.x - this.opponentsGoal().center().x);
+							if (dist2Goal < closestToGoalSoFar) {
+								closestToGoalSoFar = dist2Goal;
+								receiver = curPlayer;
+								target = passInfo.passTarget;
+								result = true;
+							}
+						}
+					}
+				}
+				return {
+					result: result,
+					target: target,
+					receiver: receiver
+				};
+			}
+		}, {
+			key: 'getBestPassToReceiver',
+			value: function getBestPassToReceiver(passer, receiver, power) {
+				var time = this.pitch().ball().timeToCoverDistance(this.pitch().ball().pos(), receiver.pos(), power);
+				if (time < 0) {
+					return false;
+				}
+				var interceptRange = time * receiver.maxSpeed();
+				var ScalingFactor = 0.3;
+				interceptRange *= ScalingFactor;
+				var ip1 = new _vector2d2.default();
+				var ip2 = new _vector2d2.default();
+				(0, _geometry.getTangentPoints)(receiver.pos(), interceptRange, this.pitch().ball().pos(), ip1, ip2);
+				var NumPassesToTry = 3;
+				var passes = [ip1, receiver.pos(), ip2];
+				var closestSoFar = _utils.MaxFloat;
+				var bResult = false;
+				var passTarget = null;
+				for (var pass = 0; pass < NumPassesToTry; pass++) {
+					var dist = Math.abs(passes[pass].x - this.opponentsGoal().center().x);
+					if (dist < closestSoFar && this.pitch().playingArea().inside(passes[pass]) && this.isPassSafeFromAllOpponents(this.pitch().ball().pos(), passes[pass], receiver, power)) {
+						closestSoFar = dist;
+						passTarget = passes[pass];
+						bResult = true;
+					}
+				}
+				return {
+					passTarget: passTarget,
+					result: bResult
+				};
+			}
+		}, {
+			key: 'isPassSafeFromOpponent',
+			value: function isPassSafeFromOpponent(from, target, receiver, opp, passingForce) {
+				var toTarget = target.add(from.getReverse());
+				var toTargetNormalized = (0, _vector2d.vec2dNormalize)(toTarget);
+				var localPosOpp = (0, _transformations.pointToLocalSpace)(opp.pos(), toTargetNormalized, toTargetNormalized.perp(), from);
+				if (localPosOpp.x < 0) {
+					return true;
+				}
+				if ((0, _vector2d.vec2DDistanceSq)(from, target) < (0, _vector2d.vec2DDistanceSq)(opp.pos(), from)) {
+					if (receiver) {
+						if ((0, _vector2d.vec2DDistanceSq)(target, opp.pos()) > (0, _vector2d.vec2DDistanceSq)(target, receiver.pos())) {
+							return true;
+						} else {
+							return false;
+						}
+					} else {
+						return true;
+					}
+				}
+				var timeForBall = this.pitch().ball().timeToCoverDistance(new _vector2d2.default(), new _vector2d2.default(localPosOpp.x, 0), passingForce);
+				var reach = opp.maxSpeed() * timeForBall + this.pitch().ball().bRadius() + opp.bRadius();
+				if (Math.abs(localPosOpp.y) < reach) {
+					return false;
+				}
+				return true;
+			}
+		}, {
+			key: 'isPassSafeFromAllOpponents',
+			value: function isPassSafeFromAllOpponents(from, target, receiver, passingForce) {
+				for (var i = 0; i < this.opponents().members().length; i++) {
+					if (!this.isPassSafeFromOpponent(from, target, receiver, this.opponents().members()[i], passingForce)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}, {
+			key: 'isOpponentWithinRadius',
+			value: function isOpponentWithinRadius(pos, rad) {
+				for (var i = 0; i < this.members().length; i++) {
+					var it = this.members()[i];
+					if ((0, _vector2d.vec2DDistanceSq)(pos, it.pos()) < rad * rad) {
+						return true;
+					}
+				}
+				return false;
+			}
+		}, {
+			key: 'requestPass',
+			value: function requestPass(requester) {
+				if ((0, _utils.randFloat)() > 0.1) {
+					return;
+				}
+				if (this.isPassSafeFromAllOpponents(this.controllingPlayer().pos(), requester.pos(), requester, _params2.default.MaxPassingForce)) {
+					_message_dispatcher2.default.dispatchMessage(0, requester.id(), this.controllingPlayer().id(), _soccer_messages2.default.Msg_PassToMe, requester);
+				}
+			}
+		}, {
+			key: 'determineBestSupportingAttacker',
+			value: function determineBestSupportingAttacker() {
+				var closestSoFar = _utils.MaxFloat;
+				var bestPlayer = null;
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					if (it.role() == _player_base.PLAYERROLE.attacker && it != this.m_pControllingPlayer) {
+						var dist = (0, _vector2d.vec2DDistanceSq)(it.pos(), this.m_pSupportSpotCalc.getBestSupportingSpot());
+						if (dist < closestSoFar) {
+							closestSoFar = dist;
+							bestPlayer = it;
+						}
+					}
+				}
+				return bestPlayer;
+			}
+		}, {
+			key: 'members',
+			value: function members() {
+				return this.m_Players;
+			}
+		}, {
+			key: 'getFSM',
+			value: function getFSM() {
+				return this.m_pStateMachine;
+			}
+		}, {
+			key: 'homeGoal',
+			value: function homeGoal() {
+				return this.m_pHomeGoal;
+			}
+		}, {
+			key: 'opponentsGoal',
+			value: function opponentsGoal() {
+				return this.m_pOpponentsGoal;
+			}
+		}, {
+			key: 'pitch',
+			value: function pitch() {
+				return this.m_pPitch;
+			}
+		}, {
+			key: 'opponents',
+			value: function opponents() {
+				return this.m_pOpponents;
+			}
+		}, {
+			key: 'setOpponents',
+			value: function setOpponents(opps) {
+				this.m_pOpponents = opps;
+			}
+		}, {
+			key: 'teamColor',
+			value: function teamColor() {
+				return this.m_Color;
+			}
+		}, {
+			key: 'setPlayerClosestToBall',
+			value: function setPlayerClosestToBall(player) {
+				this.m_pPlayerClosestToBall = player;
+			}
+		}, {
+			key: 'playerClosestToBall',
+			value: function playerClosestToBall() {
+				return this.m_pPlayerClosestToBall;
+			}
+		}, {
+			key: 'closestDistToBallSq',
+			value: function closestDistToBallSq() {
+				return this.m_dDistSqToBallOfClosestPlayer;
+			}
+		}, {
+			key: 'getSupportSpot',
+			value: function getSupportSpot() {
+				return this.m_pSupportSpotCalc.getBestSupportingSpot();
+			}
+		}, {
+			key: 'supportingPlayer',
+			value: function supportingPlayer() {
+				return this.m_pSupportingPlayer;
+			}
+		}, {
+			key: 'setSupportingPlayer',
+			value: function setSupportingPlayer(player) {
+				this.m_pSupportingPlayer = player;
+			}
+		}, {
+			key: 'receiver',
+			value: function receiver() {
+				return this.m_pReceivingPlayer;
+			}
+		}, {
+			key: 'setReceiver',
+			value: function setReceiver(player) {
+				this.m_pReceivingPlayer = player;
+			}
+		}, {
+			key: 'controllingPlayer',
+			value: function controllingPlayer() {
+				return this.m_pControllingPlayer;
+			}
+		}, {
+			key: 'setControllingPlayer',
+			value: function setControllingPlayer(player) {
+				this.m_pControllingPlayer = player;
+				this.opponents().lostControl();
+			}
+		}, {
+			key: 'inControl',
+			value: function inControl() {
+				if (this.m_pControllingPlayer) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}, {
+			key: 'lostControl',
+			value: function lostControl() {
+				this.m_pControllingPlayer = null;
+			}
+		}, {
+			key: 'getPlayerFromID',
+			value: function getPlayerFromID(id) {
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					if (it.id() == id) {
+						return it;
+					}
+				}
+				return null;
+			}
+		}, {
+			key: 'setPlayerHomeRegion',
+			value: function setPlayerHomeRegion(player, region) {
+				if (player >= 0 && player < this.m_Players.length) {
+					this.m_Players[player].setHomeRegion(region);
+				}
+			}
+		}, {
+			key: 'determineBestSupportingPosition',
+			value: function determineBestSupportingPosition() {
+				this.m_pSupportSpotCalc.determineBestSupportingPosition();
+			}
+		}, {
+			key: 'updateTargetsOfWaitingPlayers',
+			value: function updateTargetsOfWaitingPlayers() {
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					if (it.role() != _player_base.PLAYERROLE.goalKeeper) {
+						if (it.getFSM().isInstate(_field_player_state.Wait) || it.getFSM().isInstate(_field_player_state.ReturnToHomeRegion)) {
+							it.steering().setTarget(it.homeRegion().center());
+						}
+					}
+				}
+			}
+		}, {
+			key: 'allPlayersAtHome',
+			value: function allPlayersAtHome() {
+				for (var i = 0; i < this.m_Players.length; i++) {
+					var it = this.m_Players[i];
+					if (!it.inHomeRegion()) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}, {
+			key: 'name',
+			value: function name() {
+				if (this.m_Color == TEAM_COLOR.blue) {
+					return 'Blue';
+				} else {
+					return 'Red';
+				}
+			}
+		}]);
+	
+		return SoccerTeam;
+	}();
+	
+	exports.default = SoccerTeam;
+	exports.TEAM_COLOR = TEAM_COLOR;
+
+/***/ },
 /* 17 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var StateMachine = function () {
+	  function StateMachine(owner) {
+	    _classCallCheck(this, StateMachine);
+	
+	    this.m_pOwner = owner;
+	    this.m_pCurrentState = null;
+	    this.m_pPreviousState = null;
+	    this.m_pGlobalState = null;
+	  }
+	
+	  _createClass(StateMachine, [{
+	    key: "setCurrentState",
+	    value: function setCurrentState(state) {
+	      this.m_pCurrentState = state;
+	    }
+	  }, {
+	    key: "setGlobalState",
+	    value: function setGlobalState(state) {
+	      this.m_pGlobalState = state;
+	    }
+	  }, {
+	    key: "setPreviousState",
+	    value: function setPreviousState(state) {
+	      this.m_pPreviousState = state;
+	    }
+	  }, {
+	    key: "currentState",
+	    value: function currentState() {
+	      return this.m_pCurrentState;
+	    }
+	  }, {
+	    key: "update",
+	    value: function update() {
+	      if (this.m_pGlobalState) {
+	        this.m_pGlobalState.execute(this.m_pOwner);
+	      }
+	      if (this.m_pCurrentState) {
+	        this.m_pCurrentState.execute(this.m_pOwner);
+	      }
+	    }
+	  }, {
+	    key: "changeState",
+	    value: function changeState(state) {
+	      this.m_pPreviousState = this.m_pCurrentState;
+	      this.m_pCurrentState.exit(this.m_pOwner);
+	      this.m_pCurrentState = state;
+	      this.m_pCurrentState.enter(this.m_pOwner);
+	    }
+	  }, {
+	    key: "revertToPreviousState",
+	    value: function revertToPreviousState() {
+	      this.changeState(this.m_pPreviousState);
+	    }
+	  }, {
+	    key: "handleMessage",
+	    value: function handleMessage(telegram) {
+	      if (this.m_pCurrentState && this.m_pCurrentState.onMessage(this.m_pOwner, telegram)) {
+	        return true;
+	      }
+	      if (this.m_pGlobalState && this.m_pGlobalState.onMessage(this.m_pOwner, telegram)) {
+	        return true;
+	      }
+	      return false;
+	    }
+	  }, {
+	    key: "isInstate",
+	    value: function isInstate(state) {
+	      if (this.m_pCurrentState == state) {
+	        return true;
+	      }
+	      return false;
+	    }
+	  }, {
+	    key: "getNameOfCurrentState",
+	    value: function getNameOfCurrentState() {
+	      return this.m_pCurrentState.name;
+	    }
+	  }]);
+	
+	  return StateMachine;
+	}();
+	
+	exports.default = StateMachine;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.PrepareForKickOff = exports.Defending = exports.Attacking = undefined;
+	
+	var _soccer_team = __webpack_require__(16);
+	
+	function changePlayerHomeRegions(team, newRegions) {
+		for (var player = 0; player < newRegions.length; player++) {
+			team.setPlayerHomeRegion(player, newRegions[player]);
+		}
+	}
+	
+	var Attacking = {
+		enter: function enter(team) {
+			var BlueRegions = [1, 12, 14, 6, 4];
+			var RedRegions = [16, 3, 5, 9, 13];
+			if (team.teamColor() == _soccer_team.TEAM_COLOR.blue) {
+				changePlayerHomeRegions(team, BlueRegions);
+			} else {
+				changePlayerHomeRegions(team, RedRegions);
+			}
+			team.updateTargetsOfWaitingPlayers();
+		},
+		execute: function execute(team) {
+			if (!team.inControl()) {
+				team.getFSM().changeState(Defending);
+				return;
+			}
+			team.determineBestSupportingPosition();
+		},
+		exit: function exit(team) {
+			team.setSupportingPlayer(null);
+		},
+		onMessage: function onMessage(team, telegram) {
+			return false;
+		}
+	};
+	
+	var Defending = {
+		enter: function enter(team) {
+			var BlueRegions = [1, 6, 8, 3, 5];
+			var RedRegions = [16, 9, 11, 12, 14];
+			if (team.teamColor() == _soccer_team.TEAM_COLOR.blue) {
+				changePlayerHomeRegions(team, BlueRegions);
+			} else {
+				changePlayerHomeRegions(team, RedRegions);
+			}
+			team.updateTargetsOfWaitingPlayers();
+		},
+		execute: function execute(team) {
+			if (team.inControl()) {
+				team.getFSM().changeState(Attacking);
+			}
+		},
+		exit: function exit(team) {},
+		onMessage: function onMessage(team, telegram) {
+			return false;
+		}
+	};
+	
+	var PrepareForKickOff = {
+		enter: function enter(team) {
+			team.setControllingPlayer(null);
+			team.setSupportingPlayer(null);
+			team.setReceiver(null);
+			team.setPlayerClosestToBall(null);
+			team.returnAllFieldPlayersToHome();
+		},
+		execute: function execute(team) {
+			if (team.allPlayersAtHome() && team.opponents().allPlayersAtHome()) {
+				team.getFSM().changeState(Defending);
+			}
+		},
+		exit: function exit(team) {
+			team.pitch().setGameOn();
+		},
+		onMessage: function onMessage(team, telegram) {
+			return false;
+		}
+	};
+	
+	exports.Attacking = Attacking;
+	exports.Defending = Defending;
+	exports.PrepareForKickOff = PrepareForKickOff;
+
+/***/ },
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2393,338 +2736,696 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
+	var _soccer_team = __webpack_require__(16);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
 	var _cgdi = __webpack_require__(1);
 	
 	var _cgdi2 = _interopRequireDefault(_cgdi);
 	
-	var _params = __webpack_require__(12);
+	var _regulator = __webpack_require__(20);
+	
+	var _regulator2 = _interopRequireDefault(_regulator);
+	
+	var _params = __webpack_require__(10);
 	
 	var _params2 = _interopRequireDefault(_params);
-	
-	var _vector2d = __webpack_require__(3);
-	
-	var _vector2d2 = _interopRequireDefault(_vector2d);
-	
-	var _transformations = __webpack_require__(6);
-	
-	var _geometry = __webpack_require__(5);
-	
-	var _utils = __webpack_require__(10);
-	
-	var _path = __webpack_require__(11);
-	
-	var _path2 = _interopRequireDefault(_path);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var MaxDouble = 999999;
+	var SupportSpot = function SupportSpot(pos, value) {
+		_classCallCheck(this, SupportSpot);
 	
-	function randomClamped() {
-		return 1 - Math.random() * 2;
+		this.m_vPos = pos;
+		this.m_dScore = value;
+	};
+	
+	var SupportSpotCalculator = function () {
+		function SupportSpotCalculator(numX, numY, team) {
+			_classCallCheck(this, SupportSpotCalculator);
+	
+			this.m_pTeam = team;
+			this.m_Spots = [];
+			this.m_pBestSupportingSpot = null;
+			var playingField = team.pitch().playingArea();
+			var heightOfSSRegion = playingField.height() * 0.8;
+			var widthOfSSRegion = playingField.width() * 0.9;
+			var sliceX = widthOfSSRegion / numX;
+			var sliceY = heightOfSSRegion / numY;
+			var left = playingField.left() + (playingField.width() - widthOfSSRegion) / 2 + sliceX / 2;
+			var right = playingField.right() - (playingField.width() - widthOfSSRegion) / 2 - sliceX / 2;
+			var top = playingField.top() + (playingField.height() - heightOfSSRegion) / 2 + sliceY / 2;
+			for (var x = 0; x < numX / 2 - 1; x++) {
+				for (var y = 0; y < numY; y++) {
+					if (this.m_pTeam.teamColor == _soccer_team.TEAM_COLOR.blue) {
+						this.m_Spots.push(new SupportSpot(new _vector2d2.default(left + x * sliceX, top + y * sliceY), 0));
+					} else {
+						this.m_Spots.push(new SupportSpot(new _vector2d2.default(right - x * sliceX, top + y * sliceY), 0));
+					}
+				}
+			}
+			this.m_pRegulator = new _regulator2.default(_params2.default.SupportSpotUpdateFreq);
+		}
+	
+		_createClass(SupportSpotCalculator, [{
+			key: 'render',
+			value: function render() {
+				_cgdi2.default.greyPen();
+				for (var spt = 0; spt < this.m_Spots.length; spt++) {
+					_cgdi2.default.circle(this.m_Spots[spt].m_vPos, this.m_Spots[spt].m_dScore);
+				}
+				if (this.m_pBestSupportingSpot) {
+					_cgdi2.default.greenPen();
+					_cgdi2.default.circle(this.m_pBestSupportingSpot.m_vPos, this.m_pBestSupportingSpot.m_dScore);
+				}
+			}
+		}, {
+			key: 'determineBestSupportingPosition',
+			value: function determineBestSupportingPosition() {
+				if (!this.m_pRegulator.isReady() && this.m_pBestSupportingSpot) {
+					return this.m_pBestSupportingSpot.m_vPos;
+				}
+				this.m_pBestSupportingSpot = null;
+				var bestScoreSoFar = 0;
+				for (var i = 0; i < this.m_Spots.length; i++) {
+					var curSpot = this.m_Spots[i];
+					curSpot.m_dScore = 1;
+					if (this.m_pTeam.isPassSafeFromAllOpponents(this.m_pTeam.controllingPlayer().pos(), curSpot.m_vPos, null, _params2.default.MaxPassingForce)) {
+						curSpot.m_dScore += _params2.default.Spot_CanPassScore;
+					}
+					if (this.m_pTeam.canShoot(curSpot.m_vPos, _params2.default.MaxShootingForce)) {
+						curSpot.m_dScore += _params2.default.Spot_CanScoreFromPositionScore;
+					}
+					if (this.m_pTeam.supportingPlayer()) {
+						var optimalDistance = 200;
+						var dist = (0, _vector2d.vec2DDistance)(this.m_pTeam.controllingPlayer().pos(), curSpot.m_vPos);
+						var temp = Math.abs(optimalDistance - dist);
+						if (temp < optimalDistance) {
+							curSpot.m_dScore += _params2.default.Spot_DistFromControllingPlayerScore * (optimalDistance - temp) / optimalDistance;
+						}
+					}
+					if (curSpot.m_dScore > bestScoreSoFar) {
+						bestScoreSoFar = curSpot.m_dScore;
+						this.m_pBestSupportingSpot = curSpot;
+					}
+				}
+				return this.m_pBestSupportingSpot.m_vPos;
+			}
+		}, {
+			key: 'getBestSupportingSpot',
+			value: function getBestSupportingSpot() {
+				if (this.m_pBestSupportingSpot) {
+					return this.m_pBestSupportingSpot.m_vPos;
+				} else {
+					return this.determineBestSupportingPosition();
+				}
+			}
+		}]);
+	
+		return SupportSpotCalculator;
+	}();
+	
+	exports.default = SupportSpotCalculator;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _utils = __webpack_require__(15);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Regulator = function () {
+		function Regulator(numUpdatesPerSecondRqd) {
+			_classCallCheck(this, Regulator);
+	
+			this.m_dwNextUpdateTime = (0, _utils.timeGetTime)() + (0, _utils.randFloat)() * 1000;
+			if (numUpdatesPerSecondRqd > 0) {
+				this.m_dUpdatePeriod = 1000 / numUpdatesPerSecondRqd;
+			} else if ((0, _utils.isEqual)(0, numUpdatesPerSecondRqd)) {
+				this.m_dUpdatePeriod = 0;
+			} else if (numUpdatesPerSecondRqd < 0) {
+				this.m_dUpdatePeriod = -1;
+			}
+		}
+	
+		_createClass(Regulator, [{
+			key: 'isReady',
+			value: function isReady() {
+				if ((0, _utils.isEqual)(0, this.m_dUpdatePeriod)) {
+					return true;
+				}
+				if (this.m_dUpdatePeriod < 0) {
+					return false;
+				}
+				var currentTime = (0, _utils.timeGetTime)();
+				var updatePeriodVariator = 10;
+				if (currentTime >= this.m_dwNextUpdateTime) {
+					this.m_dwNextUpdateTime = currentTime + this.m_dUpdatePeriod + (0, _utils.randInRange)(-updatePeriodVariator, updatePeriodVariator);
+					return true;
+				}
+				return false;
+			}
+		}]);
+	
+		return Regulator;
+	}();
+	
+	exports.default = Regulator;
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _entity_manager = __webpack_require__(22);
+	
+	var _entity_manager2 = _interopRequireDefault(_entity_manager);
+	
+	var _telegram = __webpack_require__(23);
+	
+	var _telegram2 = _interopRequireDefault(_telegram);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function sortPriorityQ(r1, r2) {
+	  return r1.dispatchTime - r2.dispatchTime;
 	}
 	
+	var MessageDispatcher = function () {
+	  function MessageDispatcher() {
+	    _classCallCheck(this, MessageDispatcher);
+	
+	    this.prioritQ = [];
+	  }
+	
+	  _createClass(MessageDispatcher, [{
+	    key: 'discharge',
+	    value: function discharge(pReceiver, telegram) {
+	      if (!pReceiver.handleMessage(telegram)) {
+	        console.error('Message not handled');
+	      }
+	    }
+	  }, {
+	    key: 'dispatchMessage',
+	    value: function dispatchMessage(delay, senderID, receiverID, msg, extraInfo) {
+	      var pSender = _entity_manager2.default.getEntityFromID(senderID);
+	      var pReceiver = _entity_manager2.default.getEntityFromID(receiverID);
+	      if (!pReceiver) {
+	        console.error('Warning! No Receiver with ID of ' + receiverID + ' found');
+	        return;
+	      }
+	      var telegram = new _telegram2.default(0, senderID, receiverID, msg, extraInfo);
+	      if (delay <= 0) {
+	        // console.log(`即时telegram触发于: ${(new Date()).getTime()}, 由${getNameOfEntity(senderID)}发给${getNameOfEntity(receiverID)}, 信息为: ${msgToStr(msg)}`);
+	        this.discharge(pReceiver, telegram);
+	      } else {
+	        var currentTime = new Date().getTime();
+	        telegram.dispatchTime = currentTime + delay;
+	        this.prioritQ.push(telegram);
+	        this.prioritQ.sort(sortPriorityQ);
+	        // console.log(`延时telegram记录于: ${new Date().getTime()}, 由${getNameOfEntity(senderID)}发给${getNameOfEntity(receiverID)}, 信息为: ${msgToStr(msg)}`);
+	      }
+	    }
+	  }, {
+	    key: 'dispatchDelayedMessages',
+	    value: function dispatchDelayedMessages() {
+	      var currentTime = new Date().getTime();
+	      while (this.prioritQ.length && this.prioritQ[0].dispatchTime < currentTime && this.prioritQ[0].dispatchTime > 0) {
+	        var telegram = this.prioritQ[0];
+	        var pReceiver = _entity_manager2.default.getEntityFromID(telegram.receiverID);
+	        // console.log(`队列telegram准备触发: 发给${getNameOfEntity(pReceiver.id())}. 消息为: ${msgToStr(telegram.msg)}`);
+	        this.discharge(pReceiver, telegram);
+	        this.prioritQ.shift();
+	      }
+	    }
+	  }]);
+	
+	  return MessageDispatcher;
+	}();
+	
+	exports.default = new MessageDispatcher();
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var EntityManager = function () {
+	  function EntityManager() {
+	    _classCallCheck(this, EntityManager);
+	
+	    this.m_EntityMap = {};
+	  }
+	
+	  _createClass(EntityManager, [{
+	    key: "registerEntity",
+	    value: function registerEntity(newEntity) {
+	      this.m_EntityMap[newEntity.id()] = newEntity;
+	    }
+	  }, {
+	    key: "getEntityFromID",
+	    value: function getEntityFromID(id) {
+	      return this.m_EntityMap[id];
+	    }
+	  }, {
+	    key: "removeEntity",
+	    value: function removeEntity(pEntity) {
+	      this.m_EntityMap[pEntity.id()] = null;
+	    }
+	  }]);
+	
+	  return EntityManager;
+	}();
+	
+	exports.default = new EntityManager();
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Telegram = function Telegram(dispatchTime, senderID, receiverID, msg, extraInfo) {
+	  _classCallCheck(this, Telegram);
+	
+	  this.dispatchTime = dispatchTime;
+	  this.senderID = senderID;
+	  this.receiverID = receiverID;
+	  this.msg = msg;
+	  this.extraInfo = extraInfo;
+	};
+	
+	exports.default = Telegram;
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var MessageType = {
+	  Msg_ReceiveBall: 'Msg_ReceiveBall',
+	  Msg_PassToMe: 'Msg_PassToMe',
+	  Msg_SupportAttacker: 'Msg_SupportAttacker',
+	  Msg_GoHome: 'Msg_GoHome',
+	  Msg_Wait: 'Msg_Wait'
+	};
+	
+	exports.default = MessageType;
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.PLAYERROLE = exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _moving_entity = __webpack_require__(12);
+	
+	var _moving_entity2 = _interopRequireDefault(_moving_entity);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _utils = __webpack_require__(15);
+	
+	var _steering_behavior = __webpack_require__(26);
+	
+	var _steering_behavior2 = _interopRequireDefault(_steering_behavior);
+	
+	var _message_dispatcher = __webpack_require__(21);
+	
+	var _message_dispatcher2 = _interopRequireDefault(_message_dispatcher);
+	
+	var _soccer_messages = __webpack_require__(24);
+	
+	var _soccer_messages2 = _interopRequireDefault(_soccer_messages);
+	
+	var _autolist = __webpack_require__(27);
+	
+	var _autolist2 = _interopRequireDefault(_autolist);
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var PLAYERROLE = {
+	  attacker: 'attacker',
+	  defender: 'defender',
+	  goalKeeper: 'goalKeeper'
+	};
+	
+	function sortByDistanceToOpponentsGoal(p1, p2) {
+	  return p1.distToOppGoal() < p2.distToOppGoal();
+	}
+	
+	function sortByReversedDistanceToOpponentsGoal(p1, p2) {
+	  return p1.distToOppGoal() > p2.distToOppGoal();
+	}
+	
+	var PlayerBase = function (_MovingEntity) {
+	  _inherits(PlayerBase, _MovingEntity);
+	
+	  function PlayerBase(homeTeam, homeRegion, heading, velocity, mass, maxForce, maxSpeed, maxTurnRate, scale, role) {
+	    _classCallCheck(this, PlayerBase);
+	
+	    var _this = _possibleConstructorReturn(this, (PlayerBase.__proto__ || Object.getPrototypeOf(PlayerBase)).call(this, homeTeam.pitch().getRegionFromIndex(homeRegion).center(), scale * 10, velocity, maxSpeed, heading, mass, new _vector2d2.default(scale, scale), maxTurnRate, maxForce));
+	
+	    _autolist2.default.addMember(_this);
+	    _this.m_pTeam = homeTeam;
+	    _this.m_dDistSqToBall = _utils.MaxFloat;
+	    _this.m_iHomeRegion = homeRegion;
+	    _this.m_iDefaultRegion = homeRegion;
+	    _this.m_playerRole = role;
+	    _this.m_vecPlayerVB = [];
+	    _this.m_vecPlayerVBTrans = [];
+	    var NumPlayerVerts = 4;
+	    var player = [new _vector2d2.default(-3, 8), new _vector2d2.default(3, 10), new _vector2d2.default(3, -10), new _vector2d2.default(-3, -8)];
+	    for (var vtx = 0; vtx < NumPlayerVerts; vtx++) {
+	      _this.m_vecPlayerVB.push(player[vtx]);
+	      if (Math.abs(player[vtx].x) > _this.m_dBoundingRadius) {
+	        _this.m_dBoundingRadius = Math.abs(player[vtx].x);
+	      }
+	      if (Math.abs(player[vtx].y) > _this.m_dBoundingRadius) {
+	        _this.m_dBoundingRadius = Math.abs(player[vtx].y);
+	      }
+	    }
+	    _this.m_pSteering = new _steering_behavior2.default(_this, _this.m_pTeam.pitch(), _this.ball());
+	    _this.m_pSteering.setTarget(homeTeam.pitch().getRegionFromIndex(homeRegion).center());
+	    return _this;
+	  }
+	
+	  _createClass(PlayerBase, [{
+	    key: 'isThreatened',
+	    value: function isThreatened() {
+	      var oppTeamMemberList = this.team().opponents().members();
+	      for (var i = 0; i < oppTeamMemberList.length; i++) {
+	        var curOpp = oppTeamMemberList[i];
+	        if (this.positionInFrontOfPlayer(curOpp.pos()) && (0, _vector2d.vec2DDistanceSq)(this.pos(), curOpp.pos()) < _params2.default.PlayerComfortZoneSq) {
+	          return true;
+	        }
+	      }
+	      return false;
+	    }
+	  }, {
+	    key: 'trackBall',
+	    value: function trackBall() {
+	      this.rotateHeadingToFacePosition(this.ball().pos());
+	    }
+	  }, {
+	    key: 'trackTarget',
+	    value: function trackTarget() {
+	      this.setHeading((0, _vector2d.vec2dNormalize)(this.steering().target().add(this.pos().getReverse())));
+	    }
+	  }, {
+	    key: 'findSupport',
+	    value: function findSupport() {
+	      var bestSupportPly = void 0;
+	      if (this.team().supportingPlayer() == null) {
+	        bestSupportPly = this.team().determineBestSupportingAttacker();
+	        this.team().setSupportingPlayer(bestSupportPly);
+	        _message_dispatcher2.default.dispatchMessage(0, this.id(), this.team().supportingPlayer().id(), _soccer_messages2.default.Msg_SupportAttacker, null);
+	      }
+	      bestSupportPly = this.team().determineBestSupportingAttacker();
+	      if (bestSupportPly && bestSupportPly != this.team().supportingPlayer()) {
+	        if (this.team().supportingPlayer()) {
+	          _message_dispatcher2.default.dispatchMessage(0, this.id(), this.team().supportingPlayer().id(), _soccer_messages2.default.Msg_GoHome, null);
+	        }
+	        this.team().setSupportingPlayer(bestSupportPly);
+	        _message_dispatcher2.default.dispatchMessage(0, this.id(), this.team().supportingPlayer().id(), _soccer_messages2.default.Msg_SupportAttacker, null);
+	      }
+	    }
+	  }, {
+	    key: 'ballWithinKeeperRange',
+	    value: function ballWithinKeeperRange() {
+	      return (0, _vector2d.vec2DDistanceSq)(this.pos(), this.ball().pos()) < _params2.default.KeeperInBallRangeSq;
+	    }
+	  }, {
+	    key: 'ballWithinKickingRange',
+	    value: function ballWithinKickingRange() {
+	      return (0, _vector2d.vec2DDistanceSq)(this.pos(), this.ball().pos()) < _params2.default.PlayerKickingDistanceSq;
+	    }
+	  }, {
+	    key: 'ballWithinReceivingRange',
+	    value: function ballWithinReceivingRange() {
+	      return (0, _vector2d.vec2DDistanceSq)(this.pos(), this.ball().pos()) < _params2.default.BallWithinReceivingRangeSq;
+	    }
+	  }, {
+	    key: 'inHomeRegion',
+	    value: function inHomeRegion() {
+	      if (this.m_playerRole == PLAYERROLE.goalKeeper) {
+	        return this.pitch().getRegionFromIndex(this.m_iHomeRegion).inside(this.pos(), 'NORMAL');
+	      } else {
+	        return this.pitch().getRegionFromIndex(this.m_iHomeRegion).inside(this.pos(), 'HALF_SIZE');
+	      }
+	    }
+	  }, {
+	    key: 'isAheadOfAttacker',
+	    value: function isAheadOfAttacker() {
+	      return Math.abs(this.pos().x - this.team().opponentsGoal().center().x) < Math.abs(this.team().controllingPlayer().pos().x - this.team().opponentsGoal().center().x);
+	    }
+	  }, {
+	    key: 'atSupportSpot',
+	    value: function atSupportSpot() {}
+	  }, {
+	    key: 'atTarget',
+	    value: function atTarget() {
+	      return (0, _vector2d.vec2DDistanceSq)(this.pos(), this.steering().target()) < _params2.default.PlayerInTargetRangeSq;
+	    }
+	  }, {
+	    key: 'isClosestTeamMemberToBall',
+	    value: function isClosestTeamMemberToBall() {
+	      return this.team().playerClosestToBall() == this;
+	    }
+	  }, {
+	    key: 'positionInFrontOfPlayer',
+	    value: function positionInFrontOfPlayer(position) {
+	      var toSubject = position.add(this.pos().getReverse());
+	      if (toSubject.dot(this.heading()) > 0) {
+	        return true;
+	      } else {
+	        return false;
+	      }
+	    }
+	  }, {
+	    key: 'isClosestPlayerOnPitchToBall',
+	    value: function isClosestPlayerOnPitchToBall() {
+	      return this.isClosestTeamMemberToBall() && this.distSqToBall() < this.team().opponents().closestDistToBallSq();
+	    }
+	  }, {
+	    key: 'isControllingPlayer',
+	    value: function isControllingPlayer() {
+	      return this.team().controllingPlayer() == this;
+	    }
+	  }, {
+	    key: 'inHotregion',
+	    value: function inHotregion() {
+	      return Math.abs(this.pos().y - this.team().opponentsGoal().center().y) < this.pitch().playingArea().length / 3;
+	    }
+	  }, {
+	    key: 'role',
+	    value: function role() {
+	      return this.m_playerRole;
+	    }
+	  }, {
+	    key: 'distSqToBall',
+	    value: function distSqToBall() {
+	      return this.m_dDistSqToBall;
+	    }
+	  }, {
+	    key: 'setDistSqToBall',
+	    value: function setDistSqToBall(val) {
+	      this.m_dDistSqToBall = val;
+	    }
+	  }, {
+	    key: 'distToOppGoal',
+	    value: function distToOppGoal() {
+	      return Math.abs(this.pos().x - this.team().opponentsGoal().center().x);
+	    }
+	  }, {
+	    key: 'distToHomeGoal',
+	    value: function distToHomeGoal() {
+	      return Math.abs(this.pos().x - this.team().homeGoal().center().x);
+	    }
+	  }, {
+	    key: 'setDefaultHomeRegion',
+	    value: function setDefaultHomeRegion() {
+	      this.m_iHomeRegion = this.m_iDefaultRegion;
+	    }
+	  }, {
+	    key: 'ball',
+	    value: function ball() {
+	      return this.team().pitch().ball();
+	    }
+	  }, {
+	    key: 'pitch',
+	    value: function pitch() {
+	      return this.team().pitch();
+	    }
+	  }, {
+	    key: 'steering',
+	    value: function steering() {
+	      return this.m_pSteering;
+	    }
+	  }, {
+	    key: 'homeRegion',
+	    value: function homeRegion() {
+	      return this.pitch().getRegionFromIndex(this.m_iHomeRegion);
+	    }
+	  }, {
+	    key: 'setHomeRegion',
+	    value: function setHomeRegion(newRegion) {
+	      this.m_iHomeRegion = newRegion;
+	    }
+	  }, {
+	    key: 'team',
+	    value: function team() {
+	      return this.m_pTeam;
+	    }
+	  }]);
+	
+	  return PlayerBase;
+	}(_moving_entity2.default);
+	
+	exports.default = PlayerBase;
+	exports.PLAYERROLE = PLAYERROLE;
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _cgdi = __webpack_require__(1);
+	
+	var _cgdi2 = _interopRequireDefault(_cgdi);
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _transformations = __webpack_require__(8);
+	
+	var _geometry = __webpack_require__(7);
+	
+	var _utils = __webpack_require__(15);
+	
+	var _autolist = __webpack_require__(27);
+	
+	var _autolist2 = _interopRequireDefault(_autolist);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
 	var slow = 3;
-	var normal = 3;
-	var fast = 3;
+	var normal = 2;
+	var fast = 1;
 	var WanderRad = 1.2;
 	var WanderDist = 2;
 	var WanderJitterPerSec = 80;
 	var WaypointSeekDist = 20;
 	var BehaviorType = {
-		none: 0x00000,
-		seek: 0x00002,
-		flee: 0x00004,
-		arrive: 0x00008,
-		wander: 0x00010,
-		cohesion: 0x00020,
-		separation: 0x00040,
-		allignment: 0x00080,
-		obstacle_avoidance: 0x00100,
-		wall_avoidance: 0x00200,
-		follow_path: 0x00400,
-		pursuit: 0x00800,
-		evade: 0x01000,
-		interpose: 0x02000,
-		hide: 0x04000,
-		flock: 0x08000,
-		offset_pursuit: 0x10000
+		none: 0x0000,
+		seek: 0x0001,
+		arrive: 0x0002,
+		separation: 0x0004,
+		pursuit: 0x0008,
+		interpose: 0x0010
 	};
 	
 	var SteeringBehavior = function () {
-		function SteeringBehavior(agent) {
+		function SteeringBehavior(agent, world, ball) {
 			_classCallCheck(this, SteeringBehavior);
 	
-			this.m_pVehicle = agent;
-			this.m_vTarget = null;
-			this.m_vOffset = null;
-			this.m_vSteeringForce = new _vector2d2.default();
+			this.m_pPlayer = agent;
 			this.m_iFlags = 0;
-			this.m_dDBoxLength = _params2.default.MinDetectionBoxLength;
-			this.m_dWeightCohesion = _params2.default.CohesionWeight;
-			this.m_dWeightAlignment = _params2.default.AlignmentWeight;
-			this.m_dWeightSeparation = _params2.default.SeparationWeight;
-			this.m_dWeightObstacleAvoidance = _params2.default.ObstacleAvoidanceWeight;
-			this.m_dWeightWander = _params2.default.WanderWeight;
-			this.m_dWeightWallAvoidance = _params2.default.WallAvoidanceWeight;
+			this.m_dMultSeparation = _params2.default.SeparationCoefficient;
+			this.bTagged = false;
 			this.m_dViewDistance = _params2.default.ViewDistance;
-			this.m_dWallDetectionFeelerLength = _params2.default.WallDetectionFeelerLength;
-			this.m_Feelers = [new _vector2d2.default(0, 0), new _vector2d2.default(0, 0), new _vector2d2.default(0, 0)];
-			this.m_Deceleration = normal;
-			this.m_pTargetAgent1 = null;
-			this.m_pTargetAgent2 = null;
-			this.m_dWanderDistance = WanderDist;
-			this.m_dWanderJitter = WanderJitterPerSec;
-			this.m_dWanderRadius = WanderRad;
-			this.m_dWaypointSeekDistSq = WaypointSeekDist * WaypointSeekDist;
-			this.m_dWeightSeek = _params2.default.SeekWeight;
-			this.m_dWeightFlee = _params2.default.FleeWeight;
-			this.m_dWeightArrive = _params2.default.ArriveWeight;
-			this.m_dWeightPursuit = _params2.default.PursuitWeight;
-			this.m_dWeightOffsetPursuit = _params2.default.OffsetPursuitWeight;
-			this.m_dWeightInterpose = _params2.default.InterposeWeight;
-			this.m_dWeightHide = _params2.default.HideWeight;
-			this.m_dWeightEvade = _params2.default.EvadeWeight;
-			this.m_dWeightFollowPath = _params2.default.FollowPathWeight;
-			this.m_bCellSpaceOn = false;
-			this.m_SummingMethod = 'prioritized';
-			this.theta = Math.random() * Math.PI * 2;
-			this.m_vWanderTarget = new _vector2d2.default(this.m_dWanderRadius * Math.cos(this.theta), this.m_dWanderRadius * Math.sin(this.theta));
-			this.m_pPath = new _path2.default();
-			this.m_pPath.loopOn();
+			this.m_pBall = ball;
+			this.m_dInterposeDist = 0;
+			this.m_vSteeringForce = new _vector2d2.default();
+			this.m_Antenna = [new _vector2d2.default(), new _vector2d2.default(), new _vector2d2.default(), new _vector2d2.default(), new _vector2d2.default()];
 		}
 	
 		_createClass(SteeringBehavior, [{
-			key: 'forwardComponent',
-			value: function forwardComponent() {
-				return this.m_pVehicle.heading().dot(this.m_vSteeringForce);
+			key: 'force',
+			value: function force() {
+				return this.m_vSteeringForce;
 			}
 		}, {
-			key: 'sideComponent',
-			value: function sideComponent() {
-				return this.m_pVehicle.side().dot(this.m_vSteeringForce);
-			}
-		}, {
-			key: 'renderAids',
-			value: function renderAids() {
-				var _this = this;
-	
-				_cgdi2.default.transparentText();
-				_cgdi2.default.textColor(_cgdi2.default.GREY);
-				var nextSlot = 20;
-				var slotSize = 20;
-				document.addEventListener('keydown', function (e) {
-					switch (e.key) {
-						case 'PageDown':
-							_this.m_pVehicle.setMaxForce(_this.m_pVehicle.maxForce() + 1000 * _this.m_pVehicle.timeElapsed());
-							break;
-						case 'PageUp':
-							if (_this.m_pVehicle.maxForce() > 0.2) {
-								_this.m_pVehicle.setMaxForce(_this.m_pVehicle.maxForce() - 1000 * _this.m_pVehicle.timeElapsed());
-							}
-							break;
-						case 'Home':
-							_this.m_pVehicle.setMaxSpeed(_this.m_pVehicle.maxSpeed() + 5 * _this.m_pVehicle.timeElapsed());
-							break;
-						case 'End':
-							if (_this.m_pVehicle.maxSpeed() > 0.2) {
-								_this.m_pVehicle.setMaxSpeed(_this.m_pVehicle.maxSpeed() - 5 * _this.m_pVehicle.timeElapsed());
-							}
-							break;
-					}
-				});
-				if (this.m_pVehicle.maxForce() < 0) {
-					this.m_pVehicle.setMaxForce(0);
-				}
-				if (this.m_pVehicle.maxSpeed() < 0) {
-					this.m_pVehicle.setMaxSpeed(0);
-				}
-				if (this.m_pVehicle.id() == 0) {
-					_cgdi2.default.textAtPos(5, nextSlot, 'MaxForce(PgUp/PgDn):');
-					_cgdi2.default.textAtPos(160, nextSlot, this.m_pVehicle.maxForce() / _params2.default.SteeringForceTweaker);
-					nextSlot += slotSize;
-				}
-				if (this.m_pVehicle.id() == 0) {
-					_cgdi2.default.textAtPos(5, nextSlot, 'MaxSpeed(Home/End):');
-					_cgdi2.default.textAtPos(160, nextSlot, this.m_pVehicle.maxSpeed());
-					nextSlot += slotSize;
-				}
-				if (this.m_pVehicle.world().renderSteeringForce()) {
-					_cgdi2.default.redPen();
-					var F = this.m_vSteeringForce.crossNum(1 / _params2.default.SteeringForceTweaker * _params2.default.VehicleScale);
-					_cgdi2.default.line(this.m_pVehicle.pos(), this.m_pVehicle.pos().add(F));
-				}
-				if (this.on(SteeringBehavior.wander) && this.m_pVehicle.world().renderWanderCircle()) {
-					document.addEventListener('keydown', function (e) {
-						switch (e.key) {
-							case 'f':
-								_this.m_dWanderJitter += 1 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWanderJitter = (0, _utils.clamp)(_this.m_dWanderJitter, 0, 100);
-								break;
-							case 'v':
-								_this.m_dWanderJitter -= 1 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWanderJitter = (0, _utils.clamp)(_this.m_dWanderJitter, 0, 100);
-								break;
-							case 'g':
-								_this.m_dWanderDistance += 2 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWanderDistance = (0, _utils.clamp)(_this.m_dWanderDistance, 0, 50);
-								break;
-							case 'b':
-								_this.m_dWanderDistance -= 2 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWanderDistance = (0, _utils.clamp)(_this.m_dWanderDistance, 0, 50);
-								break;
-							case 'h':
-								_this.m_dWanderRadius += 2 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWanderRadius = (0, _utils.clamp)(_this.m_dWanderRadius, 0, 100);
-								break;
-							case 'n':
-								_this.m_dWanderRadius -= 2 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWanderRadius = (0, _utils.clamp)(_this.m_dWanderRadius, 0, 100);
-								break;
-						}
-					});
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'Jitter(F/V): ');
-						_cgdi2.default.textAtPos(160, nextSlot, this.m_dWanderJitter);
-						nextSlot += slotSize;
-					}
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'Distance(G/B): ');
-						_cgdi2.default.textAtPos(160, nextSlot, this.m_dWanderDistance);
-						nextSlot += slotSize;
-					}
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'Radius(H/N): ');
-						_cgdi2.default.textAtPos(160, nextSlot, this.m_dWanderRadius);
-						nextSlot += slotSize;
-					}
-					var m_vTCC = (0, _transformations.pointToWorldSpace)(new _vector2d2.default(this.m_dWanderRadius * this.m_pVehicle.bRadius(), 0), this.m_pVehicle.heading(), this.m_pVehicle.side(), this.m_pVehicle.pos());
-					_cgdi2.default.greenPen();
-					_cgdi2.default.hollowBrush();
-					_cgdi2.default.circle(m_vTCC, this.m_dWanderRadius * this.m_pVehicle.bRadius());
-					_cgdi2.default.redPen();
-					_cgdi2.default.circle((0, _transformations.pointToWorldSpace)(this.m_vWanderTarget.add(new _vector2d2.default(this.m_dWanderDistance, 0).crossNum(this.m_pVehicle.bRadius())), this.m_pVehicle.heading(), this.m_pVehicle.side(), this.m_pVehicle.pos()), 3);
-				}
-				if (this.m_pVehicle.world().renderDetectionBox()) {
-					_cgdi2.default.greyPen();
-					var box = [];
-					var length = _params2.default.MinDetectionBoxLength + this.m_pVehicle.speed() / this.m_pVehicle.maxSpeed() * _params2.default.MinDetectionBoxLength;
-					box[0] = new _vector2d2.default(0, this.m_pVehicle.bRadius());
-					box[1] = new _vector2d2.default(length, this.m_pVehicle.bRadius());
-					box[2] = new _vector2d2.default(length, -this.m_pVehicle.bRadius());
-					box[3] = new _vector2d2.default(0, -this.m_pVehicle.bRadius());
-					if (!this.m_pVehicle.isSmoothingOn()) {
-						box = (0, _transformations.worldTransform)(box, this.m_pVehicle.pos(), this.m_pVehicle.heading(), this.m_pVehicle.side());
-					} else {
-						box = (0, _transformations.worldTransform)(box, this.m_pVehicle.pos(), this.m_pVehicle.smoothedHeading(), this.m_pVehicle.smoothedHeading().perp());
-					}
-					_cgdi2.default.closedShape(box);
-	
-					this.m_dDBoxLength = length;
-					this.m_pVehicle.world().tagObstaclesWithinViewRange(this.m_pVehicle, this.m_dDBoxLength);
-					var closestIntersectingObstacle = null;
-					var distToClosestIP = MaxDouble;
-					var localPosOfClosestObstacle = new _vector2d2.default();
-					for (var i = 0; i < this.m_pVehicle.world().obstacles().length; i++) {
-						var curOb = this.m_pVehicle.world().obstacles()[i];
-						if (curOb.isTagged()) {
-							var localPos = (0, _transformations.pointToLocalSpace)(curOb.pos(), this.m_pVehicle.heading(), this.m_pVehicle.side(), this.m_pVehicle.pos());
-							if (localPos.x >= 0) {
-								if (Math.abs(localPos.y) < curOb.bRadius() + this.m_pVehicle.bRadius()) {
-									_cgdi2.default.thickRedPen();
-									// FIXME: ???
-									_cgdi2.default.closedShape(box);
-								}
-							}
-						}
-					}
-				}
-				if (this.on(SteeringBehavior.wall_avoidance) && this.m_pVehicle.world().renderFeelers()) {
-					_cgdi2.default.orangePen();
-					for (var flr = 0; flr < this.m_Feelers.length; flr++) {
-						_cgdi2.default.line(this.m_pVehicle.pos(), this.m_Feelers[flr]);
-					}
-				}
-				if (this.on(SteeringBehavior.follow_path) && this.m_pVehicle.world().renderPath()) {
-					this.m_pPath.render();
-				}
-				if (this.on(SteeringBehavior.separation)) {
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'Separation(S/X):');
-						_cgdi2.default.textAtPos(160, nextSlot, this.m_dWeightSeparation / _params2.default.SteeringForceTweaker);
-						nextSlot += slotSize;
-					}
-					docuemnt.addEventListener('keydown', function (e) {
-						switch (e.key) {
-							case 's':
-								_this.m_dWeightSeparation += 200 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWeightSeparation = (0, _utils.clamp)(_this.m_dWeightSeparation, 0, 50 * _params2.default.SteeringForceTweaker);
-								break;
-							case 'x':
-								_this.m_dWeightSeparation -= 200 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWeightSeparation = (0, _utils.clamp)(_this.m_dWeightSeparation, 0, 50 * _params2.default.SteeringForceTweaker);
-								break;
-						}
-					});
-				}
-				if (this.on(SteeringBehavior.allignment)) {
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'Alignment(A/Z):');
-						_cgdi2.default.textAtPos(160, nextSlot, this.m_dWeightAlignment / _params2.default.SteeringForceTweaker);
-						nextSlot += slotSize;
-					}
-					docuemnt.addEventListener('keydown', function (e) {
-						switch (e.key) {
-							case 'a':
-								_this.m_dWeightAlignment += 200 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWeightAlignment = (0, _utils.clamp)(_this.m_dWeightAlignment, 0, 50 * _params2.default.SteeringForceTweaker);
-								break;
-							case 'z':
-								_this.m_dWeightAlignment -= 200 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWeightAlignment = (0, _utils.clamp)(_this.m_dWeightAlignment, 0, 50 * _params2.default.SteeringForceTweaker);
-								break;
-						}
-					});
-				}
-				if (this.on(SteeringBehavior.cohesion)) {
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'Cohesion(D/C):');
-						_cgdi2.default.textAtPos(160, nextSlot, this.m_dWeightCohesion / _params2.default.SteeringForceTweaker);
-						nextSlot += slotSize;
-					}
-					docuemnt.addEventListener('keydown', function (e) {
-						switch (e.key) {
-							case 'd':
-								_this.m_dWeightCohesion += 200 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWeightCohesion = (0, _utils.clamp)(_this.m_dWeightCohesion, 0, 50 * _params2.default.SteeringForceTweaker);
-								break;
-							case 'c':
-								_this.m_dWeightCohesion -= 200 * _this.m_pVehicle.timeElapsed();
-								_this.m_dWeightCohesion = (0, _utils.clamp)(_this.m_dWeightCohesion, 0, 50 * _params2.default.SteeringForceTweaker);
-								break;
-						}
-					});
-				}
-				if (this.on(SteeringBehavior.follow_path)) {
-					var sd = Math.sqrt(this.m_dWaypointSeekDistSq);
-					if (this.m_pVehicle.id() == 0) {
-						_cgdi2.default.textAtPos(5, nextSlot, 'SeekDistance(D/C):');
-						_cgdi2.default.textAtPos(160, nextSlot, sd);
-						nextSlot += slotSize;
-					}
-					docuemnt.addEventListener('keydown', function (e) {
-						switch (e.key) {
-							case 'd':
-								_this.m_dWaypointSeekDistSq += 1;
-								break;
-							case 'c':
-								_this.m_dWaypointSeekDistSq -= 1;
-								_this.m_dWaypointSeekDistSq = (0, _utils.clamp)(_this.m_dWaypointSeekDistSq, 0, 400);
-								break;
-						}
-					});
-				}
+			key: 'target',
+			value: function target() {
+				return this.m_vTarget;
 			}
 		}, {
 			key: 'setTarget',
@@ -2732,71 +3433,34 @@
 				this.m_vTarget = t;
 			}
 		}, {
-			key: 'setTargetAgent1',
-			value: function setTargetAgent1(agent) {
-				this.m_pTargetAgent1 = agent;
+			key: 'interposeDistance',
+			value: function interposeDistance() {
+				return this.m_dInterposeDist;
 			}
 		}, {
-			key: 'setTargetAgent2',
-			value: function setTargetAgent2(agent) {
-				this.m_pTargetAgent2 = agent;
+			key: 'setInterposeDistance',
+			value: function setInterposeDistance(d) {
+				this.m_dInterposeDist = d;
 			}
 		}, {
-			key: 'setOffset',
-			value: function setOffset(offset) {
-				this.m_vOffset = offset;
+			key: 'tagged',
+			value: function tagged() {
+				return this.m_bTagged;
 			}
 		}, {
-			key: 'getOffset',
-			value: function getOffset() {
-				return this.m_vOffset;
+			key: 'tag',
+			value: function tag() {
+				this.m_bTagged = true;
 			}
 		}, {
-			key: 'setPath',
-			value: function setPath(new_path) {
-				this.m_pPath.set(new_path);
-			}
-		}, {
-			key: 'createPath',
-			value: function createPath(num_waypoints, mx, my, cx, cy) {
-				this.m_pPath.createRandomPath(num_waypoints, mx, my, cx, cy);
-			}
-		}, {
-			key: 'force',
-			value: function force() {
-				return this.m_vSteeringForce;
-			}
-		}, {
-			key: 'toggleSpacePartitioningOnOff',
-			value: function toggleSpacePartitioningOnOff() {
-				this.m_bCellSpaceOn = !this.m_bCellSpaceOn;
-			}
-		}, {
-			key: 'isSpacePartitioningOn',
-			value: function isSpacePartitioningOn() {
-				return this.m_bCellSpaceOn;
-			}
-		}, {
-			key: 'setSummingMethod',
-			value: function setSummingMethod(sm) {
-				this.m_SummingMethod = sm;
+			key: 'unTag',
+			value: function unTag() {
+				this.m_bTagged = false;
 			}
 		}, {
 			key: 'on',
 			value: function on(bt) {
 				return (this.m_iFlags & bt) == bt;
-			}
-		}, {
-			key: 'fleeOn',
-			value: function fleeOn() {
-				this.m_iFlags |= BehaviorType.flee;
-			}
-		}, {
-			key: 'fleeOff',
-			value: function fleeOff() {
-				if (this.on(BehaviorType.flee)) {
-					this.m_iFlags ^= BehaviorType.flee;
-				}
 			}
 		}, {
 			key: 'seekOn',
@@ -2811,6 +3475,11 @@
 				}
 			}
 		}, {
+			key: 'seekIsOn',
+			value: function seekIsOn() {
+				return this.on(BehaviorType.seek);
+			}
+		}, {
 			key: 'arriveOn',
 			value: function arriveOn() {
 				this.m_iFlags |= BehaviorType.arrive;
@@ -2823,22 +3492,14 @@
 				}
 			}
 		}, {
-			key: 'wanderOn',
-			value: function wanderOn() {
-				this.m_iFlags |= BehaviorType.wander;
-			}
-		}, {
-			key: 'wanderOff',
-			value: function wanderOff() {
-				if (this.on(BehaviorType.wander)) {
-					this.m_iFlags ^= BehaviorType.wander;
-				}
+			key: 'arriveIsOn',
+			value: function arriveIsOn() {
+				return this.on(BehaviorType.arrive);
 			}
 		}, {
 			key: 'pursuitOn',
-			value: function pursuitOn(v) {
+			value: function pursuitOn() {
 				this.m_iFlags |= BehaviorType.pursuit;
-				this.m_pTargetAgent1 = v;
 			}
 		}, {
 			key: 'pursuitOff',
@@ -2848,29 +3509,9 @@
 				}
 			}
 		}, {
-			key: 'evadeOn',
-			value: function evadeOn(v) {
-				this.m_iFlags |= BehaviorType.evade;
-				this.m_pTargetAgent1 = v;
-			}
-		}, {
-			key: 'evadeOff',
-			value: function evadeOff() {
-				if (this.on(BehaviorType.evade)) {
-					this.m_iFlags ^= BehaviorType.evade;
-				}
-			}
-		}, {
-			key: 'cohesionOn',
-			value: function cohesionOn() {
-				this.m_iFlags |= BehaviorType.cohesion;
-			}
-		}, {
-			key: 'cohensionOff',
-			value: function cohensionOff() {
-				if (this.on(BehaviorType.cohension)) {
-					this.m_iFlags ^= BehaviorType.cohension;
-				}
+			key: 'pursuitIsOn',
+			value: function pursuitIsOn() {
+				return this.on(BehaviorType.pursuit);
 			}
 		}, {
 			key: 'separationOn',
@@ -2885,64 +3526,15 @@
 				}
 			}
 		}, {
-			key: 'alignmentOn',
-			value: function alignmentOn() {
-				this.m_iFlags |= BehaviorType.allignment;
-			}
-		}, {
-			key: 'alignmentOff',
-			value: function alignmentOff() {
-				if (this.on(BehaviorType.alignment)) {
-					this.m_iFlags ^= BehaviorType.alignment;
-				}
-			}
-		}, {
-			key: 'obstacleAvoidanceOn',
-			value: function obstacleAvoidanceOn() {
-				this.m_iFlags |= BehaviorType.obstacle_avoidance;
-			}
-		}, {
-			key: 'obstacleAvoidanceOff',
-			value: function obstacleAvoidanceOff() {
-				if (this.on(BehaviorType.obstacle_avoidance)) {
-					this.m_iFlags ^= BehaviorType.obstacle_avoidance;
-				}
-			}
-		}, {
-			key: 'wallAvoidanceOn',
-			value: function wallAvoidanceOn() {
-				this.m_iFlags |= BehaviorType.wall_avoidance;
-			}
-		}, {
-			key: 'wallAvoidanceOff',
-			value: function wallAvoidanceOff() {
-				if (this.on(BehaviorType.wall_avoidance)) {
-					this.m_iFlags ^= BehaviorType.wall_avoidance;
-				}
-			}
-		}, {
-			key: 'followPathOn',
-			value: function followPathOn() {
-				this.m_iFlags |= BehaviorType.follow_path;
-			}
-		}, {
-			key: 'followPathOff',
-			value: function followPathOff() {
-				if (this.on(BehaviorType.follow_path)) {
-					this.m_iFlags ^= BehaviorType.follow_path;
-				}
-			}
-		}, {
-			key: 'isInterposeOn',
-			value: function isInterposeOn() {
-				return this.on(BehaviorType.interpose);
+			key: 'separationIsOn',
+			value: function separationIsOn() {
+				return this.on(BehaviorType.separation);
 			}
 		}, {
 			key: 'interposeOn',
-			value: function interposeOn(v1, v2) {
+			value: function interposeOn(d) {
 				this.m_iFlags |= BehaviorType.interpose;
-				this.m_pTargetAgent1 = v1;
-				this.m_pTargetAgent2 = v2;
+				this.m_dInterposeDist = d;
 			}
 		}, {
 			key: 'interposeOff',
@@ -2952,776 +3544,172 @@
 				}
 			}
 		}, {
-			key: 'isHideOn',
-			value: function isHideOn() {
-				return this.on(BehaviorType.hide);
+			key: 'interposeIsOn',
+			value: function interposeIsOn() {
+				return this.on(BehaviorType.interpose);
 			}
 		}, {
-			key: 'hideOn',
-			value: function hideOn(v) {
-				this.m_iFlags |= BehaviorType.hide;
-				this.m_pTargetAgent1 = v;
-			}
-		}, {
-			key: 'hideOff',
-			value: function hideOff() {
-				if (this.on(BehaviorType.hide)) {
-					this.m_iFlags ^= BehaviorType.hide;
+			key: 'accumulateForce',
+			value: function accumulateForce(steeringForce, forceToAdd) {
+				var returnForce = new _vector2d2.default();
+				var result = false;
+				var magnitudeSoFar = steeringForce.length();
+				var magnitudeRemaining = this.m_pPlayer.maxForce() - magnitudeSoFar;
+				if (magnitudeRemaining <= 0) {
+					return {
+						result: result,
+						returnForce: returnForce
+					};
 				}
-			}
-		}, {
-			key: 'offsetPursuitOn',
-			value: function offsetPursuitOn(v1, offset) {
-				this.m_iFlags |= BehaviorType.offset_pursuit;
-				this.m_pTargetAgent1 = v1;
-				this.m_vOffset = offset;
-			}
-		}, {
-			key: 'offsetPursuitOff',
-			value: function offsetPursuitOff() {
-				if (this.on(BehaviorType.offset_pursuit)) {
-					this.m_iFlags ^= BehaviorType.offset_pursuit;
+				var magnitudeToAdd = forceToAdd.length();
+				if (magnitudeToAdd > magnitudeRemaining) {
+					magnitudeToAdd = magnitudeRemaining;
 				}
-			}
-		}, {
-			key: 'flockingOn',
-			value: function flockingOn() {
-				this.cohesionOn();
-				this.alignmentOn();
-				this.separationOn();
-				this.wanderOn();
-			}
-		}, {
-			key: 'flockingOff',
-			value: function flockingOff() {
-				this.cohensionOff();
-				this.alignmentOff();
-				this.separationOff();
-				this.wanderOff();
-			}
-		}, {
-			key: 'dBoxLength',
-			value: function dBoxLength() {
-				return this.m_dDBoxLength;
-			}
-		}, {
-			key: 'getFeelers',
-			value: function getFeelers() {
-				return this.m_Feelers;
-			}
-		}, {
-			key: 'wanderJitter',
-			value: function wanderJitter() {
-				return this.m_dWanderJitter;
-			}
-		}, {
-			key: 'wanderDistance',
-			value: function wanderDistance() {
-				return this.m_dWanderDistance;
-			}
-		}, {
-			key: 'wanderRadius',
-			value: function wanderRadius() {
-				return this.m_dWanderRadius;
-			}
-		}, {
-			key: 'separationWeight',
-			value: function separationWeight() {
-				return this.m_dWeightSeparation;
-			}
-		}, {
-			key: 'alignmentWeight',
-			value: function alignmentWeight() {
-				return this.m_dWeightAlignment;
-			}
-		}, {
-			key: 'cohensionWeight',
-			value: function cohensionWeight() {
-				return this.m_dWeightCohesion;
+				returnForce = steeringForce.add((0, _vector2d.vec2dNormalize)(forceToAdd).crossNum(magnitudeToAdd));
+				result = true;
+				return {
+					result: result,
+					returnForce: returnForce
+				};
 			}
 		}, {
 			key: 'calculate',
 			value: function calculate() {
 				this.m_vSteeringForce.zero();
-				if (!this.isSpacePartitioningOn()) {
-					if (this.on(BehaviorType.separation) || this.on(BehaviorType.allignment) || this.on(BehaviorType.cohesion)) {
-						this.m_pVehicle.world().tagVehiclesWithinViewRange(this.m_pVehicle, this.m_dViewDistance);
-					}
-				} else {
-					if (this.on(BehaviorType.separation) || this.on(BehaviorType.allignment) || this.on(BehaviorType.cohesion)) {
-						this.m_pVehicle.world().cellSpace().calculateNeighbors(this.m_pVehicle.pos(), this.m_dViewDistance);
-					}
-				}
-				switch (this.m_SummingMethod) {
-					case 'weighted_average':
-						this.m_vSteeringForce = this.calculateWeightedSum();
-						break;
-					case 'prioritized':
-						this.m_vSteeringForce = this.calculatePrioritized();
-						break;
-					case 'dithered':
-						this.m_vSteeringForce = this.calculateDithered();
-						break;
-					default:
-						this.m_vSteeringForce = new _vector2d2.default(0, 0);
-				}
+				this.m_vSteeringForce = this.sumForces();
+				this.m_vSteeringForce.truncate(this.m_pPlayer.maxForce());
 				return this.m_vSteeringForce;
 			}
 		}, {
-			key: 'accumulateForce',
-			value: function accumulateForce(runningTot, forceToAdd) {
-				var magnitudeSoFar = runningTot.length();
-				var magnitudeRemaining = this.m_pVehicle.maxForce() - magnitudeSoFar;
-				var returnForce = new _vector2d2.default();
-				if (magnitudeRemaining <= 0) {
-					return false;
-				}
-				var magnitudeToAdd = forceToAdd.length();
-				if (magnitudeToAdd < magnitudeRemaining) {
-					returnForce = runningTot.add(forceToAdd);
-				} else {
-					returnForce = runningTot.add((0, _vector2d.vec2dNormalize)(forceToAdd).crossNum(magnitudeRemaining));
-				}
-				return returnForce;
-			}
-		}, {
-			key: 'calculatePrioritized',
-			value: function calculatePrioritized() {
+			key: 'sumForces',
+			value: function sumForces() {
 				var force = new _vector2d2.default();
-				if (this.on(BehaviorType.wall_avoidance)) {
-					force = this.wallAvoidance(this.m_pVehicle.world().walls()).crossNum(this.m_dWeightWallAvoidance);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-						return this.m_vSteeringForce;
+				var accumulateForceInfo = null;
+				if (this.on(BehaviorType.separation)) {
+					force = force.add(this.separation().crossNum(this.m_dMultSeparation));
+					accumulateForceInfo = this.accumulateForce(this.m_vSteeringForce, force);
+					if (accumulateForceInfo.result) {
+						this.m_vSteeringForce = accumulateForceInfo.returnForce;
 					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-					}
-				}
-				if (this.on(BehaviorType.obstacle_avoidance)) {
-					force = this.obstacleAvoidance(this.m_pVehicle.world().obstacles()).crossNum(this.m_dWeightObstacleAvoidance);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
 						return this.m_vSteeringForce;
-					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-					}
-				}
-				if (this.on(BehaviorType.evade)) {
-					if (this.m_pTargetAgent1) {
-						force = this.evade(this.m_pTargetAgent1).crossNum(this.m_dWeightEvade);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-				}
-				if (this.on(BehaviorType.flee)) {
-					force = this.flee(this.m_pVehicle.world().crosshair()).crossNum(this.m_dWeightFlee);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-						return this.m_vSteeringForce;
-					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-					}
-				}
-				if (!this.isSpacePartitioningOn()) {
-					if (this.on(BehaviorType.separation)) {
-						force = this.separation(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightSeparation);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-					if (this.on(BehaviorType.allignment)) {
-						force = this.allignment(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightAlignment);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-					if (this.on(BehaviorType.cohesion)) {
-						force = this.cohesion(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightCohesion);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-				} else {
-					if (this.on(BehaviorType.separation)) {
-						force = this.separationPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightSeparation);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-					if (this.on(BehaviorType.allignment)) {
-						force = this.allignmentPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightAlignment);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-					if (this.on(BehaviorType.cohesion)) {
-						force = this.cohesionPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightCohesion);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
 					}
 				}
 				if (this.on(BehaviorType.seek)) {
-					force = this.seek(this.m_pVehicle.world().crosshair()).crossNum(this.m_dWeightSeek);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-						return this.m_vSteeringForce;
+					force = force.add(this.seek(this.m_vTarget));
+					accumulateForceInfo = this.accumulateForce(this.m_vSteeringForce, force);
+					if (accumulateForceInfo.result) {
+						this.m_vSteeringForce = accumulateForceInfo.returnForce;
 					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
+						return this.m_vSteeringForce;
 					}
 				}
 				if (this.on(BehaviorType.arrive)) {
-					force = this.arrive(this.m_pVehicle.world().crosshair(), this.m_Deceleration).crossNum(this.m_dWeightArrive);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-						return this.m_vSteeringForce;
+					force = force.add(this.arrive(this.m_vTarget, fast));
+					accumulateForceInfo = this.accumulateForce(this.m_vSteeringForce, force);
+					if (accumulateForceInfo.result) {
+						this.m_vSteeringForce = accumulateForceInfo.returnForce;
 					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-					}
-				}
-				if (this.on(BehaviorType.wander)) {
-					force = this.wander().crossNum(this.m_dWeightWander);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
 						return this.m_vSteeringForce;
-					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
 					}
 				}
 				if (this.on(BehaviorType.pursuit)) {
-					if (this.m_pTargetAgent1) {
-						force = this.pursuit(this.m_pTargetAgent1).crossNum(this.m_dWeightPursuit);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-				}
-				if (this.on(BehaviorType.offset_pursuit)) {
-					if (this.m_pTargetAgent1 && !this.m_vOffset.isZero()) {
-						force = this.offsetPursuit(this.m_pTargetAgent1, this.m_vOffset);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
+					force = force.add(this.pursuit(this.m_pBall));
+					accumulateForceInfo = this.accumulateForce(this.m_vSteeringForce, force);
+					if (accumulateForceInfo.result) {
+						this.m_vSteeringForce = accumulateForceInfo.returnForce;
+					} else {
+						return this.m_vSteeringForce;
 					}
 				}
 				if (this.on(BehaviorType.interpose)) {
-					if (this.m_pTargetAgent1 && this.m_pTargetAgent2) {
-						force = this.interpose(this.m_pTargetAgent1, this.m_pTargetAgent2).crossNum(this.m_dWeightInterpose);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-				}
-				if (this.on(BehaviorType.hide)) {
-					if (this.m_pTargetAgent1) {
-						force = this.hide(this.m_pTargetAgent1, this.m_pVehicle.world().obstacles()).crossNum(this.m_dWeightHide);
-						if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-							return this.m_vSteeringForce;
-						} else {
-							this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
-						}
-					}
-				}
-				if (this.on(BehaviorType.follow_path)) {
-					force = this.followPath().crossNum(this.m_dWeightFollowPath);
-					if (!this.accumulateForce(this.m_vSteeringForce, force)) {
-						return this.m_vSteeringForce;
+					force = force.add(this.interpose(this.m_pBall, this.m_vTarget, this.m_dInterposeDist));
+					accumulateForceInfo = this.accumulateForce(this.m_vSteeringForce, force);
+					if (accumulateForceInfo.result) {
+						this.m_vSteeringForce = accumulateForceInfo.returnForce;
 					} else {
-						this.m_vSteeringForce = this.accumulateForce(this.m_vSteeringForce, force);
+						return this.m_vSteeringForce;
 					}
 				}
 				return this.m_vSteeringForce;
 			}
 		}, {
-			key: 'calculateWeightedSum',
-			value: function calculateWeightedSum() {
-				if (this.on(BehaviorType.wall_avoidance)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.wallAvoidance(this.m_pVehicle.world().walls()).crossNum(this.m_dWeightWallAvoidance));
-				}
-				if (this.on(BehaviorType.obstacle_avoidance)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.obstacleAvoidance(this.m_pVehicle.world().obstacles()).crossNum(this.m_dWeightObstacleAvoidance));
-				}
-				if (this.on(BehaviorType.evade)) {
-					if (this.m_pTargetAgent1) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.evade(this.m_pTargetAgent1).crossNum(this.m_dWeightEvade));
-					}
-				}
-				if (!this.isSpacePartitioningOn()) {
-					if (this.on(BehaviorType.separation)) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.separation(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightSeparation));
-					}
-					if (this.on(BehaviorType.allignment)) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.allignment(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightAlignment));
-					}
-					if (this.on(BehaviorType.cohesion)) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.cohesion(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightCohesion));
-					}
-				} else {
-					if (this.on(BehaviorType.separation)) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.separationPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightSeparation));
-					}
-					if (this.on(BehaviorType.allignment)) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.allignmentPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightAlignment));
-					}
-					if (this.on(BehaviorType.cohesion)) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.cohesionPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightCohesion));
-					}
-				}
-				if (this.on(BehaviorType.wander)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.wander().crossNum(this.m_dWeightWander));
-				}
-				if (this.on(BehaviorType.seek)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.seek(this.m_pVehicle.world().crosshair()).crossNum(this.m_dWeightSeek));
-				}
-				if (this.on(BehaviorType.flee)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.flee(this.m_pVehicle.world().crosshair()).crossNum(this.m_dWeightFlee));
-				}
-				if (this.on(BehaviorType.arrive)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.arrive(this.m_pVehicle.world().crosshair(), this.m_Deceleration).crossNum(this.m_dWeightArrive));
-				}
-				if (this.on(BehaviorType.pursuit)) {
-					if (this.m_pTargetAgent1) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.pursuit(this.m_pTargetAgent1).crossNum(this.m_dWeightPursuit));
-					}
-				}
-				if (this.on(BehaviorType.offset_pursuit)) {
-					if (this.m_pTargetAgent1 && !this.m_vOffset.isZero()) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.offsetPursuit(this.m_pTargetAgent1).crossNum(this.m_dWeightPursuit));
-					}
-				}
-				if (this.on(BehaviorType.interpose)) {
-					if (this.m_pTargetAgent1 && this.m_pTargetAgent2) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.interpose(this.m_pTargetAgent1, this.m_pTargetAgent2).crossNum(this.m_dWeightInterpose));
-					}
-				}
-				if (this.on(BehaviorType.hide)) {
-					if (this.m_pTargetAgent1) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.hide(this.m_pTargetAgent1, this.m_pVehicle.world().obstacles()).crossNum(this.m_dWeightHide));
-					}
-				}
-				if (this.on(BehaviorType.follow_path)) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.followPath().crossNum(this.m_dWeightFollowPath));
-				}
-				this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-				return this.m_vSteeringForce;
+			key: 'forwardComponent',
+			value: function forwardComponent() {
+				return this.m_pPlayer.heading().dot(this.m_vSteeringForce);
 			}
 		}, {
-			key: 'calculateDithered',
-			value: function calculateDithered() {
-				this.m_vSteeringForce.zero();
-				if (this.on(BehaviorType.wall_avoidance) && Math.random() < _params2.default.prWallAvoidance) {
-					this.m_vSteeringForce = this.wallAvoidance(this.m_pVehicle.world().walls()).crossNum(this.m_dWeightWallAvoidance / _params2.default.prWallAvoidance);
-					if (!this.m_vSteeringForce.isZero()) {
-						this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-						return this.m_vSteeringForce;
-					}
-				}
-				if (this.on(BehaviorType.obstacle_avoidance) && Math.random() < _params2.default.prObstacleAvoidance) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.obstacleAvoidance(this.m_pVehicle.world().obstacles()).crossNum(this.m_dWeightObstacleAvoidance / _params2.default.prObstacleAvoidance));
-					if (!this.m_vSteeringForce.isZero()) {
-						this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-						return this.m_vSteeringForce;
-					}
-				}
-				if (this.isSpacePartitioningOn()) {
-					if (this.on(BehaviorType.separation) && Math.random() < _params2.default.prSeparation) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.separation(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightSeparation / _params2.default.prSeparation));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-					if (this.on(BehaviorType.allignment) && Math.random() < _params2.default.prAlignment) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.allignment(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightAlignment / _params2.default.prAlignment));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-					if (this.on(BehaviorType.cohesion) && Math.random() < _params2.default.cohesion) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.cohesion(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightCohesion / _params2.default.prCohesion));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-				} else {
-					if (this.on(BehaviorType.separation) && Math.random() < _params2.default.prSeparation) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.separationPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightSeparation / _params2.default.prSeparation));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-					if (this.on(BehaviorType.allignment) && Math.random() < _params2.default.prAlignment) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.allignmentPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightAlignment / _params2.default.prAlignment));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-					if (this.on(BehaviorType.cohesion) && Math.random() < _params2.default.cohesion) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.cohesionPlus(this.m_pVehicle.world().agents()).crossNum(this.m_dWeightCohesion / _params2.default.prCohesion));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-				}
-				if (this.on(BehaviorType.flee) && Math.random() < _params2.default.prFlee) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.flee(this.m_pVehicle.world().crosshair()).crossNum(this.m_dWeightFlee / _params2.default.prFlee));
-					if (!this.m_vSteeringForce.isZero()) {
-						this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-						return this.m_vSteeringForce;
-					}
-				}
-				if (this.on(BehaviorType.evade) && Math.random() < _params2.default.prEvade) {
-					if (this.m_pTargetAgent1) {
-						this.m_vSteeringForce = this.m_vSteeringForce.add(this.evade(this.m_pTargetAgent1).crossNum(this.m_dWeightEvade / _params2.default.prEvade));
-						if (!this.m_vSteeringForce.isZero()) {
-							this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-							return this.m_vSteeringForce;
-						}
-					}
-				}
-				if (this.on(BehaviorType.wander) && Math.random() < _params2.default.prWander) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.wander().crossNum(this.m_dWeightWander / _params2.default.prWander));
-					if (!this.m_vSteeringForce.isZero()) {
-						this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-						return this.m_vSteeringForce;
-					}
-				}
-				if (this.on(BehaviorType.seek) && Math.random() < _params2.default.prSeek) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.seek(this.m_pVehicle.world().crosshair()).crossNum(this.m_dWeightSeek / _params2.default.prSeek));
-					if (!this.m_vSteeringForce.isZero()) {
-						this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-						return this.m_vSteeringForce;
-					}
-				}
-				if (this.on(BehaviorType.arrive) && Math.random() < _params2.default.prArrive) {
-					this.m_vSteeringForce = this.m_vSteeringForce.add(this.arrive(this.m_pVehicle.world().crosshair(), this.m_Deceleration).crossNum(this.m_dWeightArrive / _params2.default.prArrive));
-					if (!this.m_vSteeringForce.isZero()) {
-						this.m_vSteeringForce.truncate(this.m_pVehicle.maxForce());
-						return this.m_vSteeringForce;
-					}
-				}
-				return this.m_vSteeringForce;
+			key: 'sideComponent',
+			value: function sideComponent() {
+				return this.m_pPlayer.side().dot(this.m_vSteeringForce) * this.m_pPlayer.maxTurnRate();
 			}
 		}, {
 			key: 'seek',
 			value: function seek(targetPos) {
-				var desiredVelocity = (0, _vector2d.vec2dNormalize)(targetPos.add(this.m_pVehicle.pos().getReverse())).crossNum(this.m_pVehicle.maxSpeed());
-				return desiredVelocity.add(this.m_pVehicle.velocity().getReverse());
-			}
-		}, {
-			key: 'flee',
-			value: function flee(targetPos) {
-				var panicDistanceSq = 100 * 100;
-				if (targetPos.add(this.m_pVehicle.pos().getReverse()).length() > panicDistanceSq) {
-					return new _vector2d2.default(0, 0);
-				} else {
-					var desiredVelocity = (0, _vector2d.vec2dNormalize)(this.m_pVehicle.pos().add(targetPos.getReverse())).crossNum(this.m_pVehicle.maxSpeed());
-					return desiredVelocity.add(this.m_pVehicle.velocity().getReverse());
-				}
+				var desiredVelocity = (0, _vector2d.vec2dNormalize)(targetPos.add(this.m_pPlayer.pos().getReverse())).crossNum(this.m_pPlayer.maxSpeed());
+				return desiredVelocity.add(this.m_pPlayer.velocity().getReverse());
 			}
 		}, {
 			key: 'arrive',
 			value: function arrive(targetPos, deceleration) {
-				var toTarget = targetPos.add(this.m_pVehicle.pos().getReverse());
+				var toTarget = targetPos.add(this.m_pPlayer.pos().getReverse());
 				var dist = toTarget.length();
 				if (dist > 0) {
 					var decelerationTweaker = 0.3;
 					var speed = dist / (deceleration * decelerationTweaker);
-					speed = Math.min(speed, this.m_pVehicle.maxSpeed());
+					speed = Math.min(speed, this.m_pPlayer.maxSpeed());
 					var desiredVelocity = toTarget.crossNum(speed / dist);
-					return desiredVelocity.add(this.m_pVehicle.velocity().getReverse());
+					return desiredVelocity.add(this.m_pPlayer.velocity().getReverse());
 				}
 				return new _vector2d2.default(0, 0);
 			}
 		}, {
 			key: 'pursuit',
-			value: function pursuit(evader) {
-				var toEvader = evader.pos().add(this.m_pVehicle.pos().getReverse());
-				var relativeHeading = this.m_pVehicle.heading().dot(evader.heading());
-				if (toEvader.dot(this.m_pVehicle.heading()) > 0 && relativeHeading < -0.95) {
-					return this.seek(evader.pos());
+			value: function pursuit(ball) {
+				var toBall = ball.pos().add(this.m_pPlayer.pos().getReverse());
+				var lookAheadTime = 0;
+				if (ball.speed() != 0) {
+					lookAheadTime = toBall.length() / ball.speed();
 				}
-				var lookAheadTime = toEvader.length() / (this.m_pVehicle.maxSpeed() + evader.speed());
-				return this.seek(evader.pos().add(evader.velocity().crossNum(lookAheadTime)));
+				this.m_vTarget = ball.futurePosition(lookAheadTime);
+				return this.arrive(this.m_vTarget, fast);
 			}
 		}, {
-			key: 'evade',
-			value: function evade(pursuer) {
-				var toPursuer = pursuer.pos().add(this.m_pVehicle.pos().getReverse());
-				var thetaRange = 100;
-				if (toPursuer.lengthSq() > thetaRange * thetaRange) {
-					return new _vector2d2.default(0, 0);
-				}
-				var lookAheadTime = toPursuer.length() / (this.m_pVehicle.maxSpeed() + pursuer.speed());
-				return this.flee(pursuer.pos().add(pursuer.velocity().crossNum(lookAheadTime)));
-			}
-		}, {
-			key: 'wander',
-			value: function wander() {
-				var jitterThisTimeSlice = this.m_dWanderJitter * this.m_pVehicle.timeElapsed();
-				this.m_vWanderTarget = this.m_vWanderTarget.add(new _vector2d2.default(randomClamped() * jitterThisTimeSlice, randomClamped() * jitterThisTimeSlice));
-				this.m_vWanderTarget.normalize();
-				this.m_vWanderTarget = this.m_vWanderTarget.crossNum(this.m_dWanderRadius);
-				var target = this.m_vWanderTarget.add(new _vector2d2.default(this.m_dWanderDistance, 0));
-				var Target = (0, _transformations.pointToWorldSpace)(target, this.m_pVehicle.heading(), this.m_pVehicle.side(), this.m_pVehicle.pos());
-				return Target.add(this.m_pVehicle.pos().getReverse());
-			}
-		}, {
-			key: 'obstacleAvoidance',
-			value: function obstacleAvoidance(obstacles) {
-				this.m_dDBoxLength = _params2.default.MinDetectionBoxLength + this.m_pVehicle.speed() / this.m_pVehicle.maxSpeed() * _params2.default.MinDetectionBoxLength;
-				this.m_pVehicle.world().tagObstaclesWithinViewRange(this.m_pVehicle, this.m_dDBoxLength);
-				var closestIntersectingObstacle = null;
-				var distToclosestIP = MaxDouble;
-				var localPosOfClosestObstacle = null;
-				for (var i = 0; i < obstacles.length; i++) {
-					var curOb = obstacles[i];
-					if (curOb.isTagged()) {
-						var localPos = (0, _transformations.pointToLocalSpace)(curOb.pos(), this.m_pVehicle.heading(), this.m_pVehicle.side(), this.m_pVehicle.pos());
-						if (localPos.x >= 0) {
-							var expandedRadius = curOb.bRadius() + this.m_pVehicle.bRadius();
-							if (Math.abs(localPos.y) < expandedRadius) {
-								var cx = localPos.x;
-								var cy = localPos.y;
-								var sqrtPart = Math.sqrt(expandedRadius * expandedRadius - cy * cy);
-								var ip = cx - sqrtPart;
-								if (ip <= 0) {
-									ip = cx + sqrtPart;
-								}
-								if (ip < distToclosestIP) {
-									distToclosestIP = ip;
-									closestIntersectingObstacle = curOb;
-									localPosOfClosestObstacle = localPos;
-								}
-							}
-						}
+			key: 'findNeighbours',
+			value: function findNeighbours() {
+				var allPlayers = _autolist2.default.getAllMembers();
+				for (var i = 0; i < allPlayers.length; i++) {
+					var curPlayer = allPlayers[i];
+					curPlayer.steering().unTag();
+					var to = curPlayer.pos().add(this.m_pPlayer.pos().getReverse());
+					if (to.lengthSq() < this.m_dViewDistance * this.m_dViewDistance) {
+						curPlayer.steering().tag();
 					}
 				}
-				var steeringForce = new _vector2d2.default(0, 0);
-				if (closestIntersectingObstacle) {
-					var multiplier = 1 + (this.m_dDBoxLength - localPosOfClosestObstacle.x) / this.m_dDBoxLength;
-					steeringForce.y = (closestIntersectingObstacle.bRadius() - localPosOfClosestObstacle.y) * multiplier;
-					var brakingWeight = 0.2;
-					steeringForce.x = (closestIntersectingObstacle.bRadius() - localPosOfClosestObstacle.x) * brakingWeight;
-				}
-				return (0, _transformations.vectorToWorldSpace)(steeringForce, this.m_pVehicle.heading(), this.m_pVehicle.side());
-			}
-		}, {
-			key: 'wallAvoidance',
-			value: function wallAvoidance(walls) {
-				this.createFeelers();
-				var distToThisIP = 0;
-				var distToClosestIP = MaxDouble;
-				var closestWall = -1;
-				var steeringForce = new _vector2d2.default();
-				var point = new _vector2d2.default();
-				var closestPoint = new _vector2d2.default();
-				for (var flr = 0; flr < this.m_Feelers.length; flr++) {
-					for (var w = 0; w < walls.length; w++) {
-						var result = (0, _geometry.lineIntersection2D)(this.m_pVehicle.pos(), this.m_Feelers[flr], walls[w].from(), walls[w].to(), distToThisIP, point);
-						distToThisIP = result.dist;
-						point = result.point;
-						if (result.result) {
-							if (distToThisIP < distToClosestIP) {
-								distToClosestIP = distToThisIP;
-								closestWall = w;
-								closestPoint = point;
-							}
-						}
-					}
-					if (closestWall >= 0) {
-						var overShoot = this.m_Feelers[flr].add(closestPoint.getReverse());
-						steeringForce = walls[closestWall].normal().crossNum(overShoot.length());
-					}
-				}
-				return steeringForce;
 			}
 		}, {
 			key: 'separation',
-			value: function separation(neighbours) {
+			value: function separation() {
 				var steeringForce = new _vector2d2.default();
-				for (var a = 0; a < neighbours.length; a++) {
-					if (neighbours[a] != this.m_pVehicle && neighbours[a].isTagged() && neighbours[a] != this.m_pTargetAgent1) {
-						var toAgent = this.m_pVehicle.pos().add(neighbours[a].pos().getReverse());
+				var allPlayers = _autolist2.default.getAllMembers();
+				for (var i = 0; i < allPlayers.length; i++) {
+					var curPlayer = allPlayers[i];
+					if (curPlayer != this.m_pPlayer && curPlayer.steering().tagged()) {
+						var toAgent = this.m_pPlayer.pos().add(curPlayer.pos().getReverse());
 						steeringForce = steeringForce.add((0, _vector2d.vec2dNormalize)(toAgent).crossNum(1 / toAgent.length()));
 					}
 				}
 				return steeringForce;
-			}
-		}, {
-			key: 'allignment',
-			value: function allignment(neighbours) {
-				var averageHeading = new _vector2d2.default();
-				var neighbourCount = 0;
-				for (var a = 0; a < neighbours.length; a++) {
-					if (neighbours[a] != this.m_pVehicle && neighbours[a].isTagged() && neighbours[a] != this.m_pTargetAgent1) {
-						averageHeading = averageHeading.add(neighbours[a].heading());
-						++neighbourCount;
-					}
-				}
-				if (neighbourCount > 0) {
-					averageHeading.crossNum(1 / neighbourCount);
-					averageHeading = averageHeading.add(this.m_pVehicle.heading().getReverse());
-				}
-				return averageHeading;
-			}
-		}, {
-			key: 'cohesion',
-			value: function cohesion(neighbours) {
-				var centerOfMass = new _vector2d2.default();
-				var steeringForce = new _vector2d2.default();
-				var neighbourCount = 0;
-				for (var a = 0; a < neighbours.length; a++) {
-					if (neighbours[a] != this.m_pVehicle && neighbours[a].isTagged() && neighbours[a] != this.m_pTargetAgent1) {
-						centerOfMass = centerOfMass.add(neighbours[a].pos());
-						++neighbourCount;
-					}
-				}
-				if (neighbourCount > 0) {
-					centerOfMass.crossNum(1 / neighbourCount);
-					steeringForce = this.seek(centerOfMass);
-				}
-				return (0, _vector2d.vec2dNormalize)(steeringForce);
-			}
-		}, {
-			key: 'separationPlus',
-			value: function separationPlus(neighbours) {
-				var steeringForce = new _vector2d2.default();
-				for (var i = 0; i < this.m_pVehicle.world().cellSpace().length; i++) {
-					var pV = this.m_pVehicle.world().cellSpace()[i];
-					if (pV != this.m_pVehicle) {
-						var toAgent = this.m_pVehicle.pos().add(pv.pos().getReverse());
-						steeringForce = steeringForce.add((0, _vector2d.vec2dNormalize)(toAgent).crossNum(1 / toAgent.length()));
-					}
-				}
-				return steeringForce;
-			}
-		}, {
-			key: 'allignmentPlus',
-			value: function allignmentPlus(neighbours) {
-				var averageHeading = new _vector2d2.default();
-				var neighbourCount = 0;
-				for (var i = 0; i < this.m_pVehicle.world().cellSpace().length; i++) {
-					var pV = this.m_pVehicle.world().cellSpace()[i];
-					if (pV != this.m_pVehicle) {
-						averageHeading = averageHeading.add(pV.heading());
-						neighbourCount++;
-					}
-				}
-				if (neighbourCount > 0) {
-					averageHeading = averageHeading.crossNum(1 / neighbourCount);
-					averageHeading = averageHeading.add(this.m_pVehicle.heading().getReverse());
-				}
-				return averageHeading;
-			}
-		}, {
-			key: 'cohesionPlus',
-			value: function cohesionPlus(neighbours) {
-				var centerOfMass = new _vector2d2.default();
-				var steeringForce = new _vector2d2.default();
-				var neighbourCount = 0;
-				for (var i = 0; i < this.m_pVehicle.world().cellSpace().length; i++) {
-					var pV = this.m_pVehicle.world().cellSpace()[i];
-					if (pV != this.m_pVehicle) {
-						centerOfMass = centerOfMass.add(pV.pos());
-						neighbourCount++;
-					}
-				}
-				if (neighbourCount > 0) {
-					centerOfMass = centerOfMass.crossNum(1 / neighbourCount);
-					steeringForce = this.seek(centerOfMass);
-				}
-				return (0, _vector2d.vec2dNormalize)(steeringForce);
 			}
 		}, {
 			key: 'interpose',
-			value: function interpose(agentA, agentB) {
-				var midPoint = agentA.pos().add(agentB.pos()).crossNum(1 / 2);
-				var timeToReachMidPoint = (0, _vector2d.vec2DDistance)(this.m_pVehicle.pos(), midPoint) / this.m_pVehicle.maxSpeed();
-				var aPos = agentA.pos().add(agentA.velocity().crossNum(timeToReachMidPoint));
-				var bPos = agentB.pos().add(agentB.velocity().crossNum(timeToReachMidPoint));
-				midPoint = aPos.add(bPos).crossNum(1 / 2);
-				return this.arrive(midPoint, fast);
+			value: function interpose(ball, target, distFromTarget) {
+				return this.arrive(target.add((0, _vector2d.vec2dNormalize)(ball.pos().add(target.getReverse())).crossNum(distFromTarget)), normal);
 			}
 		}, {
-			key: 'hide',
-			value: function hide(hunter, obstacles) {
-				var distToClosest = MaxDouble;
-				var bestHidingSpot = new _vector2d2.default();
-				var closest = void 0;
-				for (var i = 0; i < obstacles.length; i++) {
-					var curOb = obstacles[i];
-					var hidingSpot = this.getHidingPosition(curOb.pos(), curOb.bRadius(), hunter.pos());
-					var dist = (0, _vector2d.vec2DDistanceSq)(hidingSpot, this.m_pVehicle.pos());
-					if (dist < distToClosest) {
-						distToClosest = dist;
-						bestHidingSpot = hidingSpot;
-						closest = curOb;
-					}
-				}
-				if (distToClosest == MaxDouble) {
-					return this.evade(hunter);
-				}
-				return arrive(bestHidingSpot, fast);
-			}
-		}, {
-			key: 'getHidingPosition',
-			value: function getHidingPosition(posOb, radiusOb, posHunter) {
-				var DistanceFromBoundary = 30;
-				var distAway = radiusOb + DistanceFromBoundary;
-				var toOb = (0, _vector2d.vec2dNormalize)(posOb.add(posHunter.getReverse()));
-				return toOb.crossNum(distAway).add(posOb);
-			}
-		}, {
-			key: 'followPath',
-			value: function followPath() {
-				if ((0, _vector2d.vec2DDistanceSq)(this.m_pPath.currentWaypoint(), this.m_pVehicle.pos()) < this.m_dWaypointSeekDistSq) {
-					this.m_pPath.setNextWaypoint();
-				}
-				if (!this.m_pPath.finished()) {
-					return this.seek(this.m_pPath.currentWaypoint());
-				} else {
-					return this.arrive(this.m_pPath.currentWaypoint(), normal);
-				}
-			}
-		}, {
-			key: 'offsetPursuit',
-			value: function offsetPursuit(leader, offset) {
-				var worldOffsetPos = (0, _transformations.pointToWorldSpace)(offset, leader.heading(), leader.side(), leader.pos());
-				var toOffset = worldOffsetPos.add(this.m_pVehicle.pos().getReverse());
-				var lookAheadTime = toOffset.length() / (this.m_pVehicle.maxSpeed() + leader.speed());
-				return this.arrive(worldOffsetPos.add(leader.velocity().crossNum(lookAheadTime)), fast);
-			}
-		}, {
-			key: 'createFeelers',
-			value: function createFeelers() {
-				this.m_Feelers[0] = this.m_pVehicle.pos().add(this.m_pVehicle.heading().crossNum(this.m_dWallDetectionFeelerLength));
-				var temp = this.m_pVehicle.heading().clone();
-				(0, _transformations.vec2dRotateAroundOrigin)(temp, Math.PI * 7 / 4);
-				this.m_Feelers[1] = this.m_pVehicle.pos().add(temp.crossNum(this.m_dWallDetectionFeelerLength / 2));
-				temp = this.m_pVehicle.heading().clone();
-				(0, _transformations.vec2dRotateAroundOrigin)(temp, Math.PI * 1 / 4);
-				this.m_Feelers[2] = this.m_pVehicle.pos().add(temp.crossNum(this.m_dWallDetectionFeelerLength / 2));
+			key: 'renderAids',
+			value: function renderAids() {
+				_cgdi2.default.redPen();
+				_cgdi2.default.line(this.m_pPlayer.pos(), this.m_pPlayer.pos().add(this.m_vSteeringForce.crossNum(20)));
 			}
 		}]);
 	
@@ -3731,10 +3719,10 @@
 	exports.default = SteeringBehavior;
 
 /***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/* 27 */
+/***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -3742,54 +3730,921 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _vector2d = __webpack_require__(3);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var AutoList = function () {
+		function AutoList() {
+			_classCallCheck(this, AutoList);
+	
+			this.m_Members = [];
+		}
+	
+		_createClass(AutoList, [{
+			key: "addMember",
+			value: function addMember(member) {
+				this.m_Members.push(member);
+			}
+		}, {
+			key: "getAllMembers",
+			value: function getAllMembers() {
+				return this.m_Members;
+			}
+		}]);
+	
+		return AutoList;
+	}();
+	
+	var autoList = new AutoList();
+	
+	exports.default = autoList;
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.PutBallBackInPlay = exports.ReturnHome = exports.InterceptBall = exports.TendGoal = exports.GlobalKeeperState = undefined;
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	var _soccer_messages = __webpack_require__(24);
+	
+	var _soccer_messages2 = _interopRequireDefault(_soccer_messages);
+	
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _message_dispatcher = __webpack_require__(21);
+	
+	var _message_dispatcher2 = _interopRequireDefault(_message_dispatcher);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var GlobalKeeperState = {
+		name: 'GlobalKeeperState',
+		enter: function enter(keeper) {
+			// 
+		},
+		execute: function execute(keeper) {
+			// 
+		},
+		exit: function exit(keeper) {
+			// 
+		},
+		onMessage: function onMessage(keeper, telegram) {
+			switch (telegram.msg) {
+				case _soccer_messages2.default.Msg_GoHome:
+					keeper.setDefaultHomeRegion();
+					keeper.getFSM().changeState(ReturnHome);
+					return true;
+					break;
+				case _soccer_messages2.default.Msg_ReceiveBall:
+					keeper.getFSM().changeState(InterceptBall);
+					return true;
+					break;
+			}
+			return false;
+		}
+	};
+	
+	var TendGoal = {
+		name: 'TendGoal',
+		enter: function enter(keeper) {
+			keeper.steering().interposeOn(_params2.default.GoalKeeperTendingDistance);
+			keeper.steering().setTarget(keeper.getRearInterposeTarget());
+		},
+		execute: function execute(keeper) {
+			keeper.steering().setTarget(keeper.getRearInterposeTarget());
+			if (keeper.ballWithinKeeperRange()) {
+				keeper.ball().trap();
+				keeper.pitch().setGoalKeeperHasBall(true);
+				keeper.getFSM().changeState(PutBallBackInPlay);
+				return;
+			}
+			if (keeper.ballWithinRangeForIntercept() && !keeper.team().inControl()) {
+				keeper.getFSM().changeState(InterceptBall);
+			}
+			if (keeper.tooFarFromGoalMouth() && keeper.team().inControl()) {
+				keeper.getFSM().changeState(ReturnHome);
+				return;
+			}
+		},
+		exit: function exit(keeper) {
+			keeper.steering().interposeOff();
+		},
+		onMessage: function onMessage(keeper, telegram) {
+			return false;
+		}
+	};
+	
+	var InterceptBall = {
+		name: 'InterceptBall',
+		enter: function enter(keeper) {
+			keeper.steering().pursuitOn();
+		},
+		execute: function execute(keeper) {
+			if (keeper.tooFarFromGoalMouth() && !keeper.isClosestPlayerOnPitchToBall()) {
+				keeper.getFSM().changeState(ReturnHome);
+				return;
+			}
+			if (keeper.ballWithinKeeperRange()) {
+				keeper.ball().trap();
+				keeper.pitch().setGoalKeeperHasBall(true);
+				keeper.getFSM().changeState(PutBallBackInPlay);
+			}
+		},
+		exit: function exit(keeper) {
+			keeper.steering().pursuitOff();
+		},
+		onMessage: function onMessage(keeper, telegram) {
+			return false;
+		}
+	};
+	
+	var ReturnHome = {
+		name: 'ReturnHome',
+		enter: function enter(keeper) {
+			keeper.steering().arriveOn();
+		},
+		execute: function execute(keeper) {
+			keeper.steering().setTarget(keeper.homeRegion().center());
+			if (keeper.inHomeRegion() || !keeper.team().inControl()) {
+				keeper.getFSM().changeState(TendGoal);
+			}
+		},
+		exit: function exit(keeper) {
+			keeper.steering().arriveOff();
+		},
+		onMessage: function onMessage(keeper, telegram) {
+			return false;
+		}
+	};
+	
+	var PutBallBackInPlay = {
+		name: 'PutBallBackInPlay',
+		enter: function enter(keeper) {
+			keeper.team().setControllingPlayer(keeper);
+			keeper.team().opponents().returnAllFieldPlayersToHome();
+			keeper.team().returnAllFieldPlayersToHome();
+		},
+		execute: function execute(keeper) {
+			var passInfo = keeper.team().findPass(keeper, _params2.default.MaxPassingForce, _params2.default.GoalkeeperMinPassDistance);
+			if (passInfo.result) {
+				keeper.ball().kick((0, _vector2d.vec2dNormalize)(passInfo.target.add(keeper.ball().pos().getReverse())), _params2.default.MaxPassingForce);
+				keeper.pitch().setGoalKeeperHasBall(false);
+				_message_dispatcher2.default.dispatchMessage(0, keeper.id(), passInfo.receiver.id(), _soccer_messages2.default.Msg_ReceiveBall, passInfo.target);
+				keeper.getFSM().changeState(TendGoal);
+				return;
+			}
+			keeper.setVelocity(new _vector2d2.default());
+		},
+		exit: function exit(keeper) {
+			// 
+		},
+		onMessage: function onMessage(keeper, telegram) {
+			return false;
+		}
+	};
+	
+	exports.GlobalKeeperState = GlobalKeeperState;
+	exports.TendGoal = TendGoal;
+	exports.InterceptBall = InterceptBall;
+	exports.ReturnHome = ReturnHome;
+	exports.PutBallBackInPlay = PutBallBackInPlay;
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.SupportAttacker = exports.ReceiveBall = exports.KickBall = exports.Wait = exports.ReturnToHomeRegion = exports.Dribble = exports.ChaseBall = exports.GlobalPlayerState = undefined;
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	var _soccer_messages = __webpack_require__(24);
+	
+	var _soccer_messages2 = _interopRequireDefault(_soccer_messages);
+	
+	var _message_dispatcher = __webpack_require__(21);
+	
+	var _message_dispatcher2 = _interopRequireDefault(_message_dispatcher);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _utils = __webpack_require__(15);
+	
+	var _soccer_ball = __webpack_require__(11);
+	
+	var _transformations = __webpack_require__(8);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var GlobalPlayerState = {
+	  name: 'GlobalPlayerState',
+	  enter: function enter(player) {},
+	  execute: function execute(player) {
+	    if (player.ballWithinReceivingRange() && player.isControllingPlayer()) {
+	      player.setMaxSpeed(_params2.default.PlayerMaxSpeedWithBall);
+	    } else {
+	      player.setMaxSpeed(_params2.default.PlayerMaxSpeedWithoutBall);
+	    }
+	  },
+	  exit: function exit(player) {},
+	  onMessage: function onMessage(player, telegram) {
+	    switch (telegram.msg) {
+	      case _soccer_messages2.default.Msg_ReceiveBall:
+	        player.steering().setTarget(telegram.extraInfo);
+	        player.getFSM().changeState(ReceiveBall);
+	        return true;
+	        break;
+	      case _soccer_messages2.default.Msg_SupportAttacker:
+	        if (player.getFSM().isInstate(SupportAttacker)) {
+	          return true;
+	        }
+	        player.steering().setTarget(player.team().getSupportSpot());
+	        player.getFSM().changeState(SupportAttacker);
+	        return true;
+	        break;
+	      case _soccer_messages2.default.Msg_Wait:
+	        player.getFSM().changeState(Wait);
+	        return true;
+	        break;
+	      case _soccer_messages2.default.Msg_GoHome:
+	        player.setDefaultHomeRegion();
+	        player.getFSM().changeState(ReturnToHomeRegion);
+	        return true;
+	        break;
+	      case _soccer_messages2.default.Msg_PassToMe:
+	        var receiver = telegram.extraInfo;
+	        if (player.team().receiver() != null || !player.ballWithinKickingRange()) {
+	          console.warn('player cannot make requested pass');
+	          return true;
+	        }
+	        player.ball().kick(receiver.pos().add(player.ball().pos().getReverse()), _params2.default.MaxPassingForce);
+	        _message_dispatcher2.default.dispatchMessage(0, player.id(), receiver.id(), _soccer_messages2.default.Msg_ReceiveBall, receiver.pos());
+	        player.getFSM().changeState(Wait);
+	        player.findSupport();
+	        return true;
+	        break;
+	    }
+	    return false;
+	  }
+	};
+	
+	var ChaseBall = {
+	  name: 'ChaseBall',
+	  enter: function enter(player) {
+	    player.steering().seekOn();
+	  },
+	  execute: function execute(player) {
+	    if (player.ballWithinKickingRange()) {
+	      player.getFSM().changeState(KickBall);
+	      return;
+	    }
+	    if (player.isClosestTeamMemberToBall()) {
+	      player.steering().setTarget(player.ball().pos());
+	      return;
+	    }
+	    player.getFSM().changeState(ReturnToHomeRegion);
+	  },
+	  exit: function exit(player) {
+	    player.steering().seekOff();
+	  },
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	var Dribble = {
+	  name: 'Dribble',
+	  enter: function enter(player) {
+	    player.team().setControllingPlayer(player);
+	  },
+	  execute: function execute(player) {
+	    var dot = player.team().homeGoal().facing().dot(player.heading());
+	    if (dot < 0) {
+	      var direction = player.heading();
+	      var angle = Math.PI / 4 * -1 * player.team().homeGoal().facing().sign(player.heading());
+	      (0, _transformations.vec2dRotateAroundOrigin)(direction, angle);
+	      var kickingForce = 0.8;
+	      player.ball().kick(direction, kickingForce);
+	    } else {
+	      player.ball().kick(player.team().homeGoal().facing(), _params2.default.MaxDribbleForce);
+	    }
+	    player.getFSM().changeState(ChaseBall);
+	    return;
+	  },
+	  exit: function exit(player) {},
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	var ReturnToHomeRegion = {
+	  name: 'ReturnToHomeRegion',
+	  enter: function enter(player) {
+	    player.steering().arriveOn();
+	    if (!player.homeRegion().inside(player.steering().target(), 'HALF_SIZE')) {
+	      player.steering().setTarget(player.homeRegion().center());
+	    }
+	  },
+	  execute: function execute(player) {
+	    if (player.pitch().gameOn()) {
+	      if (player.isClosestTeamMemberToBall() && player.team().receiver() == null && !player.pitch().goalKeeperHasBall()) {
+	        player.getFSM().changeState(ChaseBall);
+	        return;
+	      }
+	    }
+	    if (player.pitch().gameOn() && player.homeRegion().inside(player.pos(), 'HALF_SIZE')) {
+	      player.steering().setTarget(player.pos());
+	      player.getFSM().changeState(Wait);
+	    } else if (!player.pitch().gameOn() && player.atTarget()) {
+	      player.getFSM().changeState(Wait);
+	    }
+	  },
+	  exit: function exit(player) {
+	    player.steering().arriveOff();
+	  },
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	var Wait = {
+	  name: 'Wait',
+	  enter: function enter(player) {
+	    if (!player.pitch().gameOn()) {
+	      player.steering().setTarget(player.homeRegion().center());
+	    }
+	  },
+	  execute: function execute(player) {
+	    if (!player.atTarget()) {
+	      player.steering().arriveOn();
+	      return;
+	    } else {
+	      player.steering().arriveOff();
+	      player.setVelocity(new _vector2d2.default(0, 0));
+	      player.trackBall();
+	    }
+	    if (player.pitch().gameOn()) {
+	      if (player.isClosestTeamMemberToBall() && player.team().receiver() == null && !player.pitch().goalKeeperHasBall()) {
+	        player.getFSM().changeState(ChaseBall);
+	        return;
+	      }
+	    }
+	  },
+	  exit: function exit(player) {},
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	var KickBall = {
+	  name: 'KickBall',
+	  enter: function enter(player) {
+	    player.team().setControllingPlayer(player);
+	    if (!player.isReadyFornextKick()) {
+	      player.getFSM().changeState(ChaseBall);
+	    }
+	  },
+	  execute: function execute(player) {
+	    var toBall = player.ball().pos().add(player.pos().getReverse());
+	    var dot = player.heading().dot((0, _vector2d.vec2dNormalize)(toBall));
+	    var ballTarget = void 0;
+	    var kickDirection = void 0;
+	    if (player.team().receiver() != null || player.pitch().goalKeeperHasBall() || dot < 0) {
+	      console.warn('goaly has ball / ball behind player');
+	      player.getFSM().changeState(ChaseBall);
+	      return;
+	    }
+	    var power = _params2.default.MaxShootingForce * dot;
+	    var shootInfo = player.team().canShoot(player.ball().pos(), power);
+	    if (shootInfo.result || (0, _utils.randFloat)() < _params2.default.ChancePlayerAttemptsPotShot) {
+	      ballTarget = (0, _soccer_ball.addNoiseToKick)(player.ball().pos(), shootInfo.target);
+	      kickDirection = ballTarget.add(player.ball().pos().getReverse());
+	      player.ball().kick(kickDirection, power);
+	      player.getFSM().changeState(Wait);
+	      player.findSupport();
+	      return;
+	    }
+	    power = _params2.default.MaxPassingForce * dot;
+	    var passInfo = player.team().findPass(player, power, _params2.default.MinPassDistance);
+	    if (player.isThreatened() && passInfo.result) {
+	      ballTarget = (0, _soccer_ball.addNoiseToKick)(player.ball().pos(), passInfo.target);
+	      kickDirection = ballTarget.add(player.ball().pos().getReverse());
+	      player.ball().kick(kickDirection, power);
+	      _message_dispatcher2.default.dispatchMessage(0, player.id(), passInfo.receiver.id(), _soccer_messages2.default.Msg_ReceiveBall, ballTarget);
+	      player.getFSM().changeState(Wait);
+	      player.findSupport();
+	      return;
+	    } else {
+	      player.findSupport();
+	      player.getFSM().changeState(Dribble);
+	    }
+	  },
+	  exit: function exit(player) {},
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	var ReceiveBall = {
+	  name: 'ReceiveBall',
+	  enter: function enter(player) {
+	    player.team().setReceiver(player);
+	    player.team().setControllingPlayer(player);
+	    var passThreatRadius = 70;
+	    if (player.inHotregion() || (0, _utils.randFloat)() < _params2.default.ChanceOfUsingArriveTypeReceiveBehavior && !player.team().isOpponentWithinRadius(player.pos(), passThreatRadius)) {
+	      player.steering().arriveOn();
+	    } else {
+	      player.steering().pursuitOn();
+	    }
+	  },
+	  execute: function execute(player) {
+	    if (player.ballWithinReceivingRange() || !player.team().inControl()) {
+	      player.getFSM().changeState(ChaseBall);
+	      return;
+	    }
+	    if (player.steering().pursuitIsOn()) {
+	      player.steering().setTarget(player.ball().pos());
+	    }
+	    if (player.atTarget()) {
+	      player.steering().arriveOff();
+	      player.steering().pursuitOff();
+	      player.trackBall();
+	      player.setVelocity(new _vector2d2.default(0, 0));
+	    }
+	  },
+	  exit: function exit(player) {
+	    player.steering().arriveOff();
+	    player.steering().pursuitOff();
+	    player.team().setReceiver(null);
+	  },
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	var SupportAttacker = {
+	  name: 'SupportAttacker',
+	  enter: function enter(player) {
+	    player.steering().arriveOn();
+	    player.steering().setTarget(player.team().getSupportSpot());
+	  },
+	  execute: function execute(player) {
+	    if (!player.team().inControl()) {
+	      player.getFSM().changeState(ReturnToHomeRegion);
+	      return;
+	    }
+	    if (player.team().getSupportSpot() != player.steering().target()) {
+	      player.steering().setTarget(player.team().getSupportSpot());
+	      player.steering().arriveOn();
+	    }
+	    if (player.team().canShoot(player.pos(), _params2.default.MaxShootingForce)) {
+	      player.team().requestPass(player);
+	    }
+	    if (player.atTarget()) {
+	      player.steering().arriveOff();
+	      player.trackBall();
+	      player.setVelocity(new _vector2d2.default(0, 0));
+	      if (!player.isThreatened()) {
+	        player.team().requestPass(player);
+	      }
+	    }
+	  },
+	  exit: function exit(player) {
+	    player.team().setSupportingPlayer(null);
+	    player.steering().arriveOff();
+	  },
+	  onMessage: function onMessage(player, telegram) {
+	    return false;
+	  }
+	};
+	
+	exports.GlobalPlayerState = GlobalPlayerState;
+	exports.ChaseBall = ChaseBall;
+	exports.Dribble = Dribble;
+	exports.ReturnToHomeRegion = ReturnToHomeRegion;
+	exports.Wait = Wait;
+	exports.KickBall = KickBall;
+	exports.ReceiveBall = ReceiveBall;
+	exports.SupportAttacker = SupportAttacker;
+
+/***/ },
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _player_base = __webpack_require__(25);
+	
+	var _player_base2 = _interopRequireDefault(_player_base);
+	
+	var _state_machine = __webpack_require__(17);
+	
+	var _state_machine2 = _interopRequireDefault(_state_machine);
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	var _entity_function_templates = __webpack_require__(31);
+	
+	var _autolist = __webpack_require__(27);
+	
+	var _autolist2 = _interopRequireDefault(_autolist);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var _vector2d2 = _interopRequireDefault(_vector2d);
+	
+	var _soccer_team = __webpack_require__(16);
+	
+	var _cgdi = __webpack_require__(1);
+	
+	var _cgdi2 = _interopRequireDefault(_cgdi);
+	
+	var _transformations = __webpack_require__(8);
+	
+	var _goalkeeper_state = __webpack_require__(28);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var Smoother = function () {
-		function Smoother(sampleSize, zeroValue) {
-			_classCallCheck(this, Smoother);
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
-			this.m_History = [sampleSize, zeroValue];
-			this.m_iNextUpdateSlot = 0;
-			this.m_ZeroValue = zeroValue;
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var GoalKeeper = function (_PlayerBase) {
+		_inherits(GoalKeeper, _PlayerBase);
+	
+		function GoalKeeper(homeTeam, homeRegion, startState, heading, velocity, mass, maxForce, maxSpeed, maxTurnRate, scale) {
+			_classCallCheck(this, GoalKeeper);
+	
+			var _this = _possibleConstructorReturn(this, (GoalKeeper.__proto__ || Object.getPrototypeOf(GoalKeeper)).call(this, homeTeam, homeRegion, heading, velocity, mass, maxForce, maxSpeed, maxTurnRate, scale, _player_base.PLAYERROLE.goalKeeper));
+	
+			_this.m_pStateMachine = new _state_machine2.default(_this);
+			_this.m_pStateMachine.setCurrentState(startState);
+			_this.m_pStateMachine.setPreviousState(startState);
+			_this.m_pStateMachine.setGlobalState(_goalkeeper_state.GlobalKeeperState);
+			_this.m_pStateMachine.currentState().enter(_this);
+			return _this;
 		}
 	
-		_createClass(Smoother, [{
+		_createClass(GoalKeeper, [{
+			key: 'getFSM',
+			value: function getFSM() {
+				return this.m_pStateMachine;
+			}
+		}, {
+			key: 'handleMessage',
+			value: function handleMessage(msg) {
+				return this.m_pStateMachine.handleMessage(msg);
+			}
+		}, {
 			key: 'update',
-			value: function update(mostRecentValue) {
-				this.m_History[this.m_iNextUpdateSlot++] = mostRecentValue;
-				if (this.m_iNextUpdateSlot == this.m_History.length) {
-					this.m_iNextUpdateSlot = 0;
+			value: function update(timeElapsed) {
+				this.m_pStateMachine.update();
+				var steeringForce = this.m_pSteering.calculate();
+				var acceleration = steeringForce.crossNum(1 / this.m_dMass);
+				this.m_vVelocity = this.m_vVelocity.add(acceleration);
+				this.m_vVelocity.truncate(this.m_dMaxSpeed);
+				this.m_vPos = this.m_vPos.add(this.m_vVelocity);
+				if (_params2.default.bNonPenetrationConstraint) {
+					(0, _entity_function_templates.enforceNonPenetrationConstraint)(this, _autolist2.default.getAllMembers());
 				}
-				var sum = this.m_ZeroValue;
-				for (var i = 0; i < this.m_History.length; i++) {
-					var it = this.m_History[i];
-					if (sum instanceof _vector2d2.default) {
-						sum = sum.add(it);
-					} else {
-						sum += it;
-					}
+				if (!this.m_vVelocity.isZero()) {
+					this.m_vHeading = (0, _vector2d.vec2dNormalize)(this.m_vVelocity);
+					this.m_vSide = this.m_vHeading.perp();
 				}
-				if (sum instanceof _vector2d2.default) {
-					return sum.crossNum(1 / this.m_History.length);
+				if (!this.pitch().goalKeeperHasBall()) {
+					this.m_vLookAt = (0, _vector2d.vec2dNormalize)(this.ball().pos().add(this.pos().getReverse()));
+				}
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				if (this.team().teamColor() == _soccer_team.TEAM_COLOR.blue) {
+					_cgdi2.default.bluePen();
 				} else {
-					return sum / this.m_History.length;
+					_cgdi2.default.redPen();
 				}
+				this.m_vecPlayerVBTrans = (0, _transformations.worldTransform)(this.m_vecPlayerVB, this.pos(), this.m_vLookAt, this.m_vLookAt.perp(), this.scale());
+				_cgdi2.default.closedShape(this.m_vecPlayerVBTrans);
+				_cgdi2.default.brownBrush();
+				_cgdi2.default.circle(this.pos(), 6);
+				if (_params2.default.ViewIDs) {
+					_cgdi2.default.textColor('rgb(0, 170, 0)');
+					_cgdi2.default.textAtPos(this.pos().x - 20, this.pos().y - 20, this.id());
+				}
+				if (_params2.default.ViewStates) {
+					_cgdi2.default.textColor('rgb(0, 170, 0)');
+					_cgdi2.default.transparentText();
+					_cgdi2.default.textAtPos(this.pos().x, this.pos().y - 20, this.m_pStateMachine.getNameOfCurrentState());
+				}
+			}
+		}, {
+			key: 'ballWithinRangeForIntercept',
+			value: function ballWithinRangeForIntercept() {
+				return (0, _vector2d.vec2DDistanceSq)(this.team().homeGoal().center(), this.ball().pos()) <= _params2.default.GoalKeeperInterceptRangeSq;
+			}
+		}, {
+			key: 'tooFarFromGoalMouth',
+			value: function tooFarFromGoalMouth() {
+				return (0, _vector2d.vec2DDistanceSq)(this.pos(), this.getRearInterposeTarget()) > _params2.default.GoalKeeperInterceptRangeSq;
+			}
+		}, {
+			key: 'getRearInterposeTarget',
+			value: function getRearInterposeTarget() {
+				var xPosTarget = this.team().homeGoal().center().x;
+				var yPosTarget = this.pitch().playingArea().center().y - _params2.default.GoalWidth * 0.5 + this.ball().pos().y / this.pitch().playingArea().height() * _params2.default.GoalWidth;
+				return new _vector2d2.default(xPosTarget, yPosTarget);
 			}
 		}]);
 	
-		return Smoother;
-	}();
+		return GoalKeeper;
+	}(_player_base2.default);
 	
-	exports.default = Smoother;
+	exports.default = GoalKeeper;
 
 /***/ },
-/* 19 */
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.getClosestEntityLineSegmentIntersection = exports.getEntityLineSegmentIntersections = exports.enforceNonPenetrationConstraint = exports.tagNeighbors = exports.overlapped = undefined;
+	
+	var _geometry = __webpack_require__(7);
+	
+	var _vector2d = __webpack_require__(5);
+	
+	var maxDouble = 999999;
+	
+	function overlapped(ob, conOb) {
+		var minDistBetweenObstacles = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 40;
+	
+		for (var i = 0; i < conOb.length; i++) {
+			var it = conOb[i];
+			if ((0, _geometry.twoCirclesOverlapped)(ob.pos().x, ob.pos().y, ob.bRadius() + minDistBetweenObstacles, it.pos().x, it.pos().y, it.bRadius())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function tagNeighbors(entity, containerOfEntities, radius) {
+		for (var i = 0; i < containerOfEntities.length; i++) {
+			var curEntity = containerOfEntities[i];
+			curEntity.unTag();
+			var to = curEntity.pos().add(entity.pos().getReverse());
+			var range = radius + curEntity.bRadius();
+			if (curEntity != entity && to.lengthSq() < range * range) {
+				curEntity.tag();
+			}
+		}
+	}
+	
+	function enforceNonPenetrationConstraint(entity, containerOfEntities) {
+		for (var i = 0; i < containerOfEntities.length; i++) {
+			var curEntity = containerOfEntities[i];
+			if (curEntity != entity) {
+				var toEntity = entity.pos().add(curEntity.pos().getReverse());
+				var distFromEachOther = toEntity.length();
+				var amountOfOverLap = curEntity.bRadius() + entity.bRadius() - distFromEachOther;
+				if (amountOfOverLap >= 0) {
+					entity.setPos(entity.pos().add(toEntity.crossNum(1 / distFromEachOther * amountOfOverLap)));
+				}
+			}
+		}
+	}
+	
+	function getEntityLineSegmentIntersections(entities, theOneToIgnore, A, B) {
+		var range = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : maxDouble;
+	
+		var hits = [];
+		for (var i = 0; i < entities.length; i++) {
+			var it = entities[i];
+			if (it.id() === theOneToIgnore || (0, _vector2d.vec2DDistanceSq)(it.pos(), A) > range * range) {
+				// do nothing
+			} else {
+				if ((0, _geometry.distToLineSegment)(A, B, it.pos()) < it.bRadius()) {
+					hits.push(it);
+				}
+			}
+		}
+		return hits;
+	}
+	
+	function getClosestEntityLineSegmentIntersection(entities, theOneToIgnore, A, B) {
+		var range = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : MaxDouble;
+	
+		var closestEntity = null;
+		var closestDist = maxDouble;
+		for (var i = 0; i < entities.length; i++) {
+			var it = entities[i];
+			var distSq = (0, _vector2d.vec2DDistanceSq)(it.pos(), A);
+			if (it.id() === theOneToIgnore || distSq > range * range) {
+				// do nothing
+			} else {
+				if ((0, _geometry.distToLineSegment)(A, B, it.pos()) < it.bRadius()) {
+					if (distSq < closestDist) {
+						closestDist = distSq;
+						closestEntity = it;
+					}
+				}
+			}
+		}
+		return closestEntity;
+	}
+	
+	exports.overlapped = overlapped;
+	exports.tagNeighbors = tagNeighbors;
+	exports.enforceNonPenetrationConstraint = enforceNonPenetrationConstraint;
+	exports.getEntityLineSegmentIntersections = getEntityLineSegmentIntersections;
+	exports.getClosestEntityLineSegmentIntersection = getClosestEntityLineSegmentIntersection;
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _player_base = __webpack_require__(25);
+	
+	var _player_base2 = _interopRequireDefault(_player_base);
+	
+	var _state_machine = __webpack_require__(17);
+	
+	var _state_machine2 = _interopRequireDefault(_state_machine);
+	
+	var _field_player_state = __webpack_require__(29);
+	
+	var _regulator = __webpack_require__(20);
+	
+	var _regulator2 = _interopRequireDefault(_regulator);
+	
+	var _params = __webpack_require__(10);
+	
+	var _params2 = _interopRequireDefault(_params);
+	
+	var _utils = __webpack_require__(15);
+	
+	var _transformations = __webpack_require__(8);
+	
+	var _entity_function_templates = __webpack_require__(31);
+	
+	var _autolist = __webpack_require__(27);
+	
+	var _autolist2 = _interopRequireDefault(_autolist);
+	
+	var _cgdi = __webpack_require__(1);
+	
+	var _cgdi2 = _interopRequireDefault(_cgdi);
+	
+	var _soccer_team = __webpack_require__(16);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var FieldPlayer = function (_PlayerBase) {
+		_inherits(FieldPlayer, _PlayerBase);
+	
+		function FieldPlayer(homeTeam, homeRegion, startState, heading, velocity, mass, maxForce, maxSpeed, maxTurnRate, scale, role) {
+			_classCallCheck(this, FieldPlayer);
+	
+			var _this = _possibleConstructorReturn(this, (FieldPlayer.__proto__ || Object.getPrototypeOf(FieldPlayer)).call(this, homeTeam, homeRegion, heading, velocity, mass, maxForce, maxSpeed, maxTurnRate, scale, role));
+	
+			_this.m_pStateMachine = new _state_machine2.default(_this);
+			if (startState) {
+				_this.m_pStateMachine.setCurrentState(startState);
+				_this.m_pStateMachine.setPreviousState(startState);
+				_this.m_pStateMachine.setGlobalState(_field_player_state.GlobalPlayerState);
+				_this.m_pStateMachine.currentState().enter(_this);
+			}
+			_this.m_pSteering.separationOn();
+			_this.m_pKickLimiter = new _regulator2.default(_params2.default.PlayerKickFrequency);
+			return _this;
+		}
+	
+		_createClass(FieldPlayer, [{
+			key: 'update',
+			value: function update(timeElapsed) {
+				this.m_pStateMachine.update();
+				this.m_pSteering.calculate();
+				if (this.m_pSteering.force().isZero()) {
+					var BrakingRate = 0.8;
+					this.m_vVelocity = this.m_vVelocity.crossNum(BrakingRate);
+				}
+				var turningForce = this.m_pSteering.sideComponent();
+				turningForce = (0, _utils.clamp)(turningForce, -_params2.default.PlayerMaxTurnRate, _params2.default.PlayerMaxTurnRate);
+				(0, _transformations.vec2dRotateAroundOrigin)(this.m_vHeading, turningForce);
+				this.m_vVelocity = this.m_vHeading.crossNum(this.m_vVelocity.length());
+				this.m_vSide = this.m_vHeading.perp();
+				var accel = this.m_vHeading.crossNum(this.m_pSteering.forwardComponent() / this.m_dMass);
+				this.m_vVelocity = this.m_vVelocity.add(accel);
+				this.m_vVelocity.truncate(this.m_dMaxSpeed);
+				this.m_vPos = this.m_vPos.add(this.m_vVelocity);
+				if (_params2.default.bNonPenetrationConstraint) {
+					(0, _entity_function_templates.enforceNonPenetrationConstraint)(this, _autolist2.default.getAllMembers());
+				}
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				_cgdi2.default.transparentText();
+				_cgdi2.default.textColor(_cgdi2.default.GREY);
+				if (this.team().teamColor() == _soccer_team.TEAM_COLOR.blue) {
+					_cgdi2.default.bluePen();
+				} else {
+					_cgdi2.default.redPen();
+				}
+				this.m_vecPlayerVBTrans = (0, _transformations.worldTransform)(this.m_vecPlayerVB, this.pos(), this.heading(), this.side(), this.scale());
+				_cgdi2.default.closedShape(this.m_vecPlayerVBTrans);
+				// threaten
+				_cgdi2.default.brownBrush();
+				if (_params2.default.HighlightIfThreatened && this.team().controllingPlayer() == this && this.isThreatened()) {
+					_cgdi2.default.yellowBrush();
+				}
+				_cgdi2.default.circle(this.pos(), 6);
+				// state
+				if (_params2.default.ViewStates) {
+					_cgdi2.default.textColor('rgb(0, 170, 0)');
+					_cgdi2.default.textAtPos(this.m_vPos.x, this.m_vPos.y - 20, this.m_pStateMachine.getNameOfCurrentState());
+				}
+				// id
+				if (_params2.default.ViewIDs) {
+					_cgdi2.default.textColor('rgb(0, 170, 0)');
+					_cgdi2.default.textAtPos(this.pos().x - 20, this.pos().y - 20, this.id());
+				}
+				if (_params2.default.ViewTargets) {
+					_cgdi2.default.redBrush();
+					_cgdi2.default.circle(this.steering().target(), 3);
+					_cgdi2.default.textAtPos(this.steering().target().x, this.steering().target().y, this.id());
+				}
+			}
+		}, {
+			key: 'handleMessage',
+			value: function handleMessage(msg) {
+				return this.m_pStateMachine.handleMessage(msg);
+			}
+		}, {
+			key: 'getFSM',
+			value: function getFSM() {
+				return this.m_pStateMachine;
+			}
+		}, {
+			key: 'isReadyFornextKick',
+			value: function isReadyFornextKick() {
+				return this.m_pKickLimiter.isReady();
+			}
+		}]);
+	
+		return FieldPlayer;
+	}(_player_base2.default);
+	
+	exports.default = FieldPlayer;
+
+/***/ },
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3804,7 +4659,7 @@
 	
 	var _cgdi2 = _interopRequireDefault(_cgdi);
 	
-	var _vector2d = __webpack_require__(3);
+	var _vector2d = __webpack_require__(5);
 	
 	var _vector2d2 = _interopRequireDefault(_vector2d);
 	
@@ -3893,93 +4748,6 @@
 	}();
 	
 	exports.default = Wall2D;
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _cgdi = __webpack_require__(1);
-	
-	var _cgdi2 = _interopRequireDefault(_cgdi);
-	
-	var _base_game_entity = __webpack_require__(15);
-	
-	var _base_game_entity2 = _interopRequireDefault(_base_game_entity);
-	
-	var _vector2d = __webpack_require__(3);
-	
-	var _vector2d2 = _interopRequireDefault(_vector2d);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Obstacle = function (_BaseGameEntity) {
-		_inherits(Obstacle, _BaseGameEntity);
-	
-		function Obstacle(x, y, r) {
-			_classCallCheck(this, Obstacle);
-	
-			return _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).call(this, 0, new _vector2d2.default(x, y), r));
-		}
-	
-		_createClass(Obstacle, [{
-			key: 'update',
-			value: function update(time_elapsed) {}
-		}, {
-			key: 'render',
-			value: function render() {
-				_cgdi2.default.blackPen();
-				_cgdi2.default.circle(this.pos(), this.bRadius());
-			}
-		}]);
-	
-		return Obstacle;
-	}(_base_game_entity2.default);
-	
-	exports.default = Obstacle;
-
-/***/ },
-/* 21 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	var RESOURCE = {
-		IDR_MENU1: 101,
-		ID_AID_WANDER: 40001,
-		ID_AID_STEERINGFORCE: 40002,
-		ID_AID_WALLFEELERS: 40003,
-		ID_OB_WALLS: 40004,
-		ID_OB_OBSTACLES: 40005,
-		ID_OB_PATH: 40006,
-		ID_AID_DETECTIONBOX: 40007,
-		IDR_PARTITIONING: 40008,
-		IDR_WEIGHTED_SUM: 40009,
-		IDR_PRIORITIZED: 40010,
-		IDR_DITHERED: 40011,
-		ID_VIEW_KEYS: 40012,
-		ID_VIEW_FPS: 40013,
-		ID_MENU_SMOOTHING: 40014,
-		IDM_PARTITION_VIEW_NEIGHBORS: 40015
-	};
-	
-	exports.default = RESOURCE;
 
 /***/ }
 /******/ ]);

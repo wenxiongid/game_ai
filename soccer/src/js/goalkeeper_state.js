@@ -1,9 +1,12 @@
+import PRM from './params';
 import MessageType from './soccer_messages';
 import Vector2D, {
 	vec2dNormalize
 } from './common/2d/vector2d';
+import dispatcher from './common/messaging/message_dispatcher';
 
 const GlobalKeeperState = {
+	name: 'GlobalKeeperState',
 	enter: function(keeper){
 		// 
 	},
@@ -30,12 +33,13 @@ const GlobalKeeperState = {
 };
 
 const TendGoal = {
+	name: 'TendGoal',
 	enter: function(keeper){
 		keeper.steering().interposeOn(PRM.GoalKeeperTendingDistance);
-		keeper.steering().setTarget(keeper.getReadInterposeTarget());
+		keeper.steering().setTarget(keeper.getRearInterposeTarget());
 	},
 	execute: function(keeper){
-		keeper.steering().setTarget(keeper.getReadInterposeTarget());
+		keeper.steering().setTarget(keeper.getRearInterposeTarget());
 		if(keeper.ballWithinKeeperRange()){
 			keeper.ball().trap();
 			keeper.pitch().setGoalKeeperHasBall(true);
@@ -59,6 +63,7 @@ const TendGoal = {
 };
 
 const InterceptBall = {
+	name: 'InterceptBall',
 	enter: function(keeper){
 		keeper.steering().pursuitOn();
 	},
@@ -82,6 +87,7 @@ const InterceptBall = {
 };
 
 const ReturnHome = {
+	name: 'ReturnHome',
 	enter: function(keeper){
 		keeper.steering().arriveOn();
 	},
@@ -100,6 +106,7 @@ const ReturnHome = {
 };
 
 const PutBallBackInPlay = {
+	name: 'PutBallBackInPlay',
 	enter: function(keeper){
 		keeper.team().setControllingPlayer(keeper);
 		keeper.team().opponents().returnAllFieldPlayersToHome();

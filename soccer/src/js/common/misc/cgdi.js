@@ -15,6 +15,7 @@ class GDI{
 	  this.LIGHT_BLUE = 'rgb(0, 255, 255)';
 	  this.LIGHT_GREY = 'rgb(200, 200, 200)';
 	  this.LIGHT_PINK = 'rgb(255, 230, 230)';
+	  this.TRANSPARENT = 'rgba(0, 0, 0, 0)';
 	}
 	setCanvas(wrapper, width, height){
 		this.canvas = document.createElement('canvas');
@@ -24,6 +25,7 @@ class GDI{
 		wrapper.appendChild(this.canvas);
 	}
 	transparentText(){}
+	// pen
 	normalPen(){ this.ctx.lineWidth = 2; }
 	thickPen(){ this.ctx.lineWidth = 1; }
 	blackPen(){ this.ctx.strokeStyle = this.BLACK; this.normalPen(); }
@@ -41,7 +43,12 @@ class GDI{
 	lightBluePen(){ this.ctx.strokeStyle = this.LIGHT_BLUE; this.normalPen(); }
 	lightGreyPen(){ this.ctx.strokeStyle = this.LIGHT_GREY; this.normalPen(); }
 	lightPinkPen(){ this.ctx.strokeStyle = this.LIGHT_PINK; this.normalPen(); }
-	hollowBrush(){}
+	// brush
+	brownBrush(){ this.ctx.fillStyle = this.BROWN; }
+	darkGreenBrush(){ this.ctx.fillStyle = this.DARK_GREEN; }
+	whiteBrush(){ this.ctx.fillStyle = this.WHITE; }
+	blackBrush(){ this.ctx.fillStyle = this.BLACK; }
+	hollowBrush(){ this.ctx.fillStyle = this.TRANSPARENT; }
 	thickRedPen(){
 		this.redPen();
 		this.thickPen();
@@ -57,6 +64,7 @@ class GDI{
 		this.ctx.beginPath();
 		this.ctx.arc(pos.x, pos.y, r, 0, 2 * Math.PI);
 		this.ctx.stroke();
+		this.ctx.fill();
 	}
 	line(startPos, endPos){
 		this.ctx.beginPath();
@@ -65,10 +73,23 @@ class GDI{
 		this.ctx.stroke();
 	}
 	closedShape(posList){
+		this.ctx.beginPath();
 		for(let i = 0; i < posList.length - 1; i++){
-			this.line(posList[i], posList[i + 1]);
+			this.ctx.moveTo(posList[i].x, posList[i].y);
+			this.ctx.lineTo(posList[i + 1].x, posList[i + 1].y);
 		}
-		this.line(posList[posList.length - 1], posList[0]);
+		this.ctx.moveTo(posList[posList.length - 1].x, posList[posList.length - 1].y);
+		this.ctx.lineTo(posList[0].x, posList[0].y);
+		this.ctx.stroke();
+		this.ctx.fill();
+	}
+	rect(x1, y1, x2, y2){
+		let startX = Math.min(x1, x2);
+		let startY = Math.min(y1, y2);
+		this.ctx.beginPath();
+		this.ctx.rect(startX, startY, Math.abs(x1 - x2), Math.abs(y1 - y2));
+		this.ctx.stroke();
+		this.ctx.fill();
 	}
 	clear(){
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

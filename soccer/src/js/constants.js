@@ -1,7 +1,9 @@
-const constWindowWidth = 500;
-const constWindowHeight = 500;
+const WindowWidth = 700;
+const WindowHeight = 400;
+const TeamSize = 5;
 
 export {
-	constWindowWidth,
-	constWindowHeight
+	WindowWidth,
+	WindowHeight,
+	TeamSize
 }

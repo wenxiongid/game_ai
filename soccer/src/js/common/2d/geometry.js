@@ -28,7 +28,7 @@ function whereIsPoint(point, pointOnPlane, planeNormal){
 		case d < -0.000001:
 			return 'PLANE_FRONT';
 		case d > 0.000001:
-			return 'PLANE_BACKIDE';
+			return 'PLANE_BACKSIDE';
 		default:
 			return 'ON_PLANE';
 	}
@@ -53,7 +53,7 @@ function doRayCircleIntersect(rayOrigin, rayHeading, circleOrigin, radius){
 function getTangentPoints(circleOrigin, radius, point, T1, T2){
 	let toCircle = circleOrigin.add(point.getReverse());
 	let lengthSq = toCircle.lengthSq();
-	let rSq = r * r;
+	let rSq = radius * radius;
 	if(lengthSq <= rSq){
 		return false;
 	}

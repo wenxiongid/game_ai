@@ -11,7 +11,8 @@ import {
 import {
 	MaxFloat,
 	randInRange,
-	randInt
+	randInt,
+	randFloat
 } from './common/misc/utils';
 import SupportSpotCalculator from './support_spot_calculator';
 import PRM from './params';
@@ -24,12 +25,29 @@ import {
 import dispatcher from './common/messaging/message_dispatcher';
 import MessageType from './soccer_messages';
 import {
+	PLAYERROLE
+} from './player_base';
+import {
 	GlobalKeeperState,
 	TendGoal,
 	InterceptBall,
 	ReturnHome,
 	PutBallBackInPlay
 } from './goalkeeper_state';
+import {
+	GlobalPlayerState,
+	ChaseBall,
+	Dribble,
+	ReturnToHomeRegion,
+	Wait,
+	KickBall,
+	ReceiveBall,
+	SupportAttacker
+} from './field_player_state';
+import GoalKeeper from './goal_keeper';
+import FieldPlayer from './field_player';
+import entityMgr from './common/game/entity_manager';
+import gdi from './common/misc/cgdi';
 
 const TEAM_COLOR = {
 	blue: 'BLUE',
@@ -38,6 +56,7 @@ const TEAM_COLOR = {
 
 class SoccerTeam{
 	constructor(homeGoal, opponentsGoal, pitch, color) {
+		this.m_Players = [];
 		this.m_Color = color;
 		this.m_pPitch = pitch;
 		this.m_pOpponentsGoal = opponentsGoal;
@@ -74,8 +93,116 @@ class SoccerTeam{
 			));
 			this.m_Players.push(new FieldPlayer(this,
 				6,
-				Wait
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.attacker
 			));
+			this.m_Players.push(new FieldPlayer(this,
+				8,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.attacker
+			));
+			this.m_Players.push(new FieldPlayer(this,
+				3,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.defender
+			));
+			this.m_Players.push(new FieldPlayer(this,
+				5,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.defender
+			));
+		}else{
+			this.m_Players.push(new GoalKeeper(this,
+				16,
+				TendGoal,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale
+			));
+			this.m_Players.push(new FieldPlayer(this,
+				9,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.attacker
+			));
+			this.m_Players.push(new FieldPlayer(this,
+				11,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.attacker
+			));
+			this.m_Players.push(new FieldPlayer(this,
+				12,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.defender
+			));
+			this.m_Players.push(new FieldPlayer(this,
+				14,
+				Wait,
+				new Vector2D(0, 1),
+				new Vector2D(0, 0),
+				PRM.PlayerMass,
+				PRM.PlayerMaxForce,
+				PRM.PlayerMaxSpeedWithoutBall,
+				PRM.PlayerMaxTurnRate,
+				PRM.PlayerScale,
+				PLAYERROLE.defender
+			));
+		}
+		for(let i = 0; i < this.m_Players.length; i++){
+			let it = this.m_Players[i];
+			entityMgr.registerEntity(it);
 		}
 	}
 	calculateClosestPlayerToBall(){
@@ -110,17 +237,17 @@ class SoccerTeam{
 			this.m_pSupportSpotCalc.render();
 		}
 	}
-	update(){
+	update(timeElapsed){
 		this.calculateClosestPlayerToBall();
 		this.m_pStateMachine.update();
 		for(let i = 0; i < this.m_Players.length; i++){
-			this.m_Players[i].update();
+			this.m_Players[i].update(timeElapsed);
 		}
 	}
 	returnAllFieldPlayersToHome(){
 		for(let i = 0; i < this.m_Players.length; i++){
 			let it = this.m_Players[i];
-			if(it.role() != PLAYERBASE.goalKeeper){
+			if(it.role() != PLAYERROLE.goalKeeper){
 				dispatcher.dispatchMessage(0, 1, it.id(), MessageType.Msg_GoHome, null);
 			}
 		}
@@ -135,12 +262,18 @@ class SoccerTeam{
 			shotTarget.y = randInt(minYVal, maxYVal);
 			let time = this.pitch().ball().timeToCoverDistance(ballPos, shotTarget, power);
 			if(time >= 0){
-				if(isPassSafeFromAllOpponents(ballPos, shotTarget, null, power)){
-					return true;
+				if(this.isPassSafeFromAllOpponents(ballPos, shotTarget, null, power)){
+					return {
+						result: true,
+						target: shotTarget
+					};
 				}
 			}
 		}
-		return false;
+		return {
+			result: false,
+			target: shotTarget
+		};
 	}
 	findPass(passer, power, minPassingDistance){
 		let receiver = null;
@@ -152,6 +285,7 @@ class SoccerTeam{
 			if(curPlayer != passer && vec2DDistanceSq(passer.pos(), curPlayer.pos()) > minPassingDistance * minPassingDistance){
 				let passInfo = this.getBestPassToReceiver(passer, curPlayer, power);
 				if(passInfo.result){
+					target = passInfo.passTarget;
 					let dist2Goal = Math.abs(target.x - this.opponentsGoal().center().x);
 					if(dist2Goal < closestToGoalSoFar){
 						closestToGoalSoFar = dist2Goal;
@@ -233,14 +367,29 @@ class SoccerTeam{
 		}
 		return true;
 	}
-	isOpponentWithinRadius(pos, rad){}
-	requestPass(requester){}
+	isOpponentWithinRadius(pos, rad){
+		for(let i = 0; i < this.members().length; i++){
+			let it = this.members()[i];
+			if(vec2DDistanceSq(pos, it.pos()) < rad * rad){
+				return true;
+			}
+		}
+		return false;
+	}
+	requestPass(requester){
+		if(randFloat() > 0.1){
+			return;
+		}
+		if(this.isPassSafeFromAllOpponents(this.controllingPlayer().pos(), requester.pos(), requester, PRM.MaxPassingForce)){
+			dispatcher.dispatchMessage(0, requester.id(), this.controllingPlayer().id(), MessageType.Msg_PassToMe, requester);
+		}
+	}
 	determineBestSupportingAttacker(){
 		let closestSoFar = MaxFloat;
 		let bestPlayer = null;
 		for(let i = 0; i < this.m_Players.length; i++){
 			let it = this.m_Players[i];
-			if(it.role() == PLAYERBASE.attacker && it != this.m_pControllingPlayer){
+			if(it.role() == PLAYERROLE.attacker && it != this.m_pControllingPlayer){
 				let dist = vec2DDistanceSq(it.pos(), this.m_pSupportSpotCalc.getBestSupportingSpot());
 				if(dist < closestSoFar){
 					closestSoFar = dist;
@@ -315,13 +464,42 @@ class SoccerTeam{
 	lostControl(){
 		this.m_pControllingPlayer = null;
 	}
-	getPlayerFromID(id){}
-	setPlayerHomeRegion(player, region){}
+	getPlayerFromID(id){
+		for(let i = 0; i < this.m_Players.length; i++){
+			let it = this.m_Players[i];
+			if(it.id() == id){
+				return it;
+			}
+		}
+		return null;
+	}
+	setPlayerHomeRegion(player, region){
+		if(player >= 0 && player < this.m_Players.length){
+			this.m_Players[player].setHomeRegion(region);
+		}
+	}
 	determineBestSupportingPosition(){
 		this.m_pSupportSpotCalc.determineBestSupportingPosition();
 	}
-	updateTargetsOfWaitingPlayers(){}
-	allPlayersAtHome(){}
+	updateTargetsOfWaitingPlayers(){
+		for(let i = 0; i < this.m_Players.length; i++){
+			let it = this.m_Players[i];
+			if(it.role() != PLAYERROLE.goalKeeper){
+				if(it.getFSM().isInstate(Wait) || it.getFSM().isInstate(ReturnToHomeRegion)){
+					it.steering().setTarget(it.homeRegion().center());
+				}
+			}
+		}
+	}
+	allPlayersAtHome(){
+		for(let i = 0; i < this.m_Players.length; i++){
+			let it = this.m_Players[i];
+			if(!it.inHomeRegion()){
+				return false;
+			}
+		}
+		return true;
+	}
 	name(){
 		if(this.m_Color == TEAM_COLOR.blue){
 			return 'Blue';

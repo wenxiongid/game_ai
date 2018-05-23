@@ -1,22 +1,20 @@
 import gdi from './common/misc/cgdi';
-import GameWorld from './game_world';
+import {
+	WindowWidth,
+	WindowHeight,
+	TeamSize
+} from './constants';
+import SoccerPitch from './soccer_pitch';
 
-const WIDTH = 600;
-const HEIGHT = 600;
-
-gdi.setCanvas(document.getElementById('canvasWrapper'), WIDTH, HEIGHT);
-let g_GameWorld = new GameWorld(WIDTH, HEIGHT);
-
-document.addEventListener('keydown', function(e){
-	g_GameWorld.handleKeyPresses(e.key);
-});
+gdi.setCanvas(document.getElementById('canvasWrapper'), WindowWidth, WindowHeight);
+let g_SoccerPitch = new SoccerPitch(WindowWidth, WindowHeight);
 
 let lastTime = (new Date()).getTime();
 function render(){
 	let currentTime = (new Date()).getTime();
 	gdi.clear();
-	g_GameWorld.update((currentTime - lastTime) / 1000);
-	g_GameWorld.render();
+	g_SoccerPitch.update((currentTime - lastTime) / 500);
+	g_SoccerPitch.render();
 	requestAnimationFrame(render);
 	lastTime = currentTime;
 }

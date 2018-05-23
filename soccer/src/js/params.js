@@ -94,7 +94,7 @@ const PRM = {
   KeeperInBallRangeSq: KeeperInBallRange * KeeperInBallRange,
   PlayerInTargetRangeSq: PlayerInTargetRange * PlayerInTargetRange,
   PlayerKickingDistance: PlayerKickingDistance + BallSize,
-  PlayerKickingDistanceSq: (PlayerKickingDistance + BallSize) * (PlayerKickingDistance + BallSize);
+  PlayerKickingDistanceSq: (PlayerKickingDistance + BallSize) * (PlayerKickingDistance + BallSize),
   PlayerComfortZoneSq: PlayerComfortZone * PlayerComfortZone,
   GoalKeeperInterceptRangeSq: GoalKeeperInterceptRange * GoalKeeperInterceptRange,
   WithinRangeOfSupportSpotSq: WithinRangeOfSupportSpot * WithinRangeOfSupportSpot

@@ -11,7 +11,8 @@ class Goal{
 		this.m_iNumGoalsScored = 0;
 	}
 	scored(ball){
-		if(lineIntersection2D(ball.pos(), ball.oldPos(), this.m_vLeftPost, this.m_vRightPost)){
+		let scoreInfo = lineIntersection2D(ball.pos(), ball.oldPos(), this.m_vLeftPost, this.m_vRightPost);
+		if(scoreInfo.result){
 			++this.m_iNumGoalsScored;
 			return true;
 		}

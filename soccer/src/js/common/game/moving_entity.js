@@ -1,6 +1,9 @@
-import BaseGameEntity from '../../base_game_entity';
+import BaseGameEntity from '../game/base_game_entity';
 import C2DMatrix from '../2d/c2dmatrix';
 import Vector2D from '../2d/vector2d';
+import {
+  clamp
+} from '../misc/utils';
 
 class MovingEntity extends BaseGameEntity {
   constructor(
@@ -65,8 +68,9 @@ class MovingEntity extends BaseGameEntity {
     this.m_vSide = this.m_vHeading.perp();
   }
   rotateHeadingToFacePosition(target){
+    let heading = this.m_vHeading.clone();
     let toTarget = (new Vector2D(target.x - this.m_vPos.x, target.y - this.m_vPos.y)).normalize();
-    let angle = Math.acos(this.m_vHeading.dot(toTarget));
+    let angle = Math.acos(clamp(this.m_vHeading.dot(toTarget), -1, 1));
     let rotationMatrix = new C2DMatrix();
     if(angle < 0.00001){
       return true;
@@ -78,6 +82,9 @@ class MovingEntity extends BaseGameEntity {
     rotationMatrix.transformVector2D(this.m_vHeading);
     rotationMatrix.transformVector2D(this.m_vVelocity);
     this.m_vSide = this.m_vHeading.perp();
+    if((this.m_vHeading.x == 0 && this.m_vHeading.y == 0) || isNaN(this.m_vHeading.x)){
+      console.log(toTarget, heading, angle);
+    }
     return false;
   }
   maxTurnRate(){

@@ -1,5 +1,5 @@
-import ENTITYTYPE from './common/game/entity_type';
-import Vector2D from './common/2d/vector2d';
+import ENTITYTYPE from './entity_type';
+import Vector2D from '../2d/vector2d';
 
 let nextID = 0;
 function nextValidID(){
@@ -10,7 +10,7 @@ export default class BaseGameEntity{
   constructor(entityType, pos, r, forceID){
     this.m_ID = forceID || nextValidID();
     this.m_dBoundingRadius = r || 0.0;
-    this.m_vPosition = pos || new Vector2D(0, 0);
+    this.m_vPos = pos || new Vector2D(0, 0);
     this.m_vScale = new Vector2D(1.0, 1.0);
     this.m_EntityType = entityType || ENTITYTYPE.default;
     this.m_bTag = false;
@@ -23,10 +23,10 @@ export default class BaseGameEntity{
   write(){}
   read(){}
   pos(){
-    return this.m_vPosition;
+    return this.m_vPos;
   }
   setPos(newPos){
-    this.m_vPosition = newPos;
+    this.m_vPos = newPos;
   }
   bRadius(){
     return this.m_dBoundingRadius;

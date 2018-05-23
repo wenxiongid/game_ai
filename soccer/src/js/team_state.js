@@ -63,7 +63,7 @@ const PrepareForKickOff = {
 		team.returnAllFieldPlayersToHome();
 	},
 	execute: function(team){
-		if(team.allPlayersAtHome() && team.opponents.allPlayersAtHome()){
+		if(team.allPlayersAtHome() && team.opponents().allPlayersAtHome()){
 			team.getFSM().changeState(Defending);
 		}
 	},

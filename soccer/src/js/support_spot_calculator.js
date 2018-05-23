@@ -3,6 +3,8 @@ import Vector2D, {
 	vec2DDistance
 } from './common/2d/vector2d';
 import gdi from './common/misc/cgdi';
+import Regulator from './common/time/regulator';
+import PRM from './params';
 
 class SupportSpot{
 	constructor(pos, value) {
@@ -54,7 +56,7 @@ class SupportSpotCalculator{
 		for(let i = 0; i < this.m_Spots.length; i++){
 			let curSpot = this.m_Spots[i];
 			curSpot.m_dScore = 1;
-			if(this.m_pTeam.isPassSafeFromAllOpponents(this.m_pTeam.controllingPlayer.pos(), curSpot.m_vPos, null, PRM.MaxPassingForce)){
+			if(this.m_pTeam.isPassSafeFromAllOpponents(this.m_pTeam.controllingPlayer().pos(), curSpot.m_vPos, null, PRM.MaxPassingForce)){
 				curSpot.m_dScore += PRM.Spot_CanPassScore;
 			}
 			if(this.m_pTeam.canShoot(curSpot.m_vPos, PRM.MaxShootingForce)){

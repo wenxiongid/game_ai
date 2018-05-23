@@ -14,6 +14,9 @@ class StateMachine{
   setPreviousState(state){
     this.m_pPreviousState = state;
   }
+  currentState(){
+    return this.m_pCurrentState;
+  }
   update(){
     if(this.m_pGlobalState){
       this.m_pGlobalState.execute(this.m_pOwner);
@@ -39,6 +42,15 @@ class StateMachine{
       return true;
     }
     return false;
+  }
+  isInstate(state){
+    if(this.m_pCurrentState == state){
+      return true;
+    }
+    return false;
+  }
+  getNameOfCurrentState(){
+    return this.m_pCurrentState.name;
   }
 }
 
