@@ -254,6 +254,7 @@ class SteeringBehavior{
 	separation(){
 		let steeringForce = new Vector2D();
 		let allPlayers = AutoList.getAllMembers();
+		this.findNeighbours();
 		for(let i = 0; i < allPlayers.length; i++){
 			let curPlayer = allPlayers[i];
 			if(curPlayer != this.m_pPlayer && curPlayer.steering().tagged()){

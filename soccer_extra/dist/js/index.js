@@ -1466,7 +1466,7 @@
 		//1=ON; 0=OFF,
 		ViewStates: 1,
 		ViewIDs: 1,
-		bSupportSpots: 1,
+		bSupportSpots: 0,
 		ViewRegions: 0,
 		bShowControllingTeam: 1,
 		ViewTargets: 0,
@@ -2236,7 +2236,8 @@
 			value: function findPass(passer, power, minPassingDistance) {
 				var receiver = null;
 				var result = false;
-				var closestToGoalSoFar = _utils.MaxFloat;
+				var bestReceiverPoint = 0;
+				var distPasserToGoalNormalize = Math.abs(passer.pos().x - this.opponentsGoal().center().x) / this.pitch().playingArea().width();
 				var target = null;
 				for (var i = 0; i < this.members().length; i++) {
 					var curPlayer = this.members()[i];
@@ -2244,9 +2245,12 @@
 						var passInfo = this.getBestPassToReceiver(passer, curPlayer, power);
 						if (passInfo.result) {
 							target = passInfo.passTarget;
+							var targetSafePoint = this.getPosSafePoint(target);
 							var dist2Goal = Math.abs(target.x - this.opponentsGoal().center().x);
-							if (dist2Goal < closestToGoalSoFar) {
-								closestToGoalSoFar = dist2Goal;
+							// let curPoint = targetSafePoint * distPasserToGoalNormalize + dist2Goal * (1 - distPasserToGoalNormalize);
+							var curPoint = targetSafePoint;
+							if (curPoint > bestReceiverPoint) {
+								bestReceiverPoint = curPoint;
 								receiver = curPlayer;
 								target = passInfo.passTarget;
 								result = true;
@@ -2259,6 +2263,16 @@
 					target: target,
 					receiver: receiver
 				};
+			}
+		}, {
+			key: 'getPosSafePoint',
+			value: function getPosSafePoint(pos) {
+				var opponentMemberList = this.opponents().members();
+				var safePoint = 0;
+				for (var i = 0; i < opponentMemberList.length; i++) {
+					safePoint += 1 / (0, _vector2d.vec2DDistanceSq)(pos, opponentMemberList[i].pos());
+				}
+				return safePoint;
 			}
 		}, {
 			key: 'getBestPassToReceiver',
@@ -3707,6 +3721,7 @@
 			value: function separation() {
 				var steeringForce = new _vector2d2.default();
 				var allPlayers = _autolist2.default.getAllMembers();
+				this.findNeighbours();
 				for (var i = 0; i < allPlayers.length; i++) {
 					var curPlayer = allPlayers[i];
 					if (curPlayer != this.m_pPlayer && curPlayer.steering().tagged()) {

@@ -3691,6 +3691,7 @@
 			value: function separation() {
 				var steeringForce = new _vector2d2.default();
 				var allPlayers = _autolist2.default.getAllMembers();
+				this.findNeighbours();
 				for (var i = 0; i < allPlayers.length; i++) {
 					var curPlayer = allPlayers[i];
 					if (curPlayer != this.m_pPlayer && curPlayer.steering().tagged()) {

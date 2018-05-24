@@ -1,5 +1,6 @@
 import Vector2D, {
 	vec2DDistanceSq,
+	vec2DDistance,
 	vec2dNormalize
 } from './common/2d/vector2d';
 import StateMachine from './common/fsm/state_machine';
@@ -278,7 +279,8 @@ class SoccerTeam{
 	findPass(passer, power, minPassingDistance){
 		let receiver = null;
 		let result = false;
-		let closestToGoalSoFar = MaxFloat;
+		let bestReceiverPoint = 0;
+		let distPasserToGoalNormalize = Math.abs(passer.pos().x - this.opponentsGoal().center().x) / this.pitch().playingArea().width();
 		let target = null;
 		for(let i = 0; i < this.members().length; i++){
 			let curPlayer = this.members()[i];
@@ -286,9 +288,12 @@ class SoccerTeam{
 				let passInfo = this.getBestPassToReceiver(passer, curPlayer, power);
 				if(passInfo.result){
 					target = passInfo.passTarget;
+					let targetSafePoint = this.getPosSafePoint(target);
 					let dist2Goal = Math.abs(target.x - this.opponentsGoal().center().x);
-					if(dist2Goal < closestToGoalSoFar){
-						closestToGoalSoFar = dist2Goal;
+					// let curPoint = targetSafePoint * distPasserToGoalNormalize + dist2Goal * (1 - distPasserToGoalNormalize);
+					let curPoint = targetSafePoint;
+					if(curPoint > bestReceiverPoint){
+						bestReceiverPoint = curPoint;
 						receiver = curPlayer;
 						target = passInfo.passTarget;
 						result = true;
@@ -301,6 +306,14 @@ class SoccerTeam{
 			target,
 			receiver
 		};
+	}
+	getPosSafePoint(pos){
+		let opponentMemberList = this.opponents().members();
+		let safePoint = 0;
+		for(let i = 0; i < opponentMemberList.length; i++){
+			safePoint += 1 / vec2DDistanceSq(pos, opponentMemberList[i].pos());
+		}
+		return safePoint;
 	}
 	getBestPassToReceiver(passer, receiver, power){
 		let time = this.pitch().ball().timeToCoverDistance(this.pitch().ball().pos(), receiver.pos(), power);

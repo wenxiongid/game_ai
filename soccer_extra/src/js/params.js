@@ -76,7 +76,7 @@ const PRM = {
 	//1=ON; 0=OFF,
 	ViewStates:                          1,
 	ViewIDs:                             1,
-	bSupportSpots:                    1,
+	bSupportSpots:                    0,
 	ViewRegions:                         0,
 	bShowControllingTeam:                1,
 	ViewTargets:                         0,
