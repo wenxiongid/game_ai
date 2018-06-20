@@ -6,4 +6,4 @@ export {
 	WindowWidth,
 	WindowHeight,
 	TeamSize
-}
+};

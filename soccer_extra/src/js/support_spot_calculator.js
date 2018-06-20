@@ -43,7 +43,7 @@ class SupportSpotCalculator{
 			gdi.circle(this.m_Spots[spt].m_vPos, this.m_Spots[spt].m_dScore);
 		}
 		if(this.m_pBestSupportingSpot){
-			gdi.greenPen();
+			gdi.redPen();
 			gdi.circle(this.m_pBestSupportingSpot.m_vPos, this.m_pBestSupportingSpot.m_dScore);
 		}
 	}

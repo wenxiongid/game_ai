@@ -1466,7 +1466,7 @@
 		//1=ON; 0=OFF,
 		ViewStates: 1,
 		ViewIDs: 1,
-		bSupportSpots: 0,
+		bSupportSpots: 1,
 		ViewRegions: 0,
 		bShowControllingTeam: 1,
 		ViewTargets: 0,
@@ -2814,7 +2814,7 @@
 					_cgdi2.default.circle(this.m_Spots[spt].m_vPos, this.m_Spots[spt].m_dScore);
 				}
 				if (this.m_pBestSupportingSpot) {
-					_cgdi2.default.greenPen();
+					_cgdi2.default.redPen();
 					_cgdi2.default.circle(this.m_pBestSupportingSpot.m_vPos, this.m_pBestSupportingSpot.m_dScore);
 				}
 			}
