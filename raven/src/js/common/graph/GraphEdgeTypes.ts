@@ -60,8 +60,8 @@ export default class NavGraphEdge extends GraphEdge {
   setFlags(flags: number) {
     this.m_iFlags = flags
   }
-  iDofIntersectingEntity() {
-    return this.iDofIntersectingEntity
+  iDofIntersectingEntity(): number {
+    return this.m_iIDofIntersectingEntity
   }
   setIDofIntersectingEntity(id: number) {
     this.m_iIDofIntersectingEntity = id

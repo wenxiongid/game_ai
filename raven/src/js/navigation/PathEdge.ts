@@ -17,5 +17,4 @@ export default class PathEdge {
   setSource(newSrc: IVector2D) { this.m_vSource = newSrc }
   doorID() { return this.m_iDoorID }
   behavior() { return this.m_iBehavior }
-  
 }

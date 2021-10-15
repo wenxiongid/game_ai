@@ -1,6 +1,7 @@
+import SparseGraph from '../common/graph/SparseGraph'
 import IRaven_Map from './index.d'
 
-export default class Raven_Map implements IRaven_Map {
+export default class Raven_Map extends SparseGraph {
   getTriggers() {
     return this.m_TriggerSystem.getTriggers()
   }

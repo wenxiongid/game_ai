@@ -1,7 +1,7 @@
 import IRaven_PathPlanner from './Raven_PathPlanner.d'
 import IVector2D from "../common/2D/Vector2D/index.d";
 import IRaven_Bot from "../Raven_Bot/index.d";
-import IRaven_Map from "../Raven_Map/index.d";
+import Raven_Map from "../Raven_Map";
 import PathEdge from './PathEdge';
 import { NavEdgeType } from '../common/graph/GraphEdgeTypes';
 import { IGraph_SearchTimeSliced, SearchResult, SearchType } from './TimeSlicedGraphAlgorithms.d';
@@ -9,6 +9,7 @@ import Dispatcher from '../common/messaging/message_dispatcher'
 import message_type from '../Raven_Messages';
 import { isEqual, MaxFloat } from '../common/misc/utils';
 import { vec2DDistance, vec2DDistanceSq } from '../common/2D/Vector2D';
+import { Graph_SearchAStar_Ts, Graph_SearchDijkstra_TS } from './TimeSlicedGraphAlgorithms';
 
 enum SMOOTH_METHODS {
   quick,
@@ -19,7 +20,7 @@ let USING_SMOOTH_METHOD = SMOOTH_METHODS.quick
 
 export default class Raven_PathPlanner implements IRaven_PathPlanner {
   m_pOwner: IRaven_Bot
-  m_NavGraph: IRaven_Map
+  m_NavGraph: Raven_Map
   // 指向当前路径搜索
   m_pCurrentSearch: IGraph_SearchTimeSliced | null
   m_vDestinationPos: IVector2D
@@ -101,8 +102,7 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
       console.warn('no closest node to bot found')
       return false
     }
-    // TODO: DijSearch?
-    this.m_pCurrentSearch = new DijSearch(this.m_NavGraph, closestNodeToBot, itemType)
+    this.m_pCurrentSearch = new Graph_SearchDijkstra_TS(this.m_NavGraph, closestNodeToBot, itemType)
     this.m_pOwner.getWorld().getPathManager().register(this)
     return true
   }
@@ -121,8 +121,7 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
       return false
     }
     console.log(`closest node to target is ${closestNodeToTarget}`)
-    // TODO: AStar?
-    this.m_pCurrentSearch = new AStar(this.m_NavGraph, closestNodeToBot, closestNodeToTarget)
+    this.m_pCurrentSearch = new Graph_SearchAStar_Ts(this.m_NavGraph, closestNodeToBot, closestNodeToTarget)
     this.m_pOwner.getWorld().getPathManager().register(this)
     return true
   }

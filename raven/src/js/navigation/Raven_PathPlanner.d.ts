@@ -1,12 +1,12 @@
 import IVector2D from "../common/2D/Vector2D/index.d";
 import IRaven_Bot from "../Raven_Bot/index.d";
-import IRaven_Map from "../Raven_Map/index.d";
+import Raven_Map from "../Raven_Map";
 import PathEdge from "./PathEdge";
 import { IGraph_SearchTimeSliced } from "./TimeSlicedGraphAlgorithms.d";
 
 export default interface IRaven_PathPlanner {
   m_pOwner: IRaven_Bot
-  m_NavGraph: IRaven_Map
+  m_NavGraph: Raven_Map
   // 指向当前路径搜索
   m_pCurrentSearch: IGraph_SearchTimeSliced | null
   m_vDestinationPos: IVector2D

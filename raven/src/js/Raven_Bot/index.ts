@@ -5,6 +5,7 @@ import { IRaven_SensoryMemory } from "../Raven_SensoryMemory.d";
 import IRaven_TargetingSystem from "../Raven_TargetingSystem.d";
 import IRaven_WeaponSystem from "../Raven_WeaponSystem.d";
 import MovingEntity from "../common/game/moving_entity";
+import IRaven_PathPlanner from '../navigation/Raven_PathPlanner.d'
 import IRaven_Bot, { BotStatus } from "./index.d";
 
 export default class Raven_Bot extends MovingEntity implements IRaven_Bot {
@@ -13,7 +14,7 @@ export default class Raven_Bot extends MovingEntity implements IRaven_Bot {
   m_pBrain
   m_pSensoryMem: IRaven_SensoryMemory
   m_pSteering
-  m_pPathPlanner
+  m_pPathPlanner: IRaven_PathPlanner
   m_pTargSys: IRaven_TargetingSystem
   m_pWeaponSys: IRaven_WeaponSystem
   m_pWeaponSelectionRegulator: Regulator

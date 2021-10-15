@@ -1,3 +1,4 @@
+import { GraphEdge } from "../common/graph/GraphEdgeTypes";
 import PathEdge from "./PathEdge";
 
 export enum SearchType {
@@ -8,7 +9,7 @@ export enum SearchType {
 export enum SearchResult {
   target_found,
   target_not_found,
-  search_imcomplete
+  search_incomplete
 }
 
 export interface IGraph_SearchTimeSliced {
@@ -16,7 +17,7 @@ export interface IGraph_SearchTimeSliced {
   // 执行一次搜索
   cycleOnce(): SearchResult
   // 返回算法已经检查的边向量
-  getSPT()
+  getSPT():GraphEdge []
   getCostToTarget(): number
   getPathToTarget(): number[]
   getPathAsPathEdges (): PathEdge[]

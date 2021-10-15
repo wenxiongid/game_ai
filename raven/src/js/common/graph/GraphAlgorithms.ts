@@ -23,8 +23,8 @@ export class Graph_SearchDFS {
     this.m_iTarget = target
     this.m_bFound = false
     for (let i = 0; i < graph.numNodes(); i++) {
-      this.m_visited[i] = DFS_STATUS.unvisited
-      this.m_Route[i] = DFS_STATUS.no_parent_assigned
+      this.m_visited[i] = SEARCH_STATUS.unvisited
+      this.m_Route[i] = SEARCH_STATUS.no_parent_assigned
     }
     this.m_bFound = this.search()
   }
@@ -167,7 +167,7 @@ export class Graph_SearchDijkstra {
     const pq: number[] = []
     pq.push(this.m_iSource)
     while(pq.length > 0) {
-      const nextClosestNode = pq.unshift()
+      const nextClosestNode = pq.shift()
       this.m_ShortestPathTree[nextClosestNode] = this.m_SearchFrontier[nextClosestNode]
       if(nextClosestNode === this.m_iTarget) return
 
@@ -197,7 +197,7 @@ export class Graph_SearchDijkstra {
     path.unshift(nd)
     while(
       nd != this.m_iSource &&
-      !this.m_ShortestPathTree[nd]
+      this.m_ShortestPathTree[nd]
     ) {
       nd = this.m_ShortestPathTree[nd].from()
       path.unshift(nd)
@@ -244,7 +244,7 @@ export class Graph_SearchAStar {
     const pq:number[] = []
     pq.push(this.m_iSource)
     while(pq.length > 0) {
-      const nextClosestNode = pq.unshift()
+      const nextClosestNode = pq.shift()
       this.m_ShortestPathTree[nextClosestNode] = this.m_SearchFrontier[nextClosestNode]
       if(nextClosestNode === this.m_iTarget) return
       const edges = this.m_Graph.getEdgeFrom(nextClosestNode)
@@ -279,7 +279,7 @@ export class Graph_SearchAStar {
     path.unshift(nd)
     while(
       nd != this.m_iSource &&
-      !this.m_ShortestPathTree[nd]
+      this.m_ShortestPathTree[nd]
     ) {
       nd = this.m_ShortestPathTree[nd].from()
       path.unshift(nd)
