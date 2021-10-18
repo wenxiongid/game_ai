@@ -1,3 +1,5 @@
+import Vector2D, { vec2dNormalize } from "../2D/Vector2D";
+
 class GDI{
 	constructor() {
 		this.RED = 'rgb(255,0,0)';
@@ -44,7 +46,10 @@ class GDI{
 	lightGreyPen(){ this.ctx.strokeStyle = this.LIGHT_GREY; this.normalPen(); }
 	lightPinkPen(){ this.ctx.strokeStyle = this.LIGHT_PINK; this.normalPen(); }
 	// brush
+	redBrush(){ this.ctx.fillStyle = this.RED; }
 	blueBrush(){ this.ctx.fillStyle = this.BLUE; }
+	yellowBrush(){ this.ctx.fillStyle = this.YELLOW; }
+	greenBrush(){ this.ctx.fillStyle = this.GREEN; }
 	brownBrush(){ this.ctx.fillStyle = this.BROWN; }
 	darkGreenBrush(){ this.ctx.fillStyle = this.DARK_GREEN; }
 	whiteBrush(){ this.ctx.fillStyle = this.WHITE; }
@@ -76,6 +81,21 @@ class GDI{
 		this.ctx.moveTo(startPos.x, startPos.y);
 		this.ctx.lineTo(endPos.x, endPos.y);
 		this.ctx.stroke();
+	}
+	lineWithArrow(from, to, size) {
+		const norm = vec2dNormalize(new Vector2D(to.x - from.x, to.y - from.y))
+		const crossingPoint = to.add(norm.crossNum(size).getReverse())
+		const arrowPoint1 = crossingPoint.add(norm.perp().crossNum(0.4 * size))
+		const arrowPoint2 = crossingPoint.add(norm.perp().crossNum(0.4 * size).getReverse())
+		this.ctx.beginPath();
+		this.ctx.moveTo(from.x, from.y)
+		this.ctx.lineTo(crossingPoint.x, crossingPoint.y)
+		this.ctx.lineTo(arrowPoint1.x, arrowPoint1.y)
+		this.ctx.lineTo(to.x, to.y)
+		this.ctx.lineTo(arrowPoint2.x, arrowPoint2.y)
+		this.ctx.lineTo(crossingPoint.x, crossingPoint.y)
+		this.ctx.stroke();
+		this.ctx.fill();
 	}
 	closedShape(posList){
 		this.ctx.beginPath();

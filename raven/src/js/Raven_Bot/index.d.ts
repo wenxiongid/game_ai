@@ -1,6 +1,7 @@
 import IVector2D from "../common/2D/Vector2D/index.d";
 import IMovingEntity from "../common/game/moving_entity.d";
 import Regulator from "../common/time/regulator";
+import IRaven_PathPlanner from "../navigation/Raven_PathPlanner.d";
 import IRaven_Game from "../raven_game.d";
 import { IRaven_SensoryMemory } from "../Raven_SensoryMemory.d";
 import IRaven_TargetingSystem from "../Raven_TargetingSystem.d";
@@ -18,7 +19,7 @@ export default interface IRaven_Bot extends IMovingEntity {
   m_pBrain
   m_pSensoryMem: IRaven_SensoryMemory
   m_pSteering
-  m_pPathPlanner
+  m_pPathPlanner: IRaven_PathPlanner
   m_pTargSys: IRaven_TargetingSystem
   m_pWeaponSys: IRaven_WeaponSystem
   m_pWeaponSelectionRegulator: Regulator
@@ -86,7 +87,7 @@ export default interface IRaven_Bot extends IMovingEntity {
 
   getWorld(): IRaven_Game
   getSteering()
-  getPathPlanner()
+  getPathPlanner(): IRaven_PathPlanner
   getBrain()
   getTargetSys(): IRaven_TargetingSystem
   getTargetBot(): IRaven_Bot

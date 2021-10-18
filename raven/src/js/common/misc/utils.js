@@ -40,6 +40,10 @@ function randInt(x, y){
 	}
 }
 
+function randBool() {
+	return Math.random() > 0.5
+}
+
 export {
 	clamp,
 	randomClamped,
@@ -48,5 +52,6 @@ export {
 	randFloat,
 	isEqual,
 	randInRange,
-	randInt
+	randInt,
+	randBool
 }
