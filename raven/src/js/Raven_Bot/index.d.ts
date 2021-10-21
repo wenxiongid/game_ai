@@ -5,6 +5,7 @@ import Goal_Think from "../goals/Goal_Think";
 import IRaven_PathPlanner from "../navigation/Raven_PathPlanner.d";
 import IRaven_Game from "../raven_game.d";
 import { IRaven_SensoryMemory } from "../Raven_SensoryMemory.d";
+import Raven_Steering from "../Raven_SteeringBehaviors";
 import IRaven_TargetingSystem from "../Raven_TargetingSystem.d";
 import IRaven_WeaponSystem from "../Raven_WeaponSystem.d";
 
@@ -19,7 +20,7 @@ export default interface IRaven_Bot extends IMovingEntity {
   m_pWorld: IRaven_Game
   m_pBrain: Goal_Think
   m_pSensoryMem: IRaven_SensoryMemory
-  m_pSteering: 
+  m_pSteering: Raven_Steering
   m_pPathPlanner: IRaven_PathPlanner
   m_pTargSys: IRaven_TargetingSystem
   m_pWeaponSys: IRaven_WeaponSystem
@@ -87,7 +88,7 @@ export default interface IRaven_Bot extends IMovingEntity {
   canStepBackward(posOfStep: IVector2D): boolean
 
   getWorld(): IRaven_Game
-  getSteering()
+  getSteering(): Raven_Steering
   getPathPlanner(): IRaven_PathPlanner
   getBrain(): Goal_Think
   getTargetSys(): IRaven_TargetingSystem

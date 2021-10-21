@@ -3,7 +3,7 @@ import { GOAL_STATUS } from "../common/goals/goal";
 import Goal_Composite, { IGoal_Composite } from "../common/goals/goal_composite";
 import ITelegram from "../common/messaging/telegram.d";
 import gdi from "../common/misc/cgdi";
-import IRaven_Bot from "../Raven_Bot";
+import IRaven_Bot from "../Raven_Bot/index.d";
 import message_type from "../Raven_Messages";
 import { Goal_FollowPath } from "./Goal_FollowPath";
 import Goal_SeekToPosition from "./Goal_SeekToPosition";

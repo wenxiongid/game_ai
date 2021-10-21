@@ -47,6 +47,7 @@ class GDI{
 	lightPinkPen(){ this.ctx.strokeStyle = this.LIGHT_PINK; this.normalPen(); }
 	// brush
 	redBrush(){ this.ctx.fillStyle = this.RED; }
+	greyBrush(){ this.ctx.fillStyle = this.GREY; }
 	blueBrush(){ this.ctx.fillStyle = this.BLUE; }
 	yellowBrush(){ this.ctx.fillStyle = this.YELLOW; }
 	greenBrush(){ this.ctx.fillStyle = this.GREEN; }
@@ -55,6 +56,10 @@ class GDI{
 	whiteBrush(){ this.ctx.fillStyle = this.WHITE; }
 	blackBrush(){ this.ctx.fillStyle = this.BLACK; }
 	hollowBrush(){ this.ctx.fillStyle = this.TRANSPARENT; }
+	thickBlackPen(){
+		this.blackPen();
+		this.thickPen();
+	}
 	thickRedPen(){
 		this.redPen();
 		this.thickPen();

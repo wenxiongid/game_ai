@@ -1,4 +1,4 @@
-import IVector2D from "../common/2D/Vector2D/index.d";
+import Vector2D from "../common/2D/Vector2D";
 import Goal, { GOAL_STATUS, IGoal } from "../common/goals/goal";
 import gdi from "../common/misc/cgdi";
 import { randBool } from "../common/misc/utils";
@@ -6,7 +6,7 @@ import IRaven_Bot from "../Raven_Bot/index.d";
 import { GOAL_TYPES } from "./Raven_Goal_Types";
 
 export default class Goal_DodgeSideToSide extends Goal implements IGoal {
-  private m_vStrafeTarget: IVector2D
+  private m_vStrafeTarget: Vector2D
   private m_bClockwise: boolean
   constructor(pBot: IRaven_Bot) {
     super(pBot, GOAL_TYPES.goal_strafe)

@@ -19,6 +19,9 @@ const rip = [
 
 export default class Trigger_WeaponGiver extends Trigger_Respawning {
   numRocketVerts = 8
+  constructor(type: TYPE, pos: Vector2D) {
+    super(type, pos, 0)
+  }
   try(bot: IRaven_Bot) {
     if(this.isActive() && this.isTouchingTrigger(bot.pos(), bot.bRadius())) {
       bot.getWeaponSys().addWeapon(this.entityType())

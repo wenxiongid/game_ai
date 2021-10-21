@@ -1,3 +1,4 @@
+import Vector2D from "../common/2D/Vector2D";
 import Goal, { GOAL_STATUS, IGoal } from "../common/goals/goal";
 import { NavEdgeType } from "../common/graph/GraphEdgeTypes";
 import gdi from "../common/misc/cgdi";
@@ -42,7 +43,7 @@ export default class Goal_TraverseEdge extends Goal implements IGoal {
 
     const steering = bot.getSteering()
 
-    steering.setTarget(this.m_Edge.destination())
+    steering.setTarget(this.m_Edge.destination() as Vector2D)
 
     if(this.m_bLastEdgeInPath) {
       steering.arriveOn()

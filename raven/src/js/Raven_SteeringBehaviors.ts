@@ -1,5 +1,9 @@
+import { lineIntersection2D } from "./common/2D/geometry"
+import { pointToWorldSpace, vec2dRotateAroundOrigin } from "./common/2D/transformation"
 import Vector2D, { vec2dNormalize } from "./common/2D/Vector2D"
-import { randFloat } from "./common/misc/utils"
+import IVector2D from "./common/2D/Vector2D/index.d"
+import Wall2D from "./common/2D/Wall2D"
+import { MaxFloat, randFloat, randomClamped } from "./common/misc/utils"
 import { ArriveWeight, SeekWeight, SeparationWeight, ViewDistance, WallAvoidanceWeight, WallDetectionFeelerLength, WanderWeight } from "./config"
 import IRaven_Bot from "./Raven_Bot/index.d"
 import Raven_Game from "./raven_game"
@@ -40,7 +44,7 @@ export default class Raven_Steering {
 
   private m_vTarget: Vector2D
 
-  private m_Feelers: Vector2D[]
+  private m_Feelers: IVector2D[]
   private m_dWallDetectionFeelerLength: number
 
   private m_vWanderTarget: Vector2D
@@ -77,7 +81,21 @@ export default class Raven_Steering {
     }
     return true
   }
-  private createFeelers() {}
+  private createFeelers() {
+    // 前方
+    this.m_Feelers[0] = this.m_pRaven_Bot.pos()
+      .add(this.m_pRaven_Bot.heading().crossNum(this.m_dWallDetectionFeelerLength * this.m_pRaven_Bot.speed()))
+
+    // 左前
+    let temp = this.m_pRaven_Bot.heading()
+    vec2dRotateAroundOrigin(temp, Math.PI / 4 * 7)
+    this.m_Feelers[1] = this.m_pRaven_Bot.pos().add(temp.crossNum(this.m_dWallDetectionFeelerLength / 2))
+
+    // 右前
+    temp = this.m_pRaven_Bot.heading()
+    vec2dRotateAroundOrigin(temp, Math.PI / 4)
+    this.m_Feelers[2] = this.m_pRaven_Bot.pos().add(temp.crossNum(this.m_dWallDetectionFeelerLength / 2))
+  }
 
   /* .......................................................
 
@@ -85,11 +103,79 @@ export default class Raven_Steering {
 
   .......................................................*/
 
-  private seek(target: Vector2D):Vector2D {}
-  private arrive(target: Vector2D, decelertion: Deceleration): Vector2D {}
-  private wander(): Vector2D {}
-  private wallAvoidance(walls): Vector2D {}
-  private Separation(agents: IRaven_Bot[]): Vector2D {}
+  private seek(target: Vector2D):Vector2D {
+    const desiredVelocity = vec2dNormalize(target.add(this.m_pRaven_Bot.pos().getReverse()))
+      .crossNum(this.m_pRaven_Bot.maxSpeed())
+    return desiredVelocity.add(this.m_pRaven_Bot.velocity().getReverse())
+  }
+  private arrive(target: Vector2D, decelertion: Deceleration): Vector2D {
+    const toTarget = target.add(this.m_pRaven_Bot.pos())
+    const dist = toTarget.length()
+    if(dist > 0) {
+      const decelerationTweaker = 0.3
+      let speed = dist / ((decelertion as number) * decelerationTweaker)
+      speed = Math.min(speed, this.m_pRaven_Bot.maxSpeed())
+      const desiredVelocity = toTarget.crossNum(speed / dist)
+      return desiredVelocity.add(this.m_pRaven_Bot.velocity().getReverse())
+    }
+    return new Vector2D(0, 0)
+  }
+  private wander(): Vector2D {
+    this.m_vWanderTarget = this.m_vWanderTarget
+      .add((new Vector2D(
+        randomClamped() * this.m_dWanderJitter,
+        randomClamped() * this.m_dWanderJitter
+      )).getReverse())
+    this.m_vWanderTarget.normalize()
+    this.m_vWanderTarget = this.m_vWanderTarget.crossNum(this.m_dWanderRadius)
+    const target = this.m_vWanderTarget.add(new Vector2D(this.m_dWanderDistance, 0))
+    const worldTarget = pointToWorldSpace(
+      target,
+      this.m_pRaven_Bot.heading(),
+      this.m_pRaven_Bot.side(),
+      this.m_pRaven_Bot.pos()
+    )
+    return worldTarget.add(this.m_pRaven_Bot.pos())
+  }
+  private wallAvoidance(walls: Wall2D[]): Vector2D {
+    this.createFeelers()
+    let distToThisIP = 0.0
+    let distToClosestIP = MaxFloat
+    let closestWall = -1
+    let steeringForce: Vector2D, closestPoint: Vector2D
+    for (const flr of this.m_Feelers) {
+      for (let w = 0; w < walls.length; w++) {
+        const intersection = lineIntersection2D(
+          this.m_pRaven_Bot.pos() as Vector2D,
+          flr as Vector2D,
+          walls[w].from(),
+          walls[w].to(),
+        )
+        if(intersection.result) {
+          if(distToThisIP < distToClosestIP) {
+            distToClosestIP = distToThisIP
+            closestWall = w
+            closestPoint = intersection.point
+          }
+        }
+      }
+      if(closestWall >= 0) {
+        const overShoot = flr.add(closestPoint.getReverse())
+        steeringForce = walls[closestWall].normal().crossNum(overShoot.length())
+      }
+    }
+    return steeringForce
+  }
+  private separation(agents: IRaven_Bot[]): Vector2D {
+    let steeringForce = new Vector2D(0, 0)
+    for (const it of agents) {
+      if(it.id() !== this.m_pRaven_Bot.id() && it.isTagged() && it.id() !== this.m_pTargetAgent1.id()) {
+        const toAgent = this.m_pRaven_Bot.pos().add(it.pos().getReverse())
+        steeringForce = steeringForce.add(vec2dNormalize(toAgent).crossNum(1 / toAgent.length()))
+      }
+    }
+    return steeringForce
+  }
 
   /* .......................................................
 
@@ -97,7 +183,31 @@ export default class Raven_Steering {
 
   .......................................................*/
 
-  private calculatePrioritized(): Vector2D {}
+  private calculatePrioritized(): Vector2D {
+    let force: Vector2D
+    if(this.on(behavior_type.wall_avoidance)) {
+      force = this.wallAvoidance(this.m_pWorld.getMap().getWalls()).crossNum(this.m_dWeightWallAvoidance)
+      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+    }
+    if(this.on(behavior_type.separation)) {
+      force = this.separation(this.m_pWorld.getAllBots()).crossNum(this.m_dWeightSeparation)
+      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+    }
+    if(this.on(behavior_type.seek)) {
+      force = this.seek(this.m_vTarget).crossNum(this.m_dWeightSeek)
+      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+    }
+    if(this.on(behavior_type.arrive)) {
+      force = this.arrive(this.m_vTarget, this.m_Deceleration).crossNum(this.m_dWeightArrive)
+      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+    }
+    if(this.on(behavior_type.wander)) {
+      force = this.wander().crossNum(this.m_dWeightWander)
+      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+    }
+
+    return this.m_vSteeringForce
+  }
   constructor(world: Raven_Game, agent: IRaven_Bot) {
     this.m_pWorld = world
     this.m_pRaven_Bot = agent

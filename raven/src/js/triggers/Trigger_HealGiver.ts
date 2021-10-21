@@ -1,18 +1,19 @@
 import Vector2D from "../common/2D/Vector2D";
 import gdi from "../common/misc/cgdi";
 import IRaven_Bot from "../Raven_Bot/index.d";
+import TYPE from "../raven_objectEnumerations";
 import Trigger_Respawning from "./Trigger_Respawning";
 
 export default class Trigger_HealthGiver extends Trigger_Respawning {
   m_iHealthGiven: number
+  constructor(pos: Vector2D) {
+    super(TYPE.type_health, pos, 0)
+  }
   try(bot: IRaven_Bot) {
-    if(this.isActive() && this.isTouchingTrigger(bot.pos(), bot.bRadius)) {
+    if(this.isActive() && this.isTouchingTrigger(bot.pos(), bot.bRadius())) {
       bot.increaseHealth(this.m_iHealthGiven)
       this.deactivate()
     }
-  }
-  read() {
-    // TODO
   }
   render() {
     if(this.isActive()) {

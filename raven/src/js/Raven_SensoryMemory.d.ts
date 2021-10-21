@@ -23,6 +23,7 @@ export interface IRaven_SensoryMemory {
   // 角色的记忆时长
   m_dMemorySpan: number
   makeNewRecordIfNotAlreadyPresent(bot: IRaven_Bot): void
+  removeBotFromMemory(bot: IRaven_Bot): void
   // 当一个对手发出声音时，更新记忆图
   updateWithSoundSource(pNoiseMaker: IRaven_Bot): void
   // 遍历所有对手，更新在视野内的记录

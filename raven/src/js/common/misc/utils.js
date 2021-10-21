@@ -44,6 +44,10 @@ function randBool() {
 	return Math.random() > 0.5
 }
 
+function degsToRads(degs) {
+	return degs / 180 * Math.PI
+}
+
 export {
 	clamp,
 	randomClamped,
@@ -53,5 +57,6 @@ export {
 	isEqual,
 	randInRange,
 	randInt,
-	randBool
+	randBool,
+	degsToRads
 }

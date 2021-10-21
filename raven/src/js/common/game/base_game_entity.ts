@@ -31,33 +31,15 @@ export default class BaseGameEntity implements IBaseGameEntity{
   }
   write(){}
   read(){}
-  pos(){
-    return this.m_vPos;
-  }
-  setPos(newPos: IVector2D){
-    this.m_vPos = newPos;
-  }
-  bRadius(){
-    return this.m_dBoundingRadius;
-  }
-  setBRadius(r: number){
-    this.m_dBoundingRadius = r;
-  }
-  id(){
-    return this.m_ID;
-  }
-  isTagged(){
-    return this.m_bTag;
-  }
-  tag(){
-    this.m_bTag = true;
-  }
-  unTag(){
-    this.m_bTag = false;
-  }
-  scale(){
-    return this.m_vScale;
-  }
+  pos(){ return this.m_vPos; }
+  setPos(newPos: IVector2D){ this.m_vPos = newPos; }
+  bRadius(){ return this.m_dBoundingRadius; }
+  setBRadius(r: number){ this.m_dBoundingRadius = r; }
+  id(){ return this.m_ID; }
+  isTagged(){ return this.m_bTag; }
+  tag(){ this.m_bTag = true; }
+  unTag(){ this.m_bTag = false; }
+  scale(){ return this.m_vScale; }
   setScale(vec: IVector2D){
     if(typeof vec == 'number'){
       this.m_dBoundingRadius *= vec / Math.max(this.m_vScale.x, this.m_vScale.y);
@@ -67,10 +49,6 @@ export default class BaseGameEntity implements IBaseGameEntity{
       this.m_vScale = vec;
     }
   }
-  entityType(){
-    return this.m_EntityType;
-  }
-  setEntityType(newType: number){
-    this.m_EntityType = newType;
-  }
+  entityType(){ return this.m_EntityType; }
+  setEntityType(newType: number){ this.m_EntityType = newType; }
 }

@@ -9,7 +9,7 @@ export default interface IVector2D {
   add(vec: IVector2D): IVector2D
   crossNum(val: number): IVector2D
   dot(vec: IVector2D): number
-  sign(vec: IVector2D): number
+  sign(vec: IVector2D): -1 | 1
   perp(): IVector2D
   distance(vec: IVector2D): number
   distanceSq(vec: IVector2D): number

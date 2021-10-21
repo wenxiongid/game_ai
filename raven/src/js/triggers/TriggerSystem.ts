@@ -15,6 +15,7 @@ export default class TriggerSystem {
       }
     }
   }
+  getTriggers() { return this.m_Triggers }
   tryTriggers(bots: IRaven_Bot[]) {
     for (const bot of bots) {
       if(bot.isReadyForTriggerUpdate() && bot.isAlive()) {
