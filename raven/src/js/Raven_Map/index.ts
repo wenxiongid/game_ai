@@ -28,6 +28,9 @@ export default class Raven_Map implements IRaven_Map {
   m_dCellSpaceNeighborhoodRange: number
   m_iSizeX: number
   m_iSizeY: number
+  loadMap() {
+    return true
+  }
   partitionNavGraph(): void {
     this.m_pSpacePartition = new CellSpacePartition(
       this.m_iSizeX,

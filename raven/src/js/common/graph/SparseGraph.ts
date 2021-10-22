@@ -1,22 +1,6 @@
 import { GraphEdge } from "./GraphEdgeTypes";
 import GraphNode from "./GraphNodeTypes";
-
-type TCheckFunc = (item: any) => boolean
-
-function deleteItemFromArray(r: any[], check: TCheckFunc) {
-  let hasDeleted = false
-  for (let i = 0; i < r.length; i++) {
-    const item = r[i]
-    if(check(item)) {
-      r.splice(item)
-      hasDeleted = true
-      break
-    }
-  }
-  if(hasDeleted) {
-    deleteItemFromArray(r, check)
-  }
-}
+import { deleteItemFromArray } from '../misc/utils'
 
 export default class SparseGraph {
   m_Nodes: GraphNode[]
@@ -41,7 +25,7 @@ export default class SparseGraph {
   }
   // 遍历所有边，删除指向不合法node的边
   cullInvalidEdges(): void {
-    const check: TCheckFunc = (edge: GraphEdge) => {
+    const check = (edge: GraphEdge) => {
       return edge.from() === -1 || edge.to() === -1
     }
 

@@ -1,4 +1,4 @@
-import IVector2D from './index.d'
+import IVector2D, { IPoint } from './index.d'
 
 const CLOCKWISE = 1;
 const ANTICLOCKWISE = -1;
@@ -118,4 +118,8 @@ export function insideRegion(p: IVector2D, topLeft: IVector2D, bottomRight: IVec
 export function isSecondInFOVOfFirst(posFirst: IVector2D, facingFirst: IVector2D, posSecond: IVector2D, fov: number): boolean {
 	const toTarget: IVector2D = vec2dNormalize(new Vector2D(posSecond.x - posFirst.x, posSecond.y - posFirst.y))
 	return facingFirst.dot(toTarget) >= Math.cos(fov / 2)
+}
+
+export function pointToVector2D(p: IPoint) {
+	return new Vector2D(p.x, p.y)
 }

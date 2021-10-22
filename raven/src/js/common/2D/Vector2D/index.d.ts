@@ -1,3 +1,8 @@
+export interface IPoint {
+  x: number
+  y: number
+}
+
 export default interface IVector2D {
   x: number
   y: number

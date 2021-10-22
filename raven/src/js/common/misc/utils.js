@@ -1,5 +1,20 @@
 const MaxFloat = 999999;
 
+function deleteItemFromArray(r, check) {
+  let hasDeleted = false
+  for (let i = 0; i < r.length; i++) {
+    const item = r[i]
+    if(check(item)) {
+      r.splice(item)
+      hasDeleted = true
+      break
+    }
+  }
+  if(hasDeleted) {
+    deleteItemFromArray(r, check)
+  }
+}
+
 function clamp(arg, minVal, maxVal){
 	let ret = arg;
 	if(ret < minVal){
@@ -58,5 +73,6 @@ export {
 	randInRange,
 	randInt,
 	randBool,
-	degsToRads
+	degsToRads,
+	deleteItemFromArray
 }

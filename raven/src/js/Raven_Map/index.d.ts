@@ -22,6 +22,7 @@ export default interface IRaven_Map {
   m_iSizeY: number
   partitionNavGraph(): void
   m_PathCosts: number[][]
+  loadMap(): boolean
   addWallFromFile(): void
   addSpawnPoint(pos: Vector2D): void
   addHealth_Giver(pos: Vector2D): void
@@ -38,4 +39,9 @@ export default interface IRaven_Map {
   getTriggers(): ITrigger[]
   getCellSpaceNeighborhoodRange(): number
   getCellSpace(): CellSpacePartition 
+  getWalls(): Wall2D[]
+  getDoors(): Raven_Door[]
+  getSpawnPoints(): Vector2D[]
+  getCellSpace(): CellSpacePartition
+  getRandomSpawnPoint(): Vector2D 
 }

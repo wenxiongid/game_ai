@@ -55,6 +55,7 @@ class GDI{
 	darkGreenBrush(){ this.ctx.fillStyle = this.DARK_GREEN; }
 	whiteBrush(){ this.ctx.fillStyle = this.WHITE; }
 	blackBrush(){ this.ctx.fillStyle = this.BLACK; }
+	orangeBrush(){ this.ctx.fillStyle = this.ORANGE; }
 	hollowBrush(){ this.ctx.fillStyle = this.TRANSPARENT; }
 	thickBlackPen(){
 		this.blackPen();
@@ -66,6 +67,10 @@ class GDI{
 	}
 	thickBluePen(){
 		this.bluePen();
+		this.thickPen();
+	}
+	thickGreenPen(){
+		this.greenPen();
 		this.thickPen();
 	}
 	textColor(color){

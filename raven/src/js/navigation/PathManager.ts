@@ -1,5 +1,5 @@
 import Raven_PathPlanner from "./Raven_PathPlanner";
-import { SearchResult } from "./TimeSlicedGraphAlgorithms";
+import { SearchResult } from "./TimeSlicedGraphAlgorithms.d";
 
 export default class PathManager {
   // 所有活跃搜索请求的列表
