@@ -276,7 +276,7 @@ export default class Raven_Game implements IRaven_Game {
   isLOSOkay(A: IVector2D, B: IVector2D): boolean {
     return !doWallsObstructLineSegment(A, B, this.m_pMap.getWalls())
   }
-  getDistanceToClosestWall(origin: IVector2D, heading: IVector2D): number {}
+  getDistanceToClosestWall(origin: IVector2D, heading: IVector2D): number { return 0 }
   // 返回开doorId门的最近开关位置
   getPostOfClosestSwitch(botPos: IVector2D, doorId: number): IVector2D {
     let switchIDs: number[] = []
