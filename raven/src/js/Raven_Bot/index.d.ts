@@ -35,6 +35,7 @@ export default interface IRaven_Bot extends IMovingEntity {
   m_vFacing: IVector2D
   m_dFieldOfView: number
   m_iNumUpdatesHitPersistant: number
+  m_bHit: boolean
   m_bPossessed: boolean
   m_vecBotVB: IVector2D[]
   m_vecBotVBTrans: IVector2D[]

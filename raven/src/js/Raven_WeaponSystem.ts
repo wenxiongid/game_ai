@@ -7,6 +7,10 @@ import { vec2DDistance } from './common/2D/Vector2D';
 import { vec2dRotateAroundOrigin } from './common/2D/transformation';
 import { randInRange } from './common/misc/utils';
 import gdi from './common/misc/cgdi';
+import Blaster from './armory/Weapon_Blaster';
+import RailGun from './armory/Weapon_RailGun';
+import ShotGun from './armory/Weapon_ShotGun';
+import RocketLauncher from './armory/Weapon_RocketLauncher';
 
 export default class Raven_WeaponSystem implements IRaven_WeaponSystem {
   m_pOwner: IRaven_Bot

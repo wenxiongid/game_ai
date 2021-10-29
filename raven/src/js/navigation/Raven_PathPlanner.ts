@@ -1,7 +1,6 @@
 import IRaven_PathPlanner from './Raven_PathPlanner.d'
 import IVector2D from "../common/2D/Vector2D/index.d";
 import IRaven_Bot from "../Raven_Bot/index.d";
-import Raven_Map from "../Raven_Map";
 import PathEdge from './PathEdge';
 import { NavEdgeType } from '../common/graph/GraphEdgeTypes';
 import { IGraph_SearchTimeSliced, SearchResult, SearchType } from './TimeSlicedGraphAlgorithms.d';
@@ -10,6 +9,7 @@ import message_type from '../Raven_Messages';
 import { isEqual, MaxFloat } from '../common/misc/utils';
 import { vec2DDistance, vec2DDistanceSq } from '../common/2D/Vector2D';
 import { Graph_SearchAStar_Ts, Graph_SearchDijkstra_TS } from './TimeSlicedGraphAlgorithms';
+import SparseGraph from '../common/graph/SparseGraph';
 
 enum SMOOTH_METHODS {
   quick,
@@ -20,29 +20,27 @@ let USING_SMOOTH_METHOD = SMOOTH_METHODS.quick
 
 export default class Raven_PathPlanner implements IRaven_PathPlanner {
   m_pOwner: IRaven_Bot
-  m_NavGraph: Raven_Map
+  m_NavGraph: SparseGraph
   // 指向当前路径搜索
   m_pCurrentSearch: IGraph_SearchTimeSliced | null
   m_vDestinationPos: IVector2D
   getClosestNodeToPosition(pos: IVector2D): number {
     let closestSoFar = MaxFloat
-    let closeestNode = -1
+    let closestNode = -1
     const map = this.m_pOwner.getWorld().getMap()
     const range = map.getCellSpaceNeighborhoodRange()
-    // TODO: cellSpace ?
     const cellSpace = map.getCellSpace()
     cellSpace.calculateNeighbors(pos, range)
-    for (let i = 0; i < cellSpace.length; i++) {
-      const pN = cellSpace[i];
+    for (let pN = cellSpace.begin(); !cellSpace.end(); pN = cellSpace.next()) {
       if(this.m_pOwner.canWalkBetween(pos, pN.pos())) {
         const dist = vec2DDistanceSq(pos, pN.pos())
         if(dist < closestSoFar) {
           closestSoFar = dist
-          closeestNode = pN.index()
+          closestNode = cellSpace.m_curNeighborIndex
         }
       }
     }
-    return closeestNode
+    return closestNode
   }
   smoothPathEdgesQuick(path: (PathEdge | null)[]): void {
     if(path && path.length > 1) {
@@ -94,6 +92,8 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
   }
   constructor(bot: IRaven_Bot) {
     this.m_pOwner = bot
+    this.m_NavGraph = this.m_pOwner.getWorld().getMap().getNavGraph()
+    this.m_pCurrentSearch = null
   }
   requestPathToItem(itemType: number): boolean {
     this.getReadyForNewSearch()

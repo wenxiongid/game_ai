@@ -1,7 +1,6 @@
 import IRaven_Bot from "../Raven_Bot/index.d";
 import IVector2D from "../common/2D/Vector2D/index.d";
 import ITrigger from "../triggers/Trigger.d";
-import GraphNode from "../common/graph/GraphNodeTypes";
 import Wall2D from "../common/2D/Wall2D";
 import TriggerSystem from "../triggers/TriggerSystem";
 import Raven_Door from "../Raven_Door";
@@ -36,6 +35,7 @@ export default interface IRaven_Map {
   calculateCostToTravelBetweenNodes(nd1: number, nd2: number): number
   getRandomNodeLocation(): IVector2D
   updateTriggerSystem(bots: IRaven_Bot[]): void
+  getNavGraph(): SparseGraph
   getTriggers(): ITrigger[]
   getCellSpaceNeighborhoodRange(): number
   getCellSpace(): CellSpacePartition 

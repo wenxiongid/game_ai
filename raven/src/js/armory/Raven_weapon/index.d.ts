@@ -1,10 +1,11 @@
-import IRaven_Bot from "../../Raven_Bot";
+import Raven_Bot from "../../Raven_Bot";
 import IVector2D from "../../common/2D/Vector2D/index.d";
+import FuzzyModule from "../../common/fuzzy/FuzzyModule";
 
 export default interface IRaven_Weapon {
-  m_pOwner: IRaven_Bot
+  m_pOwner: Raven_Bot
   m_iType: number
-  m_FuzzyModule
+  m_FuzzyModule: FuzzyModule
   m_iNumRoundsLeft: number
   m_iMaxRoundsCarries: number
   m_dRateOfFire: number
@@ -15,17 +16,8 @@ export default interface IRaven_Weapon {
   isReadyForNextShot(): boolean
   updateTimeWeaponIsNextAvailable(): void
   initFuzzyModule(): void
-  m_vecWeaponVB: IVector2D
-  m_vecWeaponVBTrans: IVector2D
-  constructor(
-    typeOfGun: number,
-    defaultNumRound: number,
-    maxRoundsCarried: number,
-    rateOfFire: number,
-    idealRange: number,
-    projectileSpeed: number,
-    ownerOfGun: IRaven_Bot
-    ): void
+  m_vecWeaponVB: IVector2D[]
+  m_vecWeaponVBTrans: IVector2D[]
   aimAt(target: IVector2D): boolean
   shootAt(pos: IVector2D): void
   render(): void
