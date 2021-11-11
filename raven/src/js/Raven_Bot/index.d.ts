@@ -8,12 +8,7 @@ import { IRaven_SensoryMemory } from "../Raven_SensoryMemory.d";
 import Raven_Steering from "../Raven_SteeringBehaviors";
 import IRaven_TargetingSystem from "../Raven_TargetingSystem.d";
 import IRaven_WeaponSystem from "../Raven_WeaponSystem.d";
-
-export enum BotStatus {
-  alive,
-  dead,
-  spawning
-}
+import { BotStatus } from ".";
 
 export default interface IRaven_Bot extends IMovingEntity {
   m_Status: BotStatus

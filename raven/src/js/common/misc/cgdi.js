@@ -118,6 +118,14 @@ class GDI{
 		this.ctx.stroke();
 		this.ctx.fill();
 	}
+	polyLine(points) {
+		if(points.length < 2) return
+		this.ctx.moveTo(points[0].x, points[0].y)
+		for (let i = 1; i < points.length; i++) {
+			const p = points[i];
+			this.ctx.lineTo(p.x, p.y)
+		}
+	}
 	rect(x1, y1, x2, y2){
 		let startX = Math.min(x1, x2);
 		let startY = Math.min(y1, y2);

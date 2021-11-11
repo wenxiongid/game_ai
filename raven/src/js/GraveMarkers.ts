@@ -14,9 +14,9 @@ class GraveRecord {
 
 export default class GraveMarkers {
   m_dLifeTime: number
-  m_vecRIPVB: Vector2D[]
-  m_vecRIPVBTrans: Vector2D[]
-  m_GraveList: GraveRecord[]
+  m_vecRIPVB: Vector2D[] = []
+  m_vecRIPVBTrans: Vector2D[] = []
+  m_GraveList: GraveRecord[] = []
   constructor(lifetime: number) {
     this.m_dLifeTime = lifetime
     this.m_vecRIPVB = [

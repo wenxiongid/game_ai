@@ -1,10 +1,20 @@
 import SparseGraph from "../common/graph/SparseGraph";
-import { IGraph_SearchTimeSliced, SearchResult } from "./TimeSlicedGraphAlgorithms.d";
+import { IGraph_SearchTimeSliced } from "./TimeSlicedGraphAlgorithms.d";
 import NavGraphEdge, { GraphEdge } from "../common/graph/GraphEdgeTypes"
-import { SearchType } from './TimeSlicedGraphAlgorithms.d'
 import PathEdge from "./PathEdge";
 import { heuristic_Euclid_calculate } from "../common/graph/AStarHeuristicPolicies"
 import { CHECK_TYPE, isSatisfied } from "./SearchTerminaltionPolicies";
+
+export enum SearchType {
+  AStar,
+  Dijkstra
+}
+
+export enum SearchResult {
+  target_found,
+  target_not_found,
+  search_incomplete
+}
 
 export class Graph_SearchAStar_Ts implements IGraph_SearchTimeSliced {
   m_SearchType: SearchType

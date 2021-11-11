@@ -124,6 +124,7 @@ export default class Raven_SensoryMemory implements IRaven_SensoryMemory {
     console.error('attempting to get position of unrecorded bot')
   }
   getTimeOpponentHasBeenVisible(pOpponent: IRaven_Bot): number {
+    if(!pOpponent) return 0
     const id = pOpponent.id()
     const record = this.m_MemoryMap[id]
     if(record) {
@@ -133,6 +134,7 @@ export default class Raven_SensoryMemory implements IRaven_SensoryMemory {
     return 0
   }
   getTimeSinceLastSensed(pOpponent: IRaven_Bot): number {
+    if(!pOpponent) return MaxFloat
     const id = pOpponent.id()
     const record = this.m_MemoryMap[id]
     if(record) {
@@ -142,6 +144,7 @@ export default class Raven_SensoryMemory implements IRaven_SensoryMemory {
     return MaxFloat
   }
   getTimeOpponentHasBeenOutOfView(pOpponent: IRaven_Bot): number{
+    if(!pOpponent) return MaxFloat
     const id = pOpponent.id()
     const record = this.m_MemoryMap[id]
     if(record) {

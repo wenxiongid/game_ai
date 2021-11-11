@@ -1,5 +1,5 @@
 import BaseGameEntity from './base_game_entity';
-import C2DMatrix from '../2d/c2dmatrix';
+import C2DMatrix from '../2D/c2dmatrix';
 import Vector2D from '../2D/Vector2D';
 import {
   clamp

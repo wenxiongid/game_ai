@@ -6,7 +6,7 @@ import IRaven_TargetingSystem from "../Raven_TargetingSystem.d";
 import IRaven_WeaponSystem from "../Raven_WeaponSystem.d";
 import MovingEntity from "../common/game/moving_entity";
 import IRaven_PathPlanner from '../navigation/Raven_PathPlanner.d'
-import IRaven_Bot, { BotStatus } from "./index.d";
+import IRaven_Bot from "./index.d";
 import Goal_Think from "../goals/Goal_Think";
 import Raven_Steering from "../Raven_SteeringBehaviors";
 import Vector2D, { vec2DDistance, vec2DDistanceSq, vec2dNormalize } from "../common/2D/Vector2D";
@@ -25,6 +25,12 @@ import C2DMatrix from "../common/2D/c2dmatrix";
 import gdi from "../common/misc/cgdi";
 import { worldTransform } from "../common/2D/transformation";
 import userOptions from "../Raven_UserOptions";
+
+export enum BotStatus {
+  alive,
+  dead,
+  spawning
+}
 
 export default class Raven_Bot extends MovingEntity implements IRaven_Bot {
   m_Status: BotStatus
@@ -107,6 +113,7 @@ export default class Raven_Bot extends MovingEntity implements IRaven_Bot {
     }
   }
   setUpVertexBuffer(): void {
+    this.m_vecBotVB = []
     const bot = [
       new Vector2D(-3, 8),
       new Vector2D(3, 10),

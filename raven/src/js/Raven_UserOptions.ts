@@ -14,20 +14,20 @@ class Raven_UserOptions {
   m_bShowBotHealth: boolean;
   m_bShowScore: boolean;
   constructor() {
-    this.m_bShowGraph = false
-    this.m_bShowNodeIndices = false
+    this.m_bShowGraph = true
+    this.m_bShowNodeIndices = true
     this.m_bShowPathOfSelectedBot = false
     this.m_bShowTargetOfSelectedBot = false
     this.m_bShowOpponentsSensedBySelectedBot = false
     this.m_bOnlyShowBotsInTargetsFOV = false
-    this.m_bShowGoalsOfSelectedBot = false
-    this.m_bShowGoalAppraisals = false
-    this.m_bShowWeaponAppraisals = false
+    this.m_bShowGoalsOfSelectedBot = true
+    this.m_bShowGoalAppraisals = true
+    this.m_bShowWeaponAppraisals = true
     this.m_bSmoothPathsQuick = false
     this.m_bSmoothPathsPrecise = false
-    this.m_bShowBotIDs = false
-    this.m_bShowBotHealth = false
-    this.m_bShowScore = false
+    this.m_bShowBotIDs = true
+    this.m_bShowBotHealth = true
+    this.m_bShowScore = true
   }
 }
 

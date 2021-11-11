@@ -1,16 +1,7 @@
 import { GraphEdge } from "../common/graph/GraphEdgeTypes";
 import PathEdge from "./PathEdge";
 
-export enum SearchType {
-  AStar,
-  Dijkstra
-}
-
-export enum SearchResult {
-  target_found,
-  target_not_found,
-  search_incomplete
-}
+import { SearchType, SearchResult } from "./TimeSlicedGraphAlgorithms";
 
 export interface IGraph_SearchTimeSliced {
   m_SearchType: SearchType

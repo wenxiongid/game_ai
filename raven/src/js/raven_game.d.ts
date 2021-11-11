@@ -62,5 +62,5 @@ export default interface IRaven_Game {
   getAllBots(): IRaven_Bot[]
   getPathManager(): PathManager
   getNumBost(): number
-  tarRavenBotsWithinViewRange(pRaven_bot: IRaven_Bot, range: number)
+  tagRavenBotsWithinViewRange(pRaven_bot: IRaven_Bot, range: number): void
 }

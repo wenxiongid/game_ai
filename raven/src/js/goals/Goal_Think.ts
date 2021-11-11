@@ -30,24 +30,28 @@ export default class Goal_Think extends Goal_Composite implements IGoal_Composit
     const exploreBias = randInRange(lowRangeOfBias, highRangeOfBias)
     const attackBias = randInRange(lowRangeOfBias, highRangeOfBias)
 
+    this.m_Evaluators = []
     this.m_Evaluators.push(new GetHealthGoal_Evaluator(healthBias))
     this.m_Evaluators.push(new ExploreGoal_Evaluator(exploreBias))
     this.m_Evaluators.push(new AttackTargetGoal_Evaluator(attackBias))
-    this.m_Evaluators.push(new GetWeaponGoal_Evaluator(TYPE.type_shotgun, shotgunBias))
-    this.m_Evaluators.push(new GetWeaponGoal_Evaluator(TYPE.type_rail_gun, railgunBias))
-    this.m_Evaluators.push(new GetWeaponGoal_Evaluator(TYPE.type_rocket_launcher, rocketLauncherBias))
+    // this.m_Evaluators.push(new GetWeaponGoal_Evaluator(TYPE.type_shotgun, shotgunBias))
+    // this.m_Evaluators.push(new GetWeaponGoal_Evaluator(TYPE.type_rail_gun, railgunBias))
+    // this.m_Evaluators.push(new GetWeaponGoal_Evaluator(TYPE.type_rocket_launcher, rocketLauncherBias))
   }
   arbitrate() {
     const bot = this.m_pOwner as IRaven_Bot
     let best = 0
     let mostSesirable: IGoal_Evaluator | null = null
     for (const evaluator of this.m_Evaluators) {
+      // console.log('<Goal_Think>::arbitrate evaluator:', evaluator)
       const desirability = evaluator.calculateDesirability(bot)
+      // console.log('<Goal_Think>::arbitrate desirability', desirability)
       if(desirability >= best) {
         best = desirability
         mostSesirable = evaluator
       }
     }
+    console.log('<Goal_Think>::arbitrate', mostSesirable)
     if(mostSesirable) {
       mostSesirable.setGoal(bot)
     } else {

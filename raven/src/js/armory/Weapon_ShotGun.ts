@@ -101,6 +101,6 @@ export default class ShotGun extends Raven_Weapon implements IRaven_Weapon {
       this.m_pOwner.scale()
     )
     gdi.brownPen()
-    gdi.closedShape(this.m_vecWeaponVBTrans)
+    gdi.polyLine(this.m_vecWeaponVBTrans)
   }
 }

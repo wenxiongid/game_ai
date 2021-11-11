@@ -7,7 +7,7 @@ import Raven_Door from "../Raven_Door";
 import Vector2D from "../common/2D/Vector2D";
 import EntityManager from "../EntityManager";
 import Trigger_OnButtonSendMsg from "../triggers/Trigger_OnButtonSendMsg";
-import TYPE from "../raven_objectEnumerations";
+import TYPE, { getNameOfType } from "../raven_objectEnumerations";
 import Trigger_HealthGiver from "../triggers/Trigger_HealGiver";
 import Trigger_WeaponGiver from "../triggers/Trigger_WeaponGiver";
 import CellSpacePartition from "../common/misc/CellSpacePartition";
@@ -17,18 +17,58 @@ import Trigger_SoundNotify from "../triggers/Trigger_SoundNotify";
 import { randInt } from "../common/misc/utils";
 import Raven_UserOptions from "../Raven_UserOptions";
 import gdi from "../common/misc/cgdi";
+import { trim } from 'lodash'
+
+import MAP_DATA from '../../map.js'
+import { calculateAverageGraphEdgeLength } from "../common/graph/HandyGraphFunctions";
 
 export default class Raven_Map implements IRaven_Map {
-  m_Walls: Wall2D[]
+  m_Walls: Wall2D[] = []
   m_TriggerSystem: TriggerSystem
-  m_SpawnPoints: IVector2D[]
-  m_Doors: Raven_Door[]
+  m_SpawnPoints: IVector2D[] = []
+  m_Doors: Raven_Door[] = []
   m_pNavGraph: SparseGraph
   m_pSpacePartition: CellSpacePartition
   m_dCellSpaceNeighborhoodRange: number
   m_iSizeX: number
   m_iSizeY: number
   loadMap() {
+    this.m_pNavGraph = new SparseGraph(false)
+    this.m_pNavGraph.load(MAP_DATA)
+    console.log('NavGraph loaded')
+    this.m_dCellSpaceNeighborhoodRange = calculateAverageGraphEdgeLength(this.m_pNavGraph) + 1
+    console.log('average edge length is', this.m_dCellSpaceNeighborhoodRange - 1)
+    console.log('neighborhood range set to', this.m_dCellSpaceNeighborhoodRange)
+    this.m_iSizeX = MAP_DATA.width
+    this.m_iSizeY = MAP_DATA.height
+    console.log('partitioning navgraph nodes...')
+    this.partitionNavGraph()
+    console.log('partition navgraph done')
+    console.log('loading map...')
+    for (const entity of MAP_DATA.entitis) {
+      const entityName = getNameOfType(entity.type)
+      console.log(`creating a ${entityName}`)
+      const info = trim(entity.info).split(/ +/)
+      switch(entity.type) {
+        case TYPE.type_wall:
+          this.addWall(new Vector2D(+info[0], +info[1]), new Vector2D(+info[2], +info[3]))
+          break
+        case TYPE.type_sliding_door:
+          this.addDoor(new Vector2D(+info[1], +info[2]), new Vector2D(+info[3], +info[4]), +info[0], [+info[5], +info[6]])
+          break
+        case TYPE.type_door_trigger:
+          this.addDoorTrigger(new Vector2D(+info[3], +info[4]), +info[1], +info[2], +info[5], +info[0])
+          break
+        case TYPE.type_spawn_point:
+          this.addSpawnPoint(new Vector2D(+info[1], +info[2]))
+          break
+        case TYPE.type_health:
+          // this.addHealth_Giver()
+          break
+        case TYPE.type_shotgun:
+          break
+      }
+    }
     return true
   }
   partitionNavGraph(): void {
@@ -43,7 +83,7 @@ export default class Raven_Map implements IRaven_Map {
       this.m_pSpacePartition.addEntity(node)
     }
   }
-  m_PathCosts: number[][]
+  m_PathCosts: number[][] = []
   addWallFromFile(): void {}
   addSpawnPoint(pos: Vector2D): void {
     this.m_SpawnPoints.push(pos)
@@ -62,13 +102,13 @@ export default class Raven_Map implements IRaven_Map {
     node.setExtraInfo(wg)
     EntityManager.registerEntity(wg)
   }
-  addDoor(p1: Vector2D, p2: Vector2D, switches: number[]): void {
-    const pDoor = new Raven_Door(this, p1, p2, switches)
+  addDoor(p1: Vector2D, p2: Vector2D, id?: number, switchesId?: number[]): void {
+    const pDoor = new Raven_Door(this, p1, p2, id, switchesId)
     this.m_Doors.push(pDoor)
     EntityManager.registerEntity(pDoor)
   }
-  addDoorTrigger(pos: Vector2D): void {
-    const tr = new Trigger_OnButtonSendMsg(TYPE.type_door_trigger, pos)
+  addDoorTrigger(pos: Vector2D, receiver: number, messageType: number, radius: number, id?: number): void {
+    const tr = new Trigger_OnButtonSendMsg(TYPE.type_door_trigger, pos, receiver, messageType, radius, id)
     this.m_TriggerSystem.register(tr)
     EntityManager.registerEntity(tr)
   }
@@ -90,10 +130,7 @@ export default class Raven_Map implements IRaven_Map {
     this.m_pSpacePartition = null
     this.m_iSizeX = 0
     this.m_iSizeY = 0
-    this.m_dCellSpaceNeighborhoodRange = 0
-    this.m_pNavGraph = new SparseGraph(false)
-    // TODO: navGraph 初始化
-    this.partitionNavGraph()
+    this.m_TriggerSystem = new TriggerSystem()
   }
   getRandomNodeLocation() {
     const randIndex = randInt(0, this.m_pNavGraph.numActiveNodes() - 1)

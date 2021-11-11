@@ -10,8 +10,10 @@ import Trigger from "./Trigger";
 export default class Trigger_OnButtonSendMsg extends Trigger implements ITrigger {
   m_iReceiver: number
   m_iMessageToSend: number
-  constructor(type: TYPE, pos: Vector2D) {
-    super(type, pos, 0)
+  constructor(type: TYPE, pos: Vector2D, receiver: number, messageType: number, radius?: number, id?: number) {
+    super(type, pos, radius || 5, id || 0)
+    this.m_iReceiver = receiver
+    this.m_iMessageToSend = messageType
   }
   try(pEnt: BaseGameEntity) {
     if(this.isTouchingTrigger(pEnt.pos(), pEnt.bRadius())) {

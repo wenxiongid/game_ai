@@ -165,7 +165,7 @@ export default class Raven_WeaponSystem implements IRaven_WeaponSystem {
         if(weapon) {
           const score = weapon.getLastDesirabilityScore()
           const typeName = getNameOfType(weapon.getType())
-          gdi.textAtPos(p.x + 10, p.y - offset, `${score} ${type}`)
+          gdi.textAtPos(p.x + 10, p.y - offset, `${typeName} ${score}`)
           offset += 15
         }
       }

@@ -11,7 +11,7 @@ type MemberSets = {
 }
 
 export default class FuzzyVariable {
-  private m_MemberSets: MemberSets
+  private m_MemberSets: MemberSets = {}
   private m_dMinRange: number
   private m_dMaxRange: number
   private adjustRangeToFit(min: number, max: number) {

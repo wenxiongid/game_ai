@@ -1,4 +1,4 @@
-import EntityManager from '../game/entity_manager';
+import EntityManager from '../../EntityManager';
 import Telegram from './telegram';
 
 function sortPriorityQ(r1, r2){

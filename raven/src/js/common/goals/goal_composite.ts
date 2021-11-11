@@ -12,7 +12,7 @@ export interface IGoal_Composite extends IGoal {
 }
 
 export default class Goal_Composite extends Goal implements IGoal_Composite {
-  m_subGoals: Goal[]
+  m_subGoals: Goal[] = []
   constructor(pE: BaseGameEntity, type: number) {
     super(pE, type)
   }

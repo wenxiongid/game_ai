@@ -10,7 +10,7 @@ var config = {
     }, {
       test: /\.js$/,
       exclude: /(node_modules|bower_components)/,
-      use: ['babel-loader?presets[]=es2015'],
+      use: 'babel-loader',
     }]
   },
   resolve: {

@@ -5,7 +5,7 @@ export default class GraphNode {
   m_vPosition: IVector2D
   m_ExtraInfo: any
   constructor(idx?: number, pos?: IVector2D, extraInfo?: any) {
-    this.m_iIndex = idx || -1
+    this.m_iIndex = typeof idx === 'undefined' ? -1 : idx
     this.m_vPosition = pos || null
     this.m_ExtraInfo = extraInfo || null
   }

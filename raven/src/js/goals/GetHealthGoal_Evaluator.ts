@@ -12,7 +12,9 @@ export default class GetHealthGoal_Evaluator extends Goal_Evaluator implements I
     super(bias)
   }
   calculateDesirability(pBot: IRaven_Bot): number {
+    // console.log('<HealthGoal>::calc start')
     const distance = ravenFeature.distanceToItem(pBot, TYPE.type_health)
+    // console.log('<HealthGoal>::calc distance', distance)
     if(distance === 1) {
       return 0
     } else {

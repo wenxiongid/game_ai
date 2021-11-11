@@ -20,7 +20,9 @@ class Raven_Feature {
     return pBot.health() / pBot.maxHealth()
   }
   distanceToItem(pBot: IRaven_Bot, itemType: number): number {
+    // console.log('<Raven_Feature>::distanceToItem start')
     const distanceToItem = pBot.getPathPlanner().getCostToClosestItem(itemType)
+    // console.log('<Raven_Feature>::distanceToItem distance', distanceToItem)
     if(distanceToItem < 0) return 1
     const maxDistance = 500
     const minDistance = 50

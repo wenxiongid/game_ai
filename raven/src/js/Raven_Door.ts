@@ -59,11 +59,11 @@ export default class Raven_Door extends BaseGameEntity {
     this.m_pWall2.setFrom(this.m_vP1.add(perp.getReverse()))
     this.m_pWall2.setTo(this.m_vP2.add(perp.getReverse()))
   }
-  constructor(pMap: Raven_Map, p1: Vector2D, p2: Vector2D, switchs: number[]) {
-    super(TYPE.type_sliding_door, new Vector2D(0, 0), 0)
+  constructor(pMap: Raven_Map, p1: Vector2D, p2: Vector2D, id?: number, switchesId?: number[]) {
+    super(TYPE.type_sliding_door, new Vector2D(0, 0), id || 0)
     this.m_vP1 = p1
     this.m_vP2 = p2
-    this.m_Switches = switchs
+    this.m_Switches = switchesId || []
 
     this.m_Status = door_status.closed
     this.m_iNumTicksStayOpen = 60

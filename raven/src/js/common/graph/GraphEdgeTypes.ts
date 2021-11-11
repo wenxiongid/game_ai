@@ -3,9 +3,9 @@ export class GraphEdge {
   m_iTo: number
   m_dCost: number
   constructor(from?: number, to?: number, cost?: number) {
-    this.m_iFrom = from || -1
-    this.m_iTo = to || -1
-    this.m_dCost = cost || 1
+    this.m_iFrom = typeof from === 'undefined' ? -1 : from
+    this.m_iTo = typeof to === 'undefined' ? -1 : to
+    this.m_dCost = typeof cost === 'undefined' ? 1 : cost
   }
   from() {
     return this.m_iFrom

@@ -1,6 +1,5 @@
 import InvertedAABBox2D from "../2D/InvertedAABBox2D";
 import Vector2D, { vec2DDistanceSq } from "../2D/Vector2D";
-import BaseGameEntity from "../game/base_game_entity";
 
 interface entity {
   pos(): Vector2D
@@ -36,6 +35,7 @@ export default class CellSpacePartition {
     this.m_dSpaceHeight = height
     this.m_iNumCellsX = cellsX
     this.m_iNumCellsY = cellsY
+    this.m_Cells = []
     this.m_Neighbors = []
     this.m_dCellSizeX = width / cellsX
     this.m_dCellSizeY = height / cellsY

@@ -3,12 +3,12 @@ import IVector2D from "../common/2D/Vector2D/index.d";
 import IRaven_Bot from "../Raven_Bot/index.d";
 import PathEdge from './PathEdge';
 import { NavEdgeType } from '../common/graph/GraphEdgeTypes';
-import { IGraph_SearchTimeSliced, SearchResult, SearchType } from './TimeSlicedGraphAlgorithms.d';
+import { IGraph_SearchTimeSliced } from './TimeSlicedGraphAlgorithms.d';
 import Dispatcher from '../common/messaging/message_dispatcher'
 import message_type from '../Raven_Messages';
 import { isEqual, MaxFloat } from '../common/misc/utils';
 import { vec2DDistance, vec2DDistanceSq } from '../common/2D/Vector2D';
-import { Graph_SearchAStar_Ts, Graph_SearchDijkstra_TS } from './TimeSlicedGraphAlgorithms';
+import { Graph_SearchAStar_Ts, Graph_SearchDijkstra_TS, SearchResult, SearchType } from './TimeSlicedGraphAlgorithms';
 import SparseGraph from '../common/graph/SparseGraph';
 
 enum SMOOTH_METHODS {
@@ -27,12 +27,19 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
   getClosestNodeToPosition(pos: IVector2D): number {
     let closestSoFar = MaxFloat
     let closestNode = -1
+    // console.log('<PathPlanner>::getClosestNodeToPosition start', pos)
     const map = this.m_pOwner.getWorld().getMap()
     const range = map.getCellSpaceNeighborhoodRange()
+    // console.log('<PathPlanner>::getClosestNodeToPosition range', range)
     const cellSpace = map.getCellSpace()
+    // console.log('<PathPlanner>::getClosestNodeToPosition cellSpace', cellSpace)
     cellSpace.calculateNeighbors(pos, range)
+    // console.log('<PathPlanner>::getClosestNodeToPosition calcNeighbors done')
     for (let pN = cellSpace.begin(); !cellSpace.end(); pN = cellSpace.next()) {
-      if(this.m_pOwner.canWalkBetween(pos, pN.pos())) {
+      // console.log('<PathPlanner>::getClosestNodeToPosition curSpace', pN)
+      const canWalkBetween = this.m_pOwner.canWalkBetween(pos, pN.pos())
+      // console.log('<PathPlanner>::getClosestNodeToPosition canWalkBetween', canWalkBetween)
+      if(canWalkBetween) {
         const dist = vec2DDistanceSq(pos, pN.pos())
         if(dist < closestSoFar) {
           closestSoFar = dist
@@ -120,7 +127,7 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
       console.warn('no closest node to target found')
       return false
     }
-    console.log(`closest node to target is ${closestNodeToTarget}`)
+    // console.log(`closest node to target is ${closestNodeToTarget}`)
     this.m_pCurrentSearch = new Graph_SearchAStar_Ts(this.m_NavGraph, closestNodeToBot, closestNodeToTarget)
     this.m_pOwner.getWorld().getPathManager().register(this)
     return true
@@ -151,10 +158,13 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
     return cost + this.m_pOwner.getWorld().getMap().calculateCostToTravelBetweenNodes(nd, nodeIdx)
   }
   getCostToClosestItem(giverType: number): number {
+    // console.log('<PathPlanner>::getCostToClosestItem start', giverType)
     const nd = this.getClosestNodeToPosition(this.m_pOwner.pos())
+    // console.log('<PathPlanner>::getCostToClosestItem nd', nd)
     if(nd === -1) return -1
     let closestSoFar = MaxFloat
     const triggers = this.m_pOwner.getWorld().getMap().getTriggers()
+    // console.log('<PathPlanner>::getCostToClosestItem', triggers)
     for (let i = 0; i < triggers.length; i++) {
       const it = triggers[i]
       if(it.entityType() === giverType && it.isActive()) {

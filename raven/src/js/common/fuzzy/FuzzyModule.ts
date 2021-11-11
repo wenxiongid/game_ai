@@ -14,8 +14,8 @@ export enum DefuzzifyMethod {
 export const NumSamples = 15
 
 export default class FuzzyModule {
-  private m_Variables: VarMap
-  private m_Rules: FuzzyRule[]
+  private m_Variables: VarMap = {}
+  private m_Rules: FuzzyRule[] = []
   private setConfidencesOfConsequentsToZero() {
     for (const curRule of this.m_Rules) {
       curRule.setConfidenceOfConsequentToZero()

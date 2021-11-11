@@ -29,9 +29,11 @@ export default class Raven_TargetingSystem implements IRaven_TargetingSystem {
     return this.m_pCurrentTarget !== null
   }
   isTargetWithinFOV(): boolean {
+    if(!this.m_pCurrentTarget) return false
     return this.m_pOwner.getSensoryMem().isOpponentWithinFOV(this.m_pCurrentTarget)
   }
   isTargetShootable(): boolean {
+    if(!this.m_pCurrentTarget) return false
     return this.m_pOwner.getSensoryMem().isOpponentShootable(this.m_pCurrentTarget)
   }
   getLastRecordedPosition(): IVector2D {

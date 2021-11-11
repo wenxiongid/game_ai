@@ -15,7 +15,7 @@ enum TYPE {
 }
 
 export function getNameOfType(w: number) {
-  let s:string
+  let s:string = 'no this type'
   switch(w) {
     case TYPE.type_wall:
       s = 'Wall'
@@ -57,6 +57,7 @@ export function getNameOfType(w: number) {
       s = 'door_trigger'
       break
   }
+  return s
 }
 
 export default TYPE

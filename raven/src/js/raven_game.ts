@@ -6,7 +6,7 @@ import PathManager from "./navigation/PathManager"
 import Raven_Projectile from "./armory/Raven_Projectile"
 import { deleteItemFromArray, MaxFloat } from "./common/misc/utils"
 import GraveMarkers from "./GraveMarkers"
-import Vector2D, { isSecondInFOVOfFirst, pointToVector2D, vec2DDistance, vec2DDistanceSq } from "./common/2D/Vector2D"
+import Vector2D, { isSecondInFOVOfFirst, pointToVector2D, vec2DDistance, vec2DDistanceSq, vec2dNormalize } from "./common/2D/Vector2D"
 import Raven_Bot from "./Raven_Bot"
 import EntityManager from "./EntityManager"
 import message_dispatcher from "./common/messaging/message_dispatcher"
@@ -50,7 +50,7 @@ export default class Raven_Game implements IRaven_Game {
     this.m_pSelectedBot = null
   }
   attemptToAddBot(bot: IRaven_Bot): boolean {
-    const spawnPointCount = this.m_pMap.getSpawnPoints.length
+    const spawnPointCount = this.m_pMap.getSpawnPoints().length
     if(spawnPointCount <= 0) {
       console.error('Map has no spawn points!')
       return false
@@ -162,21 +162,28 @@ export default class Raven_Game implements IRaven_Game {
   update():void {
     if(this.m_bPaused) return
     this.m_pGraveMarkers.update()
+    // console.log('graveMarker update done')
     this.getPlayerInput()
+    // console.log('getInput done')
     this.m_PathManager.updateSearches()
+    // console.log('update search done')
     for (const curDoor of this.m_pMap.getDoors()) {
       curDoor.update()
     }
+    // console.log('door update done')
     deleteItemFromArray(this.m_Projectiles, (curW: Raven_Projectile) => {
       return curW.isDead()
     })
+    // console.log('projectile delete done')
     for (const curW of this.m_Projectiles) {
       curW.update()
     }
+    // console.log('projectile update done')
     let bSpawnPossible = true
     for (const curBot of this.m_Bots) {
       if(curBot.isSpawning() && bSpawnPossible) {
         bSpawnPossible = this.attemptToAddBot(curBot)
+        // console.log('attemp to add bot done', bSpawnPossible)
       } else if(curBot.isDead()) {
         this.m_pGraveMarkers.addGrave(curBot.pos())
         curBot.setSpawning()
@@ -184,7 +191,9 @@ export default class Raven_Game implements IRaven_Game {
         curBot.update()
       }
     }
+    // console.log('bots update done')
     this.m_pMap.updateTriggerSystem(this.m_Bots)
+    // console.log('update Trigger done')
     if(this.m_bRemoveABot) {
       if(this.m_Bots.length > 0) {
         const pBot = this.m_Bots[this.m_Bots.length - 1]
@@ -195,6 +204,7 @@ export default class Raven_Game implements IRaven_Game {
       }
       this.m_bRemoveABot = false
     }
+    // console.log('remove bot done')
   }
   loadMap(url: string): boolean {
     this.clear()
@@ -238,7 +248,7 @@ export default class Raven_Game implements IRaven_Game {
   removeBot(): void { this.m_bRemoveABot = true }
   // 返回一个尺寸为boundingRadius的物体从A到B是否会和地形相撞
   isPathObstructed(A: IVector2D, B: IVector2D, boundingRadius: number): boolean {
-    const toB = B.add(A.getReverse())
+    const toB = vec2dNormalize(B.add(A.getReverse()))
     let curPos = A.clone()
     while(vec2DDistanceSq(curPos, B) > boundingRadius * boundingRadius) {
       curPos = curPos.add(toB.crossNum(0.5 * boundingRadius))
@@ -373,5 +383,5 @@ export default class Raven_Game implements IRaven_Game {
   getAllBots(): IRaven_Bot[] { return this.m_Bots }
   getPathManager() { return this.m_PathManager }
   getNumBost(): number { return this.m_Bots.length }
-  tarRavenBotsWithinViewRange(pRaven_bot: IRaven_Bot, range: number) {}
+  tagRavenBotsWithinViewRange(pRaven_bot: IRaven_Bot, range: number) {}
 }

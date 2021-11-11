@@ -1,12 +1,13 @@
 import { GraphEdge } from "./GraphEdgeTypes";
 import GraphNode from "./GraphNodeTypes";
 import { deleteItemFromArray } from '../misc/utils'
+import Vector2D from "../2D/Vector2D";
 
 export default class SparseGraph {
-  m_Nodes: GraphNode[]
+  m_Nodes: GraphNode[] = []
   m_Edges: {
     [k: number]: GraphEdge[]
-  }
+  } = {}
   // 是否有向图
   m_bDigraph: boolean
   m_iNextNodeIndex: number
@@ -269,5 +270,23 @@ export default class SparseGraph {
         this.m_Edges[from] = []
       }
     }
+  }
+  load(mapData: any) {
+    const { nodes, edges } = mapData
+    for (const node of nodes) {
+      const newNode = new GraphNode(node.index, new Vector2D(node.x, node.y))
+      if(node.index !== -1) {
+        this.addNode(newNode)
+      } else {
+        this.m_Nodes.push(newNode)
+        this.m_Edges[this.m_iNextNodeIndex] = []
+        ++this.m_iNextNodeIndex
+      }
+    }
+    for (const edge of edges) {
+      const nextEdge = new GraphEdge(edge.from, edge.to, edge.cost)
+      this.m_Edges[nextEdge.from()].push(nextEdge)
+    }
+    return true
   }
 }

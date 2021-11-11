@@ -37,7 +37,7 @@ export default class Raven_Steering {
   private m_pRaven_Bot: IRaven_Bot
   private m_pWorld: Raven_Game
 
-  private m_vSteeringForce: Vector2D
+  private m_vSteeringForce: Vector2D = new Vector2D(0, 0)
 
   private m_pTargetAgent1: IRaven_Bot
   private m_pTargetAgent2: IRaven_Bot
@@ -82,6 +82,7 @@ export default class Raven_Steering {
     return true
   }
   private createFeelers() {
+    this.m_Feelers = []
     // 前方
     this.m_Feelers[0] = this.m_pRaven_Bot.pos()
       .add(this.m_pRaven_Bot.heading().crossNum(this.m_dWallDetectionFeelerLength * this.m_pRaven_Bot.speed()))
@@ -142,7 +143,7 @@ export default class Raven_Steering {
     let distToThisIP = 0.0
     let distToClosestIP = MaxFloat
     let closestWall = -1
-    let steeringForce: Vector2D, closestPoint: Vector2D
+    let steeringForce: Vector2D = new Vector2D(0, 0), closestPoint: Vector2D = new Vector2D(0, 0)
     for (const flr of this.m_Feelers) {
       for (let w = 0; w < walls.length; w++) {
         const intersection = lineIntersection2D(
@@ -234,7 +235,7 @@ export default class Raven_Steering {
   calculate(): Vector2D {
     this.m_vSteeringForce.zero()
     if(this.on(behavior_type.separation)) {
-      this.m_pWorld.tagRaven_BotsWithinViewRange(this.m_pRaven_Bot, this.m_dViewDistance)
+      this.m_pWorld.tagRavenBotsWithinViewRange(this.m_pRaven_Bot, this.m_dViewDistance)
     }
     this.m_vSteeringForce = this.calculatePrioritized()
     return this.m_vSteeringForce
