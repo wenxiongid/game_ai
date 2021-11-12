@@ -39,7 +39,7 @@ export class Goal_FollowPath extends Goal_Composite implements IGoal_Composite {
   process(): number {
     this.activeIfInactive()
     this.m_iStatus = this.processSubgoals()
-    if(this.m_iStatus !== GOAL_STATUS.completed && this.m_Path.length > 0) {
+    if(this.m_iStatus === GOAL_STATUS.completed && this.m_Path.length > 0) {
       this.activate()
     }
     return this.m_iStatus

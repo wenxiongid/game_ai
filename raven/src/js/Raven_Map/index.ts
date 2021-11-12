@@ -54,7 +54,7 @@ export default class Raven_Map implements IRaven_Map {
           this.addWall(new Vector2D(+info[0], +info[1]), new Vector2D(+info[2], +info[3]))
           break
         case TYPE.type_sliding_door:
-          this.addDoor(new Vector2D(+info[1], +info[2]), new Vector2D(+info[3], +info[4]), +info[0], [+info[5], +info[6]])
+          this.addDoor(new Vector2D(+info[1], +info[2]), new Vector2D(+info[3], +info[4]), +info[5], +info[0], [+info[6], +info[7]])
           break
         case TYPE.type_door_trigger:
           this.addDoorTrigger(new Vector2D(+info[3], +info[4]), +info[1], +info[2], +info[5], +info[0])
@@ -102,8 +102,8 @@ export default class Raven_Map implements IRaven_Map {
     node.setExtraInfo(wg)
     EntityManager.registerEntity(wg)
   }
-  addDoor(p1: Vector2D, p2: Vector2D, id?: number, switchesId?: number[]): void {
-    const pDoor = new Raven_Door(this, p1, p2, id, switchesId)
+  addDoor(p1: Vector2D, p2: Vector2D, r:number, id?: number, switchesId?: number[]): void {
+    const pDoor = new Raven_Door(this, p1, p2, r, id, switchesId)
     this.m_Doors.push(pDoor)
     EntityManager.registerEntity(pDoor)
   }

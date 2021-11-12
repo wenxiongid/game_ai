@@ -6,7 +6,8 @@ import Wall2D from "./Wall2D";
 // 线段是否与其中一墙相交
 export function doWallsObstructLineSegment(from: Vector2D, to: Vector2D, walls: Wall2D[]) {
   for (const wall of walls) {
-    if(lineIntersection2D(from, to, wall.from(), wall.to())) {
+    const { result } = lineIntersection2D(from, to, wall.from(), wall.to())
+    if(result) {
       return true
     }
   }
