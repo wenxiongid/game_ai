@@ -45,6 +45,7 @@ class GDI{
 	lightBluePen(){ this.ctx.strokeStyle = this.LIGHT_BLUE; this.normalPen(); }
 	lightGreyPen(){ this.ctx.strokeStyle = this.LIGHT_GREY; this.normalPen(); }
 	lightPinkPen(){ this.ctx.strokeStyle = this.LIGHT_PINK; this.normalPen(); }
+	setPenColor(color) {this.ctx.strokeStyle = color}
 	// brush
 	redBrush(){ this.ctx.fillStyle = this.RED; }
 	greyBrush(){ this.ctx.fillStyle = this.GREY; }

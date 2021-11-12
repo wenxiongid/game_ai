@@ -13,6 +13,7 @@ export class Goal_FollowPath extends Goal_Composite implements IGoal_Composite {
   constructor(pBot: IRaven_Bot, path: PathEdge[]) {
     super(pBot, GOAL_TYPES.goal_follow_path)
     this.m_Path = path
+    this.render()
   }
   activate(): void {
     this.m_iStatus = GOAL_STATUS.active

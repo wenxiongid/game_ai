@@ -1,4 +1,4 @@
-import { GraphEdge } from "./GraphEdgeTypes";
+import NavGraphEdge, { GraphEdge } from "./GraphEdgeTypes";
 import GraphNode from "./GraphNodeTypes";
 import { deleteItemFromArray } from '../misc/utils'
 import Vector2D from "../2D/Vector2D";
@@ -284,7 +284,7 @@ export default class SparseGraph {
       }
     }
     for (const edge of edges) {
-      const nextEdge = new GraphEdge(edge.from, edge.to, edge.cost)
+      const nextEdge = new NavGraphEdge(edge.from, edge.to, edge.cost, edge.flag, edge.id)
       this.m_Edges[nextEdge.from()].push(nextEdge)
     }
     return true

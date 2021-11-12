@@ -20,7 +20,7 @@ import gdi from "../common/misc/cgdi";
 import { trim } from 'lodash'
 
 import MAP_DATA from '../../map.js'
-import { calculateAverageGraphEdgeLength } from "../common/graph/HandyGraphFunctions";
+import { calculateAverageGraphEdgeLength, GraphHelper_DrawUsingGDI } from "../common/graph/HandyGraphFunctions";
 
 export default class Raven_Map implements IRaven_Map {
   m_Walls: Wall2D[] = []
@@ -138,7 +138,7 @@ export default class Raven_Map implements IRaven_Map {
   }
   render() {
     if(Raven_UserOptions.m_bShowGraph) {
-      // 
+      GraphHelper_DrawUsingGDI(this.m_pNavGraph, gdi.GREY, Raven_UserOptions.m_bShowNodeIndices)
     }
     for (const curDoor of this.m_Doors) {
       curDoor.render()

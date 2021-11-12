@@ -15,7 +15,7 @@ import Bolt from "./armory/Projectile_Bolt"
 import Rocket from "./armory/Projectile_Rocket"
 import Slug from "./armory/Projectile_Slug"
 import Pellet from "./armory/Projectile_Pellet"
-import { GraveLifetime, MaxSearchCyclesPerUpdateStep, NumBots } from "./config"
+import { Bot_Scale, GraveLifetime, MaxSearchCyclesPerUpdateStep, NumBots } from "./config"
 import Raven_Map from "./Raven_Map"
 import controlKey from './common/control/key'
 import controlMouse from './common/control/mouse'
@@ -24,6 +24,7 @@ import { doWallsIntersectCircle, doWallsObstructLineSegment } from "./common/2D/
 import Raven_UserOptions from "./Raven_UserOptions"
 import gdi from "./common/misc/cgdi"
 import goalTypeToString from './goals/Raven_Goal_Types'
+import { pathEnd, pathStart, pathTarget } from "./navigation/Raven_PathPlanner"
 
 export default class Raven_Game implements IRaven_Game {
   // 游戏地图
@@ -91,6 +92,20 @@ export default class Raven_Game implements IRaven_Game {
     this.m_PathManager = null
     this.m_pGraveMarkers = null
     this.loadMap('s')
+    document.addEventListener('click', (e) => {
+      this.clickLeftMouseButton({
+        x: e.pageX,
+        y: e.pageY
+      })
+      e.preventDefault()
+    })
+    document.addEventListener('contextmenu', (e) => {
+      this.clickRightMouseButton({
+        x: e.pageX,
+        y: e.pageY
+      })
+      e.preventDefault()
+    })
   }
   render():void {
     this.m_pGraveMarkers.render()
@@ -158,32 +173,41 @@ export default class Raven_Game implements IRaven_Game {
         gdi.textAtPos(controlMouse.pos().x, controlMouse.pos().y, 'Queuing')
       }
     }
+    for (const bot of this.m_Bots) {
+      bot.getBrain().render()
+    }
+    // if(pathStart >= 0) {
+    //   gdi.redPen()
+    //   gdi.hollowBrush()
+    //   gdi.circle(this.m_pMap.getNavGraph().getNode(pathStart).pos(), 5)
+    // }
+    // if(pathEnd >= 0) {
+    //   gdi.pinkPen()
+    //   gdi.circle(this.m_pMap.getNavGraph().getNode(pathEnd).pos(), 5)
+    // }
+    // if(pathTarget) {
+    //   gdi.bluePen()
+    //   gdi.circle(pathTarget, 5)
+    // }
   }
   update():void {
     if(this.m_bPaused) return
     this.m_pGraveMarkers.update()
-    // console.log('graveMarker update done')
     this.getPlayerInput()
-    // console.log('getInput done')
     this.m_PathManager.updateSearches()
-    // console.log('update search done')
     for (const curDoor of this.m_pMap.getDoors()) {
       curDoor.update()
     }
-    // console.log('door update done')
     deleteItemFromArray(this.m_Projectiles, (curW: Raven_Projectile) => {
       return curW.isDead()
     })
-    // console.log('projectile delete done')
     for (const curW of this.m_Projectiles) {
       curW.update()
     }
-    // console.log('projectile update done')
     let bSpawnPossible = true
     for (const curBot of this.m_Bots) {
       if(curBot.isSpawning() && bSpawnPossible) {
         bSpawnPossible = this.attemptToAddBot(curBot)
-        // console.log('attemp to add bot done', bSpawnPossible)
       } else if(curBot.isDead()) {
         this.m_pGraveMarkers.addGrave(curBot.pos())
         curBot.setSpawning()
@@ -191,9 +215,7 @@ export default class Raven_Game implements IRaven_Game {
         curBot.update()
       }
     }
-    // console.log('bots update done')
     this.m_pMap.updateTriggerSystem(this.m_Bots)
-    // console.log('update Trigger done')
     if(this.m_bRemoveABot) {
       if(this.m_Bots.length > 0) {
         const pBot = this.m_Bots[this.m_Bots.length - 1]
@@ -204,7 +226,6 @@ export default class Raven_Game implements IRaven_Game {
       }
       this.m_bRemoveABot = false
     }
-    // console.log('remove bot done')
   }
   loadMap(url: string): boolean {
     this.clear()

@@ -1,5 +1,6 @@
 import InvertedAABBox2D from "../2D/InvertedAABBox2D";
 import Vector2D, { vec2DDistanceSq } from "../2D/Vector2D";
+import gdi from "./cgdi";
 
 interface entity {
   pos(): Vector2D
@@ -16,6 +17,7 @@ class Cell {
 
 export default class CellSpacePartition {
   m_Cells: Cell[]
+  m_NeighborCell: Cell[]
   m_Neighbors: entity[]
   m_curNeighborIndex: number
   m_dSpaceWidth: number
@@ -36,6 +38,7 @@ export default class CellSpacePartition {
     this.m_iNumCellsX = cellsX
     this.m_iNumCellsY = cellsY
     this.m_Cells = []
+    this.m_NeighborCell = []
     this.m_Neighbors = []
     this.m_dCellSizeX = width / cellsX
     this.m_dCellSizeY = height / cellsY
@@ -45,10 +48,11 @@ export default class CellSpacePartition {
         const right = left + this.m_dCellSizeX
         const top = y * this.m_dCellSizeY
         const bottom = top + this.m_dCellSizeY
-        const cell = new Cell(new Vector2D(top, left), new Vector2D(right, bottom))
+        const cell = new Cell(new Vector2D(left, top), new Vector2D(right, bottom))
         this.m_Cells.push(cell)
       }
     }
+    console.log(this.m_Cells)
   }
   addEntity(ent: entity) {
     const idx = this.positionToIndex(ent.pos())
@@ -69,12 +73,17 @@ export default class CellSpacePartition {
   }
   calculateNeighbors(targetPos: Vector2D, queryRadius: number) {
     this.m_Neighbors = []
+    this.m_NeighborCell = []
     const queryBox = new InvertedAABBox2D(
       targetPos.add(new Vector2D(-queryRadius, -queryRadius)),
       targetPos.add(new Vector2D(queryRadius, queryRadius))
     )
     for (const curCell of this.m_Cells) {
-      if(curCell.bbox.isOverlappedWith(queryBox) && curCell.members.length) {
+      const isOverLapped = curCell.bbox.isOverlappedWith(queryBox)
+      if(isOverLapped) {
+        this.m_NeighborCell.push(curCell)
+      }
+      if(isOverLapped && curCell.members.length) {
         for (const it of curCell.members) {
           if(vec2DDistanceSq(it.pos(), targetPos) < queryRadius * queryRadius) {
             this.m_Neighbors.push(it)
@@ -101,6 +110,15 @@ export default class CellSpacePartition {
   }
   renderCells() {
     for (const curCell of this.m_Cells) {
+      curCell.bbox.render(true)
+    }
+  }
+  renderNeighbors() {
+    for (const curIt of this.m_Neighbors) {
+      gdi.brownBrush()
+      gdi.circle(curIt.pos(), 5)
+    }
+    for (const curCell of this.m_NeighborCell) {
       curCell.bbox.render(false)
     }
   }

@@ -27,6 +27,7 @@ export default class Goal_TraverseEdge extends Goal implements IGoal {
     this.m_bLastEdgeInPath = lastEdge
   }
   activate(): void {
+    this.m_iStatus = GOAL_STATUS.active
     const bot = (this.m_pOwner as IRaven_Bot)
     switch(this.m_Edge.behavior()) {
       case NavEdgeType.swim:

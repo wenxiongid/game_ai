@@ -54,7 +54,7 @@ export class Graph_SearchAStar_Ts implements IGraph_SearchTimeSliced {
     if(this.m_pPQ.length === 0) {
       return SearchResult.target_not_found
     }
-    const nextClosestNode = this.m_pPQ.unshift()
+    const nextClosestNode = this.m_pPQ.shift()
     this.m_ShortestPathTree[nextClosestNode] = this.m_SearchFrontier[nextClosestNode]
     if(nextClosestNode === this.m_iTarget) {
       return SearchResult.target_found

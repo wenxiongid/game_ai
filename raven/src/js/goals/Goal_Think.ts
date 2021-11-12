@@ -51,7 +51,7 @@ export default class Goal_Think extends Goal_Composite implements IGoal_Composit
         mostSesirable = evaluator
       }
     }
-    console.log('<Goal_Think>::arbitrate', mostSesirable)
+    // console.log('<Goal_Think>::arbitrate', mostSesirable)
     if(mostSesirable) {
       mostSesirable.setGoal(bot)
     } else {

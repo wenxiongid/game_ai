@@ -3,11 +3,12 @@ import IVector2D from "../common/2D/Vector2D/index.d";
 import IRaven_Bot from "../Raven_Bot/index.d";
 import PathEdge from './PathEdge';
 import { NavEdgeType } from '../common/graph/GraphEdgeTypes';
+import GraphNode from '../common/graph/GraphNodeTypes';
 import { IGraph_SearchTimeSliced } from './TimeSlicedGraphAlgorithms.d';
 import Dispatcher from '../common/messaging/message_dispatcher'
 import message_type from '../Raven_Messages';
 import { isEqual, MaxFloat } from '../common/misc/utils';
-import { vec2DDistance, vec2DDistanceSq } from '../common/2D/Vector2D';
+import Vector2D, { vec2DDistance, vec2DDistanceSq } from '../common/2D/Vector2D';
 import { Graph_SearchAStar_Ts, Graph_SearchDijkstra_TS, SearchResult, SearchType } from './TimeSlicedGraphAlgorithms';
 import SparseGraph from '../common/graph/SparseGraph';
 
@@ -18,6 +19,10 @@ enum SMOOTH_METHODS {
 
 let USING_SMOOTH_METHOD = SMOOTH_METHODS.quick
 
+export let pathStart: number = -1
+export let pathEnd: number
+export let pathTarget: Vector2D
+
 export default class Raven_PathPlanner implements IRaven_PathPlanner {
   m_pOwner: IRaven_Bot
   m_NavGraph: SparseGraph
@@ -27,29 +32,27 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
   getClosestNodeToPosition(pos: IVector2D): number {
     let closestSoFar = MaxFloat
     let closestNode = -1
-    // console.log('<PathPlanner>::getClosestNodeToPosition start', pos)
     const map = this.m_pOwner.getWorld().getMap()
     const range = map.getCellSpaceNeighborhoodRange()
-    // console.log('<PathPlanner>::getClosestNodeToPosition range', range)
     const cellSpace = map.getCellSpace()
-    // console.log('<PathPlanner>::getClosestNodeToPosition cellSpace', cellSpace)
     cellSpace.calculateNeighbors(pos, range)
-    // console.log('<PathPlanner>::getClosestNodeToPosition calcNeighbors done')
     for (let pN = cellSpace.begin(); !cellSpace.end(); pN = cellSpace.next()) {
-      // console.log('<PathPlanner>::getClosestNodeToPosition curSpace', pN)
       const canWalkBetween = this.m_pOwner.canWalkBetween(pos, pN.pos())
-      // console.log('<PathPlanner>::getClosestNodeToPosition canWalkBetween', canWalkBetween)
       if(canWalkBetween) {
         const dist = vec2DDistanceSq(pos, pN.pos())
         if(dist < closestSoFar) {
           closestSoFar = dist
-          closestNode = cellSpace.m_curNeighborIndex
+          closestNode = (pN as GraphNode).index()
         }
       }
     }
+    if(closestNode === -1) {
+      console.error('<PathPlanner>::getClosestNodeToPos not found', pos)
+    }
     return closestNode
   }
-  smoothPathEdgesQuick(path: (PathEdge | null)[]): void {
+  smoothPathEdgesQuick(path: (PathEdge | null)[]): PathEdge[] {
+    const newPath = path.slice(0)
     if(path && path.length > 1) {
       let i = 0
       let e1 = path[i]
@@ -68,8 +71,16 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
         }
       }
     }
+    const result:PathEdge[] = []
+    for (const edge of newPath) {
+      if(edge) {
+        result.push(edge)
+      }
+    }
+    return result
   }
-  smoothPathEdgesPrecise(path: (PathEdge | null)[]): void {
+  smoothPathEdgesPrecise(path: (PathEdge | null)[]): PathEdge[] {
+    const newPath = path.slice(0)
     if(path && path.length > 1) {
       let i = 0
       let e1: PathEdge
@@ -92,6 +103,13 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
         ++i
       }
     }
+    const result:PathEdge[] = []
+    for (const edge of newPath) {
+      if(edge) {
+        result.push(edge)
+      }
+    }
+    return result
   }
   getReadyForNewSearch(): void {
     this.m_pOwner.getWorld().getPathManager().unRegister(this)
@@ -127,14 +145,16 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
       console.warn('no closest node to target found')
       return false
     }
-    // console.log(`closest node to target is ${closestNodeToTarget}`)
+    pathStart = closestNodeToBot
+    pathEnd = closestNodeToTarget
+    pathTarget = targetPos
     this.m_pCurrentSearch = new Graph_SearchAStar_Ts(this.m_NavGraph, closestNodeToBot, closestNodeToTarget)
     this.m_pOwner.getWorld().getPathManager().register(this)
     return true
   }
   getPath(): PathEdge[] | null {
     if(this.m_pCurrentSearch) {
-      const path = this.m_pCurrentSearch.getPathAsPathEdges()
+      let path = this.m_pCurrentSearch.getPathAsPathEdges()
       const closest = this.getClosestNodeToPosition(this.m_pOwner.pos())
       path.unshift(new PathEdge(this.m_pOwner.pos(), this.getNodePosition(closest), NavEdgeType.normal))
       if(this.m_pCurrentSearch.searchType() === SearchType.AStar) {
@@ -142,10 +162,10 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
       }
       switch(USING_SMOOTH_METHOD) {
         case SMOOTH_METHODS.quick:
-          this.smoothPathEdgesQuick(path)
+          path = this.smoothPathEdgesQuick(path)
           break
         case SMOOTH_METHODS.precise:
-          this.smoothPathEdgesPrecise(path)
+          path = this.smoothPathEdgesPrecise(path)
           break
       }
       return path

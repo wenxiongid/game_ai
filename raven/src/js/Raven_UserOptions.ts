@@ -16,9 +16,9 @@ class Raven_UserOptions {
   constructor() {
     this.m_bShowGraph = true
     this.m_bShowNodeIndices = true
-    this.m_bShowPathOfSelectedBot = false
-    this.m_bShowTargetOfSelectedBot = false
-    this.m_bShowOpponentsSensedBySelectedBot = false
+    this.m_bShowPathOfSelectedBot = true
+    this.m_bShowTargetOfSelectedBot = true
+    this.m_bShowOpponentsSensedBySelectedBot = true
     this.m_bOnlyShowBotsInTargetsFOV = false
     this.m_bShowGoalsOfSelectedBot = true
     this.m_bShowGoalAppraisals = true

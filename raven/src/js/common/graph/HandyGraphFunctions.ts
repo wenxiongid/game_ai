@@ -1,4 +1,5 @@
 import { vec2DDistance } from "../2D/Vector2D";
+import gdi from "../misc/cgdi";
 import SparseGraph from "./SparseGraph";
 
 export function calculateAverageGraphEdgeLength(g: SparseGraph) {
@@ -12,4 +13,23 @@ export function calculateAverageGraphEdgeLength(g: SparseGraph) {
     }
   }
   return totalLength / numEdgesCounted
+}
+
+export function GraphHelper_DrawUsingGDI(graph: SparseGraph, color: string, drawNodeIds:boolean = false) {
+  if(graph.numNodes() === 0) return
+  gdi.setPenColor(color)
+  gdi.hollowBrush()
+
+  for (const pN of graph.m_Nodes) {
+    gdi.circle(pN.pos(), 2)
+    if(drawNodeIds) {
+      gdi.textColor('rgb(200, 200, 200)')
+      gdi.textAtPos(pN.pos().x + 5, pN.pos().y - 5, pN.index())
+    }
+    if(graph.m_Edges[pN.index()]) {
+      for (const edge of graph.m_Edges[pN.index()]) {
+        gdi.line(pN.pos(), graph.getNode(edge.to()).pos())
+      }
+    }
+  }
 }

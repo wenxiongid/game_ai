@@ -16,6 +16,5 @@ export default class ExploreGoal_Evaluator extends Goal_Evaluator implements IGo
   }
   renderInfo(position: IVector2D, pBot: IRaven_Bot) {
     gdi.textAtPos(position, `EX: ${this.calculateDesirability(pBot)}`)
-    console.log('<Explorer_goal>::render done')
   }
 }
