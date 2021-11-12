@@ -114,6 +114,7 @@ export default class CellSpacePartition {
     }
   }
   renderNeighbors() {
+    gdi.pinkPen()
     for (const curIt of this.m_Neighbors) {
       gdi.brownBrush()
       gdi.circle(curIt.pos(), 5)

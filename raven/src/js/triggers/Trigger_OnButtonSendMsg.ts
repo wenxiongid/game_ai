@@ -14,9 +14,14 @@ export default class Trigger_OnButtonSendMsg extends Trigger implements ITrigger
     super(type, pos, radius || 5, id || 0)
     this.m_iReceiver = receiver
     this.m_iMessageToSend = messageType
+    this.addRectangularTriggerRegion(
+      this.pos().add(new Vector2D(-this.bRadius(), -this.bRadius())),
+      this.pos().add(new Vector2D(this.bRadius(), this.bRadius()))
+    )
   }
   try(pEnt: BaseGameEntity) {
     if(this.isTouchingTrigger(pEnt.pos(), pEnt.bRadius())) {
+      console.log('<Trigger>::try touching')
       message_dispatcher.dispatchMessage(
         0,
         this.id(),

@@ -37,12 +37,14 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
     const cellSpace = map.getCellSpace()
     cellSpace.calculateNeighbors(pos, range)
     for (let pN = cellSpace.begin(); !cellSpace.end(); pN = cellSpace.next()) {
+      const index = (pN as GraphNode).index()
+      if(index === -1) continue
       const canWalkBetween = this.m_pOwner.canWalkBetween(pos, pN.pos())
       if(canWalkBetween) {
         const dist = vec2DDistanceSq(pos, pN.pos())
         if(dist < closestSoFar) {
           closestSoFar = dist
-          closestNode = (pN as GraphNode).index()
+          closestNode = index
         }
       }
     }
@@ -178,13 +180,10 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
     return cost + this.m_pOwner.getWorld().getMap().calculateCostToTravelBetweenNodes(nd, nodeIdx)
   }
   getCostToClosestItem(giverType: number): number {
-    // console.log('<PathPlanner>::getCostToClosestItem start', giverType)
     const nd = this.getClosestNodeToPosition(this.m_pOwner.pos())
-    // console.log('<PathPlanner>::getCostToClosestItem nd', nd)
     if(nd === -1) return -1
     let closestSoFar = MaxFloat
     const triggers = this.m_pOwner.getWorld().getMap().getTriggers()
-    // console.log('<PathPlanner>::getCostToClosestItem', triggers)
     for (let i = 0; i < triggers.length; i++) {
       const it = triggers[i]
       if(it.entityType() === giverType && it.isActive()) {

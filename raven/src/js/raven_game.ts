@@ -176,19 +176,20 @@ export default class Raven_Game implements IRaven_Game {
     for (const bot of this.m_Bots) {
       bot.getBrain().render()
     }
-    if(pathStart >= 0) {
-      gdi.redPen()
-      gdi.hollowBrush()
-      gdi.circle(this.m_pMap.getNavGraph().getNode(pathStart).pos(), 5)
-    }
-    if(pathEnd >= 0) {
-      gdi.pinkPen()
-      gdi.circle(this.m_pMap.getNavGraph().getNode(pathEnd).pos(), 5)
-    }
-    if(pathTarget) {
-      gdi.bluePen()
-      gdi.circle(pathTarget, 5)
-    }
+    // if(pathStart >= 0) {
+    //   gdi.redPen()
+    //   gdi.hollowBrush()
+    //   gdi.circle(this.m_pMap.getNavGraph().getNode(pathStart).pos(), 5)
+    // }
+    // if(pathEnd >= 0) {
+    //   gdi.pinkPen()
+    //   gdi.circle(this.m_pMap.getNavGraph().getNode(pathEnd).pos(), 5)
+    // }
+    // if(pathTarget) {
+    //   gdi.bluePen()
+    //   gdi.circle(pathTarget, 5)
+    // }
+    // this.getMap().getCellSpace().renderNeighbors()
   }
   update():void {
     if(this.m_bPaused) return
