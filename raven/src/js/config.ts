@@ -3,7 +3,7 @@
 
 // --the number of bots the game instantiates
 
-export const NumBots   = 1
+export const NumBots   = 3
 
 // --this is the maximum number of search cycles allocated to *all* current path
 // -- planning searches per update

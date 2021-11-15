@@ -174,13 +174,9 @@ export default class Raven_Game implements IRaven_Game {
         gdi.textAtPos(controlMouse.pos().x, controlMouse.pos().y, 'Queuing')
       }
     }
-    for (const bot of this.m_Bots) {
-      bot.getBrain().render()
-    }
-    if(globalEdge) {
-      gdi.redPen()
-      gdi.line(globalEdge.m_vSource, globalEdge.m_vDestination)
-    }
+    // for (const bot of this.m_Bots) {
+    //   bot.getBrain().render()
+    // }
     // if(pathStart >= 0) {
     //   gdi.redPen()
     //   gdi.hollowBrush()

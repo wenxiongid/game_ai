@@ -6,7 +6,7 @@ import IRaven_Bot from "../Raven_Bot/index.d";
 import { GOAL_TYPES } from "./Raven_Goal_Types";
 
 export default class Goal_DodgeSideToSide extends Goal implements IGoal {
-  private m_vStrafeTarget: Vector2D
+  private m_vStrafeTarget: Vector2D = new Vector2D(0, 0)
   private m_bClockwise: boolean
   constructor(pBot: IRaven_Bot) {
     super(pBot, GOAL_TYPES.goal_strafe)
