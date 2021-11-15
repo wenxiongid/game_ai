@@ -110,7 +110,7 @@ export default class Raven_Steering {
     return desiredVelocity.add(this.m_pRaven_Bot.velocity().getReverse())
   }
   private arrive(target: Vector2D, decelertion: Deceleration): Vector2D {
-    const toTarget = target.add(this.m_pRaven_Bot.pos())
+    const toTarget = target.add(this.m_pRaven_Bot.pos().getReverse())
     const dist = toTarget.length()
     if(dist > 0) {
       const decelerationTweaker = 0.3
