@@ -54,22 +54,23 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
     return closestNode
   }
   smoothPathEdgesQuick(path: (PathEdge | null)[]): PathEdge[] {
+    if(path.length < 2) return path
     const newPath = path.slice(0)
-    if(path && path.length > 1) {
+    if(newPath && newPath.length > 1) {
       let i = 0
-      let e1 = path[i]
-      let e2 = path[++i]
-      while(i < path.length) {
+      let e1 = newPath[i]
+      let e2 = newPath[++i]
+      while(i < newPath.length) {
         if(
           e2.behavior() === NavEdgeType.normal &&
           this.m_pOwner.canWalkBetween(e1.source(), e2.destination())
         ) {
           e1.setDestination(e2.destination())
-          path[i] = null
-          e2 = path[++i]
+          newPath[i] = null
+          e2 = newPath[++i]
         } else {
           e1 = e2
-          e2 = path[++i]
+          e2 = newPath[++i]
         }
       }
     }

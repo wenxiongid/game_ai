@@ -49,10 +49,10 @@ export default class Goal_TraverseEdge extends Goal implements IGoal {
     steering.setTarget(this.m_Edge.destination() as Vector2D)
 
     if(this.m_bLastEdgeInPath) {
-      steering.seekOff()
+      // steering.seekOff()
       steering.arriveOn()
     } else {
-      steering.arriveOff()
+      // steering.arriveOff()
       steering.seekOn()
     }
   }
