@@ -101,7 +101,7 @@ export default class Raven_Door extends BaseGameEntity {
     return false
   }
   getSwitchIDs() { return this.m_Switches }
-  addSwirch(id: number) {
+  addSwitch(id: number) {
     let bfound = false
     for (const sw of this.m_Switches) {
       if(sw === id) {

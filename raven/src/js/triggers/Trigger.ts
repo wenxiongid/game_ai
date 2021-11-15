@@ -10,7 +10,7 @@ export default class Trigger extends BaseGameEntity implements ITrigger {
   m_pRegionOfInfluence: ITriggerRegion
   m_bRemoveFromGame: boolean = false
   m_bActive: boolean = false
-  m_iGraphNodeIndex: number
+  m_iGraphNodeIndex: number = -1
   setGraphNodeIndex(idx: number) {
     this.m_iGraphNodeIndex = idx
   }

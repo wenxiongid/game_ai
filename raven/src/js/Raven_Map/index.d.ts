@@ -24,7 +24,7 @@ export default interface IRaven_Map {
   loadMap(): boolean
   addWallFromFile(): void
   addSpawnPoint(pos: Vector2D): void
-  addHealth_Giver(pos: Vector2D): void
+  addHealth_Giver(pos: Vector2D, r:number, healthGiven: number, nodeIndex: number): void
   addWeapon_Giver(type: TYPE, pos: Vector2D): void 
   addDoor(p1: Vector2D, p2: Vector2D, id?: number): void
   addDoorTrigger(pos: Vector2D, receiver: number, messageType: number, radius: number, id?: number): void

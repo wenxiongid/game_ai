@@ -1,5 +1,6 @@
 import { vec2DDistance } from "../2D/Vector2D";
 import gdi from "../misc/cgdi";
+import { Graph_SearchDijkstra } from "./GraphAlgorithms";
 import SparseGraph from "./SparseGraph";
 
 export function calculateAverageGraphEdgeLength(g: SparseGraph) {
@@ -32,4 +33,18 @@ export function GraphHelper_DrawUsingGDI(graph: SparseGraph, color: string, draw
       }
     }
   }
+}
+
+export function createAllPairsCostsTable(g: SparseGraph): number[][] {
+  const pathCost = []
+  for (let source = 0; source < g.numNodes(); source++) {
+    pathCost[source] = []
+    const search = new Graph_SearchDijkstra(g, source)
+    for (let target = 0; target < g.numNodes(); target++) {
+      if(source !== target) {
+        pathCost[source][target] = search.getCostToNode(target)
+      }
+    }
+  }
+  return pathCost
 }

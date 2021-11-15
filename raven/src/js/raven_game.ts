@@ -352,6 +352,7 @@ export default class Raven_Game implements IRaven_Game {
   }
   togglePause() { this.m_bPaused = !this.m_bPaused }
   clickRightMouseButton(p: IPoint): void {
+    console.log('[right click]', p)
     const pos = pointToVector2D(p)
     const pBot = this.getBotAtPosition(pos)
     if(!pBot && !this.m_pSelectedBot) return

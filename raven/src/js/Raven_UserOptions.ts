@@ -25,9 +25,9 @@ class Raven_UserOptions {
     this.m_bShowWeaponAppraisals = true
     this.m_bSmoothPathsQuick = false
     this.m_bSmoothPathsPrecise = false
-    this.m_bShowBotIDs = false
-    this.m_bShowBotHealth = false
-    this.m_bShowScore = false
+    this.m_bShowBotIDs = true
+    this.m_bShowBotHealth = true
+    this.m_bShowScore = true
   }
 }
 

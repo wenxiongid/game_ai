@@ -144,7 +144,7 @@ export class Graph_SearchDijkstra {
   m_SearchFrontier: GraphEdge[]
   m_iSource: number
   m_iTarget: number
-  constructor(graph: SparseGraph, source: number, target: number) {
+  constructor(graph: SparseGraph, source: number, target: number = -1) {
     this.m_Graph = graph
     this.m_ShortestPathTree = []
     this.m_SearchFrontier = []

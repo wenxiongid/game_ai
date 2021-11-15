@@ -14,13 +14,13 @@ import CellSpacePartition from "../common/misc/CellSpacePartition";
 import { NumCellsX, NumCellsY } from "../config";
 import IRaven_Bot from "../Raven_Bot";
 import Trigger_SoundNotify from "../triggers/Trigger_SoundNotify";
-import { randInt } from "../common/misc/utils";
+import { MaxFloat, randInt } from "../common/misc/utils";
 import Raven_UserOptions from "../Raven_UserOptions";
 import gdi from "../common/misc/cgdi";
 import { trim } from 'lodash'
 
 import MAP_DATA from '../../map.js'
-import { calculateAverageGraphEdgeLength, GraphHelper_DrawUsingGDI } from "../common/graph/HandyGraphFunctions";
+import { calculateAverageGraphEdgeLength, createAllPairsCostsTable, GraphHelper_DrawUsingGDI } from "../common/graph/HandyGraphFunctions";
 
 export default class Raven_Map implements IRaven_Map {
   m_Walls: Wall2D[] = []
@@ -63,12 +63,13 @@ export default class Raven_Map implements IRaven_Map {
           this.addSpawnPoint(new Vector2D(+info[1], +info[2]))
           break
         case TYPE.type_health:
-          // this.addHealth_Giver()
+          this.addHealth_Giver(new Vector2D(+info[0], +info[1]), +info[2], +info[3], +info[4])
           break
         case TYPE.type_shotgun:
           break
       }
     }
+    this.m_PathCosts = createAllPairsCostsTable(this.m_pNavGraph)
     return true
   }
   partitionNavGraph(): void {
@@ -88,8 +89,8 @@ export default class Raven_Map implements IRaven_Map {
   addSpawnPoint(pos: Vector2D): void {
     this.m_SpawnPoints.push(pos)
   }
-  addHealth_Giver(pos: Vector2D): void {
-    const hg = new Trigger_HealthGiver(pos)
+  addHealth_Giver(pos: Vector2D, r: number, healthGiven: number, nodeIndex: number): void {
+    const hg = new Trigger_HealthGiver(pos, r, healthGiven, nodeIndex)
     this.m_TriggerSystem.register(hg)
     const node = this.m_pNavGraph.getNode(hg.graphNodeIndex())
     node.setExtraInfo(hg)
@@ -173,6 +174,10 @@ export default class Raven_Map implements IRaven_Map {
   getMaxDimension() { return Math.max(this.m_iSizeX, this.m_iSizeY) }
   getCellSpaceNeighborhoodRange() { return this.m_dCellSpaceNeighborhoodRange }
   calculateCostToTravelBetweenNodes(nd1: number, nd2: number): number {
-    return this.m_PathCosts[nd1][nd2]
+    if(this.m_PathCosts[nd1]) {
+      return this.m_PathCosts[nd1][nd2]
+    } else {
+      return MaxFloat
+    }
   }
 }

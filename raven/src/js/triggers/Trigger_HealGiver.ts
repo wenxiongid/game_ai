@@ -1,16 +1,25 @@
 import Vector2D from "../common/2D/Vector2D";
 import gdi from "../common/misc/cgdi";
+import { DefaultGiverTriggerRange, Health_RespawnDelay } from "../config";
 import IRaven_Bot from "../Raven_Bot/index.d";
 import TYPE from "../raven_objectEnumerations";
 import Trigger_Respawning from "./Trigger_Respawning";
 
 export default class Trigger_HealthGiver extends Trigger_Respawning {
   m_iHealthGiven: number
-  constructor(pos: Vector2D) {
-    super(TYPE.type_health, pos, 0)
+  constructor(pos: Vector2D, r:number, healthGiven: number, nodeIndex: number) {
+    super(TYPE.type_health, pos, r)
+    this.m_iHealthGiven = healthGiven
+    this.setGraphNodeIndex(nodeIndex)
+    this.addCircularTriggerRegion(pos, DefaultGiverTriggerRange)
+    this.setRespawnDelay(Health_RespawnDelay * 1000)
+    this.m_bActive = true
   }
   try(bot: IRaven_Bot) {
-    if(this.isActive() && this.isTouchingTrigger(bot.pos(), bot.bRadius())) {
+    const isActive = this.isActive()
+    const isTouching = this.isTouchingTrigger(bot.pos(), bot.bRadius())
+    console.log('<HealthGiver>::try', isActive, isTouching)
+    if(isActive && isTouching) {
       bot.increaseHealth(this.m_iHealthGiven)
       this.deactivate()
     }
