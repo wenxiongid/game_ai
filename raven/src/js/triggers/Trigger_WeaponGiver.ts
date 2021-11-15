@@ -1,6 +1,8 @@
 import { worldTransform } from "../common/2D/transformation";
 import Vector2D from "../common/2D/Vector2D";
 import gdi from "../common/misc/cgdi";
+import { DefaultGiverTriggerRange, Weapon_RespawnDelay } from "../config";
+import { frameRate } from "../constant";
 import IRaven_Bot from "../Raven_Bot/index.d";
 import TYPE from "../raven_objectEnumerations";
 import Trigger_Respawning from "./Trigger_Respawning";
@@ -19,17 +21,18 @@ const rip = [
 
 export default class Trigger_WeaponGiver extends Trigger_Respawning {
   numRocketVerts = 8
-  constructor(type: TYPE, pos: Vector2D) {
-    super(type, pos, 0)
+  constructor(type: TYPE, pos: Vector2D, r: number, graphNodeIndex: number) {
+    super(type, pos, r)
+    this.setGraphNodeIndex(graphNodeIndex)
+    this.addCircularTriggerRegion(pos, DefaultGiverTriggerRange)
+    this.setRespawnDelay(Weapon_RespawnDelay * 1000 / frameRate)
+    this.setActive()
   }
   try(bot: IRaven_Bot) {
     if(this.isActive() && this.isTouchingTrigger(bot.pos(), bot.bRadius())) {
       bot.getWeaponSys().addWeapon(this.entityType())
       this.deactivate()
     }
-  }
-  read() {
-    // TODO
   }
   render() {
     if(this.isActive()) {

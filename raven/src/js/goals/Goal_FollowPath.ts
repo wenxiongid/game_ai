@@ -45,13 +45,13 @@ export class Goal_FollowPath extends Goal_Composite implements IGoal_Composite {
     return this.m_iStatus
   }
   render(): void {
-    for (const edge of this.m_Path) {
-      gdi.blackPen()
-      gdi.lineWithArrow(edge.source(), edge.destination(), 5)
-      gdi.redBrush()
-      gdi.blackPen()
-      gdi.circle(edge.destination(), 3)
-    }
+    // for (const edge of this.m_Path) {
+    //   gdi.blackPen()
+    //   gdi.lineWithArrow(edge.source(), edge.destination(), 5)
+    //   gdi.redBrush()
+    //   gdi.blackPen()
+    //   gdi.circle(edge.destination(), 3)
+    // }
     super.render()
   }
   terminate(): void {}

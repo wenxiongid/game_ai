@@ -37,11 +37,11 @@ export default class Goal_HuntTarget extends Goal_Composite implements IGoal_Com
   }
   render() {
     const bot = (this.m_pOwner as IRaven_Bot);
-    if(bot.getTargetSys().isTargetPresent()) {
-      gdi.greenPen()
-      gdi.redBrush()
-      gdi.circle(bot.getTargetSys().getLastRecordedPosition(), 3)
-    }
+    // if(bot.getTargetSys().isTargetPresent()) {
+    //   gdi.greenPen()
+    //   gdi.redBrush()
+    //   gdi.circle(bot.getTargetSys().getLastRecordedPosition(), 3)
+    // }
     super.render()
   }
 }

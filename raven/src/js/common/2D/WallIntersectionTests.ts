@@ -40,6 +40,7 @@ export function findClosestPointOfIntersectionWithWalls(
   let retResult = false
   let distance = MaxFloat
   let ip: Vector2D
+  let hitWall: Wall2D
   for (const wall of walls) {
     const {result, dist, point} = lineIntersection2D(A, B, wall.from(), wall.to())
     if(result) {
@@ -47,9 +48,13 @@ export function findClosestPointOfIntersectionWithWalls(
         retResult = true
         distance = dist
         ip = point
+        hitWall = wall
       }
     }
   }
+  // if(retResult) {
+  //   console.log(A, B, hitWall)
+  // }
   return {
     result: retResult,
     distance,

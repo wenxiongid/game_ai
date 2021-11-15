@@ -11,16 +11,18 @@ import Raven_Projectile from "./Raven_Projectile";
 export default class Pellet extends Raven_Projectile {
   m_dTimeShotIsVisible: number
   testForImpact() {
-    this.m_bImpacted = true
-    // 开枪到当前位置是否有bot中抢
-    const hit = this.getClosestIntersectingBot(this.m_vOrigin, this.m_vPos)
-    if(!hit) return
     // 开枪点到墙的撞击点
     const { result, ip } = findClosestPointOfIntersectionWithWalls(
       this.m_vOrigin,
       this.m_vPos,
       this.m_pWorld.getMap().getWalls()
     )
+    this.m_vImpactPoint = ip
+    this.m_bImpacted = result
+    // 开枪到当前位置是否有bot中抢
+    const hit = this.getClosestIntersectingBot(this.m_vOrigin, this.m_vPos)
+    if(!hit) return
+    
     if(result) {
       // 从开枪点到墙，是否打中最近的bot
       const { result: hitResult, intersectionPoint } = getLineSegmentCircleClosestIntersectionPoint(
@@ -31,6 +33,7 @@ export default class Pellet extends Raven_Projectile {
       )
       if(hitResult) {
         this.m_vImpactPoint = intersectionPoint
+        this.m_bImpacted = hitResult
         message_dispatcher.dispatchMessage(
           0,
           this.m_iShooterID,
@@ -61,7 +64,7 @@ export default class Pellet extends Raven_Projectile {
   }
   update() {
     if(!this.hasImpacted()) {
-      const desiredVelocity = vec2dNormalize(this.m_vTarget.add(this.pos().getReverse()).crossNum(this.maxSpeed()))
+      const desiredVelocity = vec2dNormalize(this.m_vTarget.add(this.pos().getReverse())).crossNum(this.maxSpeed())
       const sf = desiredVelocity.add(this.velocity().getReverse())
       const accel = sf.crossNum(1 / this.m_dMass)
       this.m_vVelocity = this.m_vVelocity.add(accel)
@@ -79,6 +82,9 @@ export default class Pellet extends Raven_Projectile {
 
       gdi.brownBrush()
       gdi.circle(this.m_vImpactPoint, 3)
+    } else {
+      gdi.yellowPen()
+      gdi.line(this.m_vOrigin, this.pos())
     }
   }
 }

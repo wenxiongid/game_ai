@@ -10,6 +10,6 @@ export default class TriggerRegion_Circle implements ITriggerRegion {
     this.m_dRadius = radius
   }
   isTouching(pos: IVector2D, entityRadius: number) {
-    return vec2DDistanceSq(pos, this.m_vPos) < (entityRadius + this.m_dRadius)
+    return vec2DDistanceSq(pos, this.m_vPos) < (entityRadius + this.m_dRadius) * (entityRadius + this.m_dRadius)
   }
 }

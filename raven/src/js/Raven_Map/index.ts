@@ -66,6 +66,7 @@ export default class Raven_Map implements IRaven_Map {
           this.addHealth_Giver(new Vector2D(+info[0], +info[1]), +info[2], +info[3], +info[4])
           break
         case TYPE.type_shotgun:
+          this.addWeapon_Giver(TYPE.type_shotgun, new Vector2D(+info[0], +info[1]), +info[2], +info[3])
           break
       }
     }
@@ -96,8 +97,8 @@ export default class Raven_Map implements IRaven_Map {
     node.setExtraInfo(hg)
     EntityManager.registerEntity(hg)
   }
-  addWeapon_Giver(type: TYPE, pos: Vector2D): void {
-    const wg = new Trigger_WeaponGiver(type, pos)
+  addWeapon_Giver(type: TYPE, pos: Vector2D, r:number, graphNodeIndex: number): void {
+    const wg = new Trigger_WeaponGiver(type, pos, r, graphNodeIndex)
     this.m_TriggerSystem.register(wg)
     const node = this.m_pNavGraph.getNode(wg.graphNodeIndex())
     node.setExtraInfo(wg)

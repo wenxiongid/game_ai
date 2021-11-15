@@ -21,10 +21,18 @@ export default class FuzzySet_Triangle extends FuzzySet {
 
     if(val <= this.m_dPeakPoint && val >= (this.m_dPeakPoint - this.m_dLeftOffset)) {
       const grad = 1 / this.m_dLeftOffset
-      return grad * (val - (this.m_dPeakPoint - this.m_dLeftOffset))
+      const ret = grad * (val - (this.m_dPeakPoint - this.m_dLeftOffset))
+      if(ret > 1) {
+        console.log('<Triangle>', ret)
+      }
+      return ret
     } else if(val > this.m_dPeakPoint && (val < this.m_dPeakPoint + this.m_dRightOffset)) {
-      const grad = 1 / this.m_dRightOffset
-      return grad * (val - this.m_dPeakPoint) + 1
+      const grad = 1 / -this.m_dRightOffset
+      const ret = grad * (val - this.m_dPeakPoint) + 1
+      if(ret > 1) {
+        console.log('<Triangle>', ret)
+      }
+      return ret
     } else {
       return 0
     }

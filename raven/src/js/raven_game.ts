@@ -126,6 +126,9 @@ export default class Raven_Game implements IRaven_Game {
     }
     for (const curW of this.m_Projectiles) {
       curW.render()
+      if(curW instanceof Pellet && curW.hasImpacted()) {
+        console.log('impacted')
+      }
     }
     if(this.m_pSelectedBot) {
       if(this.m_pSelectedBot.isPossessed()) {
@@ -174,9 +177,11 @@ export default class Raven_Game implements IRaven_Game {
         gdi.textAtPos(controlMouse.pos().x, controlMouse.pos().y, 'Queuing')
       }
     }
-    // for (const bot of this.m_Bots) {
-    //   bot.getBrain().render()
-    // }
+    for (const bot of this.m_Bots) {
+      bot.getBrain().render()
+      bot.getBrain().renderEvaluations(5, 415)
+      bot.getWeaponSys().renderDesirabilities()
+    }
     // if(pathStart >= 0) {
     //   gdi.redPen()
     //   gdi.hollowBrush()
@@ -249,7 +254,7 @@ export default class Raven_Game implements IRaven_Game {
       this.m_Bots.push(rb)
       EntityManager.registerEntity(rb)
       console.log(`Adding bot with ID ${rb.id()}`)
-      // if(numBotsToAdd === 1) {
+      // if(numBotsToAdd === 0) {
       //   this.m_pSelectedBot = rb
       //   setTimeout(() => {
       //     rb.takePossession()
@@ -389,6 +394,12 @@ export default class Raven_Game implements IRaven_Game {
   getPlayerInput(): void {
     if(this.m_pSelectedBot && this.m_pSelectedBot.isPossessed()) {
       this.m_pSelectedBot.rotateFacingTowardPosition(pointToVector2D(controlMouse.pos()))
+      if(controlKey.isKeyPress('z')) {
+        this.m_pSelectedBot.getWeaponSys().changeWeapon(TYPE.type_blaster)
+      }
+      if(controlKey.isKeyPress('x')) {
+        this.m_pSelectedBot.getWeaponSys().changeWeapon(TYPE.type_shotgun)
+      }
     }
   }
   possessedBot(): IRaven_Bot { return this.m_pSelectedBot }
