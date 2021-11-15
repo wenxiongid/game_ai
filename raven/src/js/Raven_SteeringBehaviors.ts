@@ -196,11 +196,15 @@ export default class Raven_Steering {
     }
     if(this.on(behavior_type.seek)) {
       force = this.seek(this.m_vTarget).crossNum(this.m_dWeightSeek)
-      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+      if(!this.accumulateForce(this.m_vSteeringForce, force)){
+        return this.m_vSteeringForce
+      }
     }
     if(this.on(behavior_type.arrive)) {
       force = this.arrive(this.m_vTarget, this.m_Deceleration).crossNum(this.m_dWeightArrive)
-      if(!this.accumulateForce(this.m_vSteeringForce, force)) return this.m_vSteeringForce
+      if(!this.accumulateForce(this.m_vSteeringForce, force)){
+        return this.m_vSteeringForce
+      }
     }
     if(this.on(behavior_type.wander)) {
       force = this.wander().crossNum(this.m_dWeightWander)

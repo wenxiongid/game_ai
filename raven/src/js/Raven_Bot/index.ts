@@ -187,7 +187,7 @@ export default class Raven_Bot extends MovingEntity implements IRaven_Bot {
   setAlive(): void { this.m_Status = BotStatus.alive }
 
   calculateTimeToReachPosition(pos: IVector2D): number {
-    return vec2DDistance(this.m_vPos, pos) / (this.m_dMaxSpeed * frameRate)
+    return vec2DDistance(this.m_vPos, pos) / (this.m_dMaxSpeed * frameRate) * 2000
   }
 
   isAtPosition(pos: IVector2D): boolean {

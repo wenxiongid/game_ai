@@ -25,6 +25,7 @@ import Raven_UserOptions from "./Raven_UserOptions"
 import gdi from "./common/misc/cgdi"
 import goalTypeToString from './goals/Raven_Goal_Types'
 import { pathEnd, pathStart, pathTarget } from "./navigation/Raven_PathPlanner"
+import { globalEdge } from "./goals/Goal_TraverseEdge"
 
 export default class Raven_Game implements IRaven_Game {
   // 游戏地图
@@ -175,6 +176,10 @@ export default class Raven_Game implements IRaven_Game {
     }
     for (const bot of this.m_Bots) {
       bot.getBrain().render()
+    }
+    if(globalEdge) {
+      gdi.redPen()
+      gdi.line(globalEdge.m_vSource, globalEdge.m_vDestination)
     }
     // if(pathStart >= 0) {
     //   gdi.redPen()

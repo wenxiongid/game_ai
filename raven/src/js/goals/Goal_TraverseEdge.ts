@@ -7,6 +7,8 @@ import PathEdge from "../navigation/PathEdge";
 import IRaven_Bot from "../Raven_Bot/index.d";
 import { GOAL_TYPES } from "./Raven_Goal_Types";
 
+export let globalEdge: PathEdge
+
 export default class Goal_TraverseEdge extends Goal implements IGoal {
   m_Edge: PathEdge
   m_bLastEdgeInPath: boolean
@@ -15,7 +17,7 @@ export default class Goal_TraverseEdge extends Goal implements IGoal {
   private isStuck(): boolean {
     const timeTaken = (new Date()).getTime() - this.m_dStartTime
     if(timeTaken > this.m_dTimeExpected) {
-      console.warn(`BOT ${this.m_pOwner.id()} is STUCK`)
+      console.warn(`BOT ${this.m_pOwner.id()} is STUCK, taken:`, timeTaken, 'expect', this.m_dTimeExpected)
       return true
     }
     return false
@@ -47,14 +49,18 @@ export default class Goal_TraverseEdge extends Goal implements IGoal {
     steering.setTarget(this.m_Edge.destination() as Vector2D)
 
     if(this.m_bLastEdgeInPath) {
+      steering.seekOff()
       steering.arriveOn()
     } else {
+      steering.arriveOff()
       steering.seekOn()
     }
   }
   process(): number {
     this.activeIfInactive()
+    globalEdge = this.m_Edge
     if(this.isStuck()) {
+      console.log('<Goal_TraverseEdge>::stuck', this.m_Edge)
       this.m_iStatus = GOAL_STATUS.failed
     } else {
       if((this.m_pOwner as IRaven_Bot).isAtPosition(this.m_Edge.destination())) {
