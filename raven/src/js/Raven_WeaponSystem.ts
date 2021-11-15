@@ -60,7 +60,7 @@ export default class Raven_WeaponSystem implements IRaven_WeaponSystem {
       ) {
         aimingPos = this.predictFuturePositionOfTarget()
         if(
-          this.m_pOwner.rotateHeadingToFacePosition(aimingPos) &&
+          this.m_pOwner.rotateFacingTowardPosition(aimingPos) &&
           (
             this.m_pOwner.getTargetSys().getTimeTargetHasBeenVisible() > this.m_dReactionTime &&
             this.m_pOwner.hasLOSto(aimingPos)
@@ -71,7 +71,7 @@ export default class Raven_WeaponSystem implements IRaven_WeaponSystem {
         }
       } else {
         if(
-          this.m_pOwner.rotateHeadingToFacePosition(aimingPos) &&
+          this.m_pOwner.rotateFacingTowardPosition(aimingPos) &&
           this.m_pOwner.getTargetSys().getTimeTargetHasBeenVisible() > this.m_dReactionTime
         ) {
           aimingPos = this.addNoiseToAim(aimingPos)
@@ -79,7 +79,7 @@ export default class Raven_WeaponSystem implements IRaven_WeaponSystem {
         }
       }
     } else {
-      this.m_pOwner.rotateHeadingToFacePosition(this.m_pOwner.pos().add(this.m_pOwner.heading()))
+      this.m_pOwner.rotateFacingTowardPosition(this.m_pOwner.pos().add(this.m_pOwner.heading()))
     }
   }
   selectWeapon(): void {

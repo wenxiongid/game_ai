@@ -94,7 +94,7 @@ export default class Raven_Bot extends MovingEntity implements IRaven_Bot {
     this.m_pBrain = new Goal_Think(this)
     this.m_pTargSys = new Raven_TargetingSystem(this)
     this.m_pWeaponSys = new Raven_WeaponSystem(this, Bot_ReactionTime, Bot_AimAccuracy, Bot_AimPersistance)
-    this.m_pSensoryMem = new Raven_SensoryMemory(this, Bot_MemorySpan)
+    this.m_pSensoryMem = new Raven_SensoryMemory(this, Bot_MemorySpan * 1000)
   }
   updateMovement(): void {
     const force = this.m_pSteering.calculate()

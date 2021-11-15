@@ -87,9 +87,11 @@ class MovingEntity extends BaseGameEntity implements IMovingEntity {
     if(angle > this.m_dMaxTurnRate){
       angle = this.m_dMaxTurnRate;
     }
+    console.log('<MovingEntity>::rotate', angle, this.m_vHeading)
     rotationMatrix.rotate(angle * this.m_vHeading.sign(toTarget));
     rotationMatrix.transformVector2D(this.m_vHeading);
     rotationMatrix.transformVector2D(this.m_vVelocity);
+    console.log('<MovingEntity>::rotate after', this.m_vHeading)
     this.m_vSide = this.m_vHeading.perp();
     if((this.m_vHeading.x == 0 && this.m_vHeading.y == 0) || isNaN(this.m_vHeading.x)){
       console.log(toTarget, heading, angle);

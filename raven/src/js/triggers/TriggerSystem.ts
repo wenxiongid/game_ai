@@ -4,16 +4,17 @@ import ITrigger from "./Trigger.d";
 export default class TriggerSystem {
   m_Triggers: (ITrigger | null)[] = []
   updateTriggers() {
+    const newTriggerList:ITrigger[] = []
     for(let i = 0; i < this.m_Triggers.length; i++) {
       const trigger = this.m_Triggers[i]
       if(trigger) {
-        if(trigger.isToBeRemoved()) {
-          this.m_Triggers[i] = null
-        } else {
+        if(!trigger.isToBeRemoved()) {
           trigger.update()
+          newTriggerList.push(trigger)
         }
       }
     }
+    this.m_Triggers = newTriggerList
   }
   getTriggers() { return this.m_Triggers }
   tryTriggers(bots: IRaven_Bot[]) {

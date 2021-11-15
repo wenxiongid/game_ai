@@ -249,6 +249,13 @@ export default class Raven_Game implements IRaven_Game {
       this.m_Bots.push(rb)
       EntityManager.registerEntity(rb)
       console.log(`Adding bot with ID ${rb.id()}`)
+      // if(numBotsToAdd === 1) {
+      //   this.m_pSelectedBot = rb
+      //   setTimeout(() => {
+      //     rb.takePossession()
+      //     rb.getBrain().removeAllSubgoals()
+      //   }, 500);
+      // }
     }
   }
   addRocket(shooter: IRaven_Bot, target: IVector2D): void {

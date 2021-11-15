@@ -46,11 +46,11 @@ export default class Bolt extends Raven_Projectile {
           this.m_iDamageInflicted
         )
       }
-      const { result } = findClosestPointOfIntersectionWithWalls(oldPos, newPos, this.m_pWorld.getMap().getWalls())
+      const { result, ip } = findClosestPointOfIntersectionWithWalls(oldPos, newPos, this.m_pWorld.getMap().getWalls())
       if(result) {
         this.m_bDead = true
         this.m_bImpacted = true
-        this.m_vPos = this.m_vImpactPoint
+        this.m_vPos = ip
         return
       }
     }
