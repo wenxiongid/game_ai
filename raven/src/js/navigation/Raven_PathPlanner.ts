@@ -159,6 +159,9 @@ export default class Raven_PathPlanner implements IRaven_PathPlanner {
     if(this.m_pCurrentSearch) {
       let path = this.m_pCurrentSearch.getPathAsPathEdges()
       const closest = this.getClosestNodeToPosition(this.m_pOwner.pos())
+      if(closest === -1) {
+        return null
+      }
       path.unshift(new PathEdge(this.m_pOwner.pos(), this.getNodePosition(closest), NavEdgeType.normal))
       if(this.m_pCurrentSearch.searchType() === SearchType.AStar) {
         path.push(new PathEdge(path[path.length - 1].destination(), this.m_vDestinationPos, NavEdgeType.normal))
