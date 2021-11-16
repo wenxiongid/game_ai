@@ -68,6 +68,12 @@ export default class Raven_Map implements IRaven_Map {
         case TYPE.type_shotgun:
           this.addWeapon_Giver(TYPE.type_shotgun, new Vector2D(+info[0], +info[1]), +info[2], +info[3])
           break
+        case TYPE.type_rail_gun:
+          this.addWeapon_Giver(TYPE.type_rail_gun, new Vector2D(+info[0], +info[1]), +info[2], +info[3])
+          break
+        case TYPE.type_rocket_launcher:
+          this.addWeapon_Giver(TYPE.type_rocket_launcher, new Vector2D(+info[0], +info[1]), +info[2], +info[3])
+          break
       }
     }
     this.m_PathCosts = createAllPairsCostsTable(this.m_pNavGraph)

@@ -82,9 +82,6 @@ export default class Pellet extends Raven_Projectile {
 
       gdi.brownBrush()
       gdi.circle(this.m_vImpactPoint, 3)
-    } else {
-      gdi.yellowPen()
-      gdi.line(this.m_vOrigin, this.pos())
     }
   }
 }

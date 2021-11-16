@@ -10,12 +10,13 @@ import Raven_Projectile from "./Raven_Projectile";
 export default class Slug extends Raven_Projectile {
   m_dTimeShotIsVisible: number
   testForImpact() {
-    this.m_bImpacted = true
     const { result, distance: distToClosestImpact , ip  } = findClosestPointOfIntersectionWithWalls(
       this.m_vOrigin,
       this.m_vPos,
       this.m_pWorld.getMap().getWalls()
     )
+    this.m_bImpacted = result
+    this.m_vImpactPoint = ip
     const hits = this.getListOfIntersectingBots(
       this.m_vOrigin,
       result ? ip : this.m_vPos

@@ -5,7 +5,7 @@ function deleteItemFromArray(r, check) {
   for (let i = 0; i < r.length; i++) {
     const item = r[i]
     if(check(item)) {
-      r.splice(item)
+      r.splice(i, 1)
       hasDeleted = true
       break
     }

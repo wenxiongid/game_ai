@@ -163,9 +163,10 @@ export default class Raven_WeaponSystem implements IRaven_WeaponSystem {
       if (Object.prototype.hasOwnProperty.call(this.m_WeaponMap, type)) {
         const weapon = this.m_WeaponMap[type];
         if(weapon) {
+          const remain = weapon.m_iNumRoundsLeft
           const score = weapon.getLastDesirabilityScore()
           const typeName = getNameOfType(weapon.getType())
-          gdi.textAtPos(p.x + 10, p.y - offset, `${typeName} ${score}`)
+          gdi.textAtPos(p.x + 10, p.y - offset, `${typeName} ${remain} ${score}`)
           offset += 15
         }
       }

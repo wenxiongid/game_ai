@@ -59,7 +59,7 @@ export default class Raven_Weapon implements IRaven_Weapon {
   }
   updateTimeWeaponIsNextAvailable() {
     const now = (new Date()).getTime()
-    this.m_dTimeNextAvailable = now + 1 / this.m_dRateOfFire
+    this.m_dTimeNextAvailable = now + 1 * 1000 / this.m_dRateOfFire
   }
   aimAt(target: IVector2D): boolean {
     return this.m_pOwner.rotateFacingTowardPosition(target)

@@ -70,17 +70,24 @@ export default class RocketLauncher extends Raven_Weapon implements IRaven_Weapo
     const desirable = desirability.addTriangularSet('Desirable', 20, 50, 75)
     const undesirable = desirability.addLeftShoulderSet('Undesirable', 0, 25, 50)
 
-    this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoLoads), undesirable)
-    this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoOkay), undesirable)
-    this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoLow), undesirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoLoads), undesirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoOkay), undesirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoLow), undesirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoLoads), veryDesirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoOkay), veryDesirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetClose, ammoLow), veryDesirable)
 
     this.m_FuzzyModule.addRule(new FzAND(targetMedium, ammoLoads), veryDesirable)
     this.m_FuzzyModule.addRule(new FzAND(targetMedium, ammoOkay), veryDesirable)
-    this.m_FuzzyModule.addRule(new FzAND(targetMedium, ammoLow), desirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetMedium, ammoLow), desirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetMedium, ammoLow), veryDesirable)
 
-    this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoLoads), desirable)
-    this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoOkay), undesirable)
-    this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoLow), undesirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoLoads), desirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoOkay), undesirable)
+    // this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoLow), undesirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoLoads), veryDesirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoOkay), veryDesirable)
+    this.m_FuzzyModule.addRule(new FzAND(targetFar, ammoLow), veryDesirable)
   }
   render() {
     this.m_vecWeaponVBTrans = worldTransform(

@@ -1,4 +1,4 @@
-import Vector2D, { vec2DDistance } from "../common/2D/Vector2D";
+import Vector2D, { vec2DDistance, vec2DDistanceSq } from "../common/2D/Vector2D";
 import { findClosestPointOfIntersectionWithWalls } from "../common/2D/WallIntersectionTests";
 import message_dispatcher from "../common/messaging/message_dispatcher";
 import gdi from "../common/misc/cgdi";
@@ -38,16 +38,23 @@ export default class Rocket extends Raven_Projectile {
         this.m_iDamageInflicted
       )
       this.inflictDamageOnBotsWithinBlastRadius()
-    }
-    const { result, distance, ip } = findClosestPointOfIntersectionWithWalls(
-      this.m_vPos.add(this.m_vVelocity.getReverse()),
-      this.m_vPos,
-      this.m_pWorld.getMap().getWalls()
-    )
-    if(result) {
-      this.m_bImpacted = true
-      this.inflictDamageOnBotsWithinBlastRadius()
-      this.m_vPos = this.m_vImpactPoint
+    } else {
+      const { result, distance, ip } = findClosestPointOfIntersectionWithWalls(
+        this.m_vPos.add(this.m_vVelocity.getReverse()),
+        this.m_vPos,
+        this.m_pWorld.getMap().getWalls()
+      )
+      if(result) {
+        this.m_bImpacted = true
+        this.inflictDamageOnBotsWithinBlastRadius()
+        this.m_vPos = ip
+      } else {
+        const tolerance = 5
+        if(vec2DDistanceSq(this.pos(), this.m_vTarget) < tolerance * tolerance) {
+          this.m_bImpacted = true
+          this.inflictDamageOnBotsWithinBlastRadius()
+        }
+      }
     }
   }
   constructor(shooter: IRaven_Bot, target: Vector2D) {
@@ -64,7 +71,7 @@ export default class Rocket extends Raven_Projectile {
       Rocket_MaxForce
     )
     this.m_dCurrentBlastRadius = 0
-    this.m_dBoundingRadius = Rocket_BlastRadius
+    this.m_dBlastRadius = Rocket_BlastRadius
   }
   update() {
     if(!this.m_bImpacted) {

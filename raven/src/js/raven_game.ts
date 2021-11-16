@@ -126,9 +126,6 @@ export default class Raven_Game implements IRaven_Game {
     }
     for (const curW of this.m_Projectiles) {
       curW.render()
-      if(curW instanceof Pellet && curW.hasImpacted()) {
-        console.log('impacted')
-      }
     }
     if(this.m_pSelectedBot) {
       if(this.m_pSelectedBot.isPossessed()) {
